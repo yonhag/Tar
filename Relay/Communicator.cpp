@@ -9,7 +9,6 @@ Communicator::Communicator()
 	this->_serverSocket = socket(AF_INET, SOCK_STREAM, 0);
 	if (this->_serverSocket == INVALID_SOCKET)
 		throw std::exception("Invalid Socket Creation");
-
 }
 
 Communicator::~Communicator()
