@@ -6,11 +6,10 @@
 
 Communicator::Communicator()
 {
-	SOCKET serverSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+	this->_serverSocket = socket(AF_INET, SOCK_STREAM, 0);
+	if (this->_serverSocket == INVALID_SOCKET)
+		throw std::exception("Invalid Socket Creation");
 
-	if (_serverSocket == INVALID_SOCKET)
-		throw std::exception(__FUNCTION__ " - socket");
-	_serverSocket = serverSocket;
 }
 
 Communicator::~Communicator()

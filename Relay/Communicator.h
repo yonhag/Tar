@@ -1,5 +1,8 @@
 #include <WinSock2.h>
+#include <Windows.h>
 #include <vector>
+#include <map>
+#include <string>
 
 class Communicator
 {
