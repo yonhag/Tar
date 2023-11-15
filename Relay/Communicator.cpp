@@ -87,7 +87,7 @@ void Communicator::HandleClient(SOCKET sock)
 	Request request = RequestHandler::HandleRequest(message);
 
 	// Add sender save
-	this->_ip_list.push_back(request.ip);
+	//this->_ip_list.push_back(request.ip);
 
 	SendData(sock, request.data);
 }

@@ -15,7 +15,7 @@ private:
 	void SendData(SOCKET sock, const std::vector<unsigned char>& data);
 
 	SOCKET _serverSocket;
-	std::vector<std::string> _ip_list;
+	std::map<std::string, unsigned int> _ip_list; // IP, Key
 
 	const u_short port = 8200;
 };
