@@ -8,7 +8,7 @@
 #include "cryptopp/strciphr.h"
 
 
-Request RequestHandler::HandleRequest(std::vector<unsigned char>& data, const RSA::PrivateKey& key)
+Request RequestHandler::HandleRequest(std::vector<unsigned char>& data, const RSA::PublicKey& key)
 {
 	Request request;
 
@@ -19,7 +19,7 @@ Request RequestHandler::HandleRequest(std::vector<unsigned char>& data, const RS
 	return request;
 }
 
-std::vector<unsigned char> RequestHandler::DecryptData(const std::vector<unsigned char>& data, const RSA::PrivateKey& key)
+std::vector<unsigned char> RequestHandler::DecryptData(const std::vector<unsigned char>& data, const RSA::PublicKey& key)
 {
 	std::vector<unsigned char> decryptedData = DecryptRSA(data, key);
 	decryptedData = DecryptAES(decryptedData);
@@ -55,7 +55,7 @@ std::vector<unsigned char> RequestHandler::DecryptAES(const std::vector<unsigned
 	return std::vector<unsigned char>();
 }
 
-std::vector<unsigned char> RequestHandler::DecryptRSA(const std::vector<unsigned char>& data, const RSA::PrivateKey& key)
+std::vector<unsigned char> RequestHandler::DecryptRSA(const std::vector<unsigned char>& data, const RSA::PublicKey& key)
 {
 	std::vector<unsigned char> dercyptedText;
 	const int StandardKeySize = 2048;

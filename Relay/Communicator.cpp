@@ -82,12 +82,16 @@ void Communicator::HandleClient(SOCKET sock)
 	// Dealing with the message
 	std::vector<unsigned char> message(buffer, buffer + len);
 
-	Request request = RequestHandler::HandleRequest(message);
-
-	// Add sender save
-	//this->_ip_list.push_back(request.ip);
-
-	SendData(sock, request.data);
+	if (this->_user_list.find(sock) != this->_user_list.end())
+	{
+		Request request = RequestHandler::HandleRequest(message, this->_user_list.find(sock)->second);
+		SendData(sock, request.data);
+	}
+	else
+	{
+		RSA::PublicKey key;
+		this->_user_list.insert(std::pair<SOCKET, RSA::PublicKey>(sock, key));
+	}
 }
 
 void Communicator::SendData(SOCKET sock, const std::vector<unsigned char>& data)
