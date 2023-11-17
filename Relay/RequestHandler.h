@@ -1,15 +1,19 @@
 #include "Request.h"
+#include "cryptopp/rsa.h"
+#include "cryptopp/aes.h"
 #include <iostream>
+
+using namespace CryptoPP;
 
 class RequestHandler
 {
 public:
-	static Request HandleRequest(std::vector<unsigned char>& data);
+	static Request HandleRequest(std::vector<unsigned char>& data, const RSA::PrivateKey& key);
 private:
 	// Decryption
-	static void DecryptData(std::vector<unsigned char>& data);
-	static void DecryptRSA(std::vector<unsigned char>& data);
-	static void DecryptAES(std::vector<unsigned char>& data);
+	static std::vector<unsigned char> DecryptData(const std::vector<unsigned char>& data, const RSA::PrivateKey& key);
+	static std::vector<unsigned char> DecryptRSA(const std::vector<unsigned char>& data, const RSA::PrivateKey& key);
+	static std::vector<unsigned char> DecryptAES(const std::vector<unsigned char>& data);
 
 	static std::string ExtractIP(std::vector<unsigned char>& data);
 };
