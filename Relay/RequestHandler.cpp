@@ -21,8 +21,10 @@ Request RequestHandler::HandleRequest(std::vector<unsigned char>& data, const RS
 
 std::vector<unsigned char> RequestHandler::DecryptData(const std::vector<unsigned char>& data, const RSA::PrivateKey& key)
 {
-	DecryptRSA(data, key);
-	DecryptAES(data);
+	std::vector<unsigned char> decryptedData = DecryptRSA(data, key);
+	decryptedData = DecryptAES(decryptedData);
+
+	return decryptedData;
 }
 
 std::string RequestHandler::ExtractIP(std::vector<unsigned char>& data)
@@ -50,7 +52,7 @@ std::string RequestHandler::ExtractIP(std::vector<unsigned char>& data)
 
 std::vector<unsigned char> RequestHandler::DecryptAES(const std::vector<unsigned char>& data)
 {
-
+	return std::vector<unsigned char>();
 }
 
 std::vector<unsigned char> RequestHandler::DecryptRSA(const std::vector<unsigned char>& data, const RSA::PrivateKey& key)
@@ -63,9 +65,6 @@ std::vector<unsigned char> RequestHandler::DecryptRSA(const std::vector<unsigned
 	InvertibleRSAFunction params;
 
 	params.GenerateRandomWithKeySize(prng, StandardKeySize);
-
-	// ?
-	RSA::PrivateKey key(params);
 
 	RSAES_OAEP_SHA256_Encryptor d(key);
 	HexEncoder encoder(new FileSink(std::cout));
