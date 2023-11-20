@@ -128,6 +128,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Communicator.cpp" />
+    <ClCompile Include="Protocol.h" />
     <ClCompile Include="RequestHandler.cpp" />
     <ClCompile Include="RequestHandler.h" />
     <ClCompile Include="Source.cpp" />

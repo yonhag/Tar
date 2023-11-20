@@ -5,6 +5,6 @@
 
 struct Request
 {
-	std::string ip;
+	std::string dest_ip;
 	std::vector<unsigned char> data;
 };

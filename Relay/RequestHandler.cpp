@@ -13,7 +13,7 @@ Request RequestHandler::HandleRequest(std::vector<unsigned char>& data, const RS
 	Request request;
 
 	DecryptData(data, key);
-	request.ip = ExtractIP(data);
+	request.dest_ip = ExtractIP(data);
 	request.data = data;
 
 	return request;
@@ -53,6 +53,12 @@ std::string RequestHandler::ExtractIP(std::vector<unsigned char>& data)
 std::vector<unsigned char> RequestHandler::DecryptAES(const std::vector<unsigned char>& data)
 {
 	return std::vector<unsigned char>();
+}
+
+RSA::PublicKey RequestHandler::GetKeyFromHandshake(std::vector<unsigned char>& data)
+{
+	RSA::PublicKey key;
+	return key;
 }
 
 std::vector<unsigned char> RequestHandler::DecryptRSA(const std::vector<unsigned char>& data, const RSA::PublicKey& key)

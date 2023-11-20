@@ -1,4 +1,5 @@
 #include "Communicator.h"
+#include "Protocol.h"
 #include "RequestHandler.h"
 #include <thread>
 #include <exception>
@@ -89,8 +90,9 @@ void Communicator::HandleClient(SOCKET sock)
 	}
 	else
 	{
-		RSA::PublicKey key;
+		RSA::PublicKey key = RequestHandler::GetKeyFromHandshake(message);
 		this->_user_list.insert(std::pair<SOCKET, RSA::PublicKey>(sock, key));
+		SendData(sock, std::vector<unsigned char>(Protocol::OK));
 	}
 }
 

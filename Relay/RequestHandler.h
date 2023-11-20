@@ -9,6 +9,7 @@ class RequestHandler
 {
 public:
 	static Request HandleRequest(std::vector<unsigned char>& data, const RSA::PublicKey& key);
+	static RSA::PublicKey GetKeyFromHandshake(std::vector<unsigned char>& data);
 private:
 	// Decryption
 	static std::vector<unsigned char> DecryptData(const std::vector<unsigned char>& data, const RSA::PublicKey& key);
