@@ -127,7 +127,18 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <None Include="cryptopp890.zip" />
+    <ClCompile Include="Communicator.cpp" />
+    <ClCompile Include="Protocol.h" />
+    <ClCompile Include="RequestHandler.cpp" />
+    <ClCompile Include="RequestHandler.h" />
+    <ClCompile Include="Source.cpp" />
+    <ClCompile Include="WSAInitializer.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Communicator.h" />
+    <ClInclude Include="Consts.h" />
+    <ClInclude Include="Request.h" />
+    <ClInclude Include="WSAInitializer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
