@@ -23,7 +23,7 @@ Communicator::~Communicator()
 
 void Communicator::RunServer()
 {
-	bindAndListen();
+	BindAndListen();
 
 	while (true)
 	{
@@ -41,7 +41,7 @@ void Communicator::RunServer()
 
 }
 
-void Communicator::bindAndListen()
+void Communicator::BindAndListen()
 {
 	struct sockaddr_in sa = { 0 };
 
@@ -82,18 +82,24 @@ void Communicator::HandleClient(SOCKET sock)
 
 	// Dealing with the message
 	std::vector<unsigned char> message(buffer, buffer + len);
-
-	if (this->_user_list.find(sock) != this->_user_list.end())
+	
+	if (IsDirectoryMessage(message))
 	{
-		Request request = RequestHandler::HandleRequest(message, this->_user_list.find(sock)->second);
+		DirResponse request = RequestHandler::HandleDirRequest(message);
 		SendData(sock, request.data);
 	}
 	else
 	{
-		RSA::PublicKey key = RequestHandler::GetKeyFromHandshake(message);
-		this->_user_list.insert(std::pair<SOCKET, RSA::PublicKey>(sock, key));
-		SendData(sock, std::vector<unsigned char>(Protocol::OK));
+		Request request = RequestHandler::HandleRequest(message);
+		SendData(sock, request.data);
 	}
+}
+
+bool Communicator::IsDirectoryMessage(const std::vector<unsigned char>& message)
+{
+	if (message[0] == 'D' && message[1] == 'I' && message[2] == 'R')
+		return true;
+	return false;
 }
 
 void Communicator::SendData(SOCKET sock, const std::vector<unsigned char>& data)

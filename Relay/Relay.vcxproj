@@ -137,6 +137,7 @@
   <ItemGroup>
     <ClInclude Include="Communicator.h" />
     <ClInclude Include="Consts.h" />
+    <ClInclude Include="json.hpp" />
     <ClInclude Include="Request.h" />
     <ClInclude Include="WSAInitializer.h" />
   </ItemGroup>

@@ -14,12 +14,15 @@ public:
 	[[noreturn]] void RunServer();
 
 private:
-	void bindAndListen();
+	void BindAndListen();
 	void HandleClient(SOCKET clientSocket);
+	bool IsDirectoryMessage(const std::vector<unsigned char>& message);
+
+
 	void SendData(SOCKET sock, const std::vector<unsigned char>& data);
 
 	SOCKET _serverSocket;
-	std::map<SOCKET, RSA::PublicKey> _user_list;
+	std::vector<SOCKET> _user_list;
 
 	const u_short port = 8200;
 };
