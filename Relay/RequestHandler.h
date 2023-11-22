@@ -1,5 +1,6 @@
 #include "Request.h"
 #include "cryptopp/rsa.h"
+#include "cryptopp/osrng.h"
 #include "cryptopp/aes.h"
 #include <iostream>
 
