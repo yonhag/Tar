@@ -1,4 +1,5 @@
 #include "RequestHandler.h"
+#include "json.hpp"
 #include "cryptopp/osrng.h"
 #include "cryptopp/base64.h"
 #include "cryptopp/hex.h"
@@ -7,21 +8,67 @@
 #include "cryptopp/filters.h"
 #include "cryptopp/strciphr.h"
 
+using json = nlohmann::json;
+using nlohmann::json;
 
-Request RequestHandler::HandleRequest(std::vector<unsigned char>& data, const RSA::PublicKey& key)
+Request RequestHandler::HandleRequest(std::vector<unsigned char>& data)
 {
 	Request request;
 
-	DecryptData(data, key);
+	DecryptData(data);
 	request.dest_ip = ExtractIP(data);
 	request.data = data;
 
 	return request;
 }
 
-std::vector<unsigned char> RequestHandler::DecryptData(const std::vector<unsigned char>& data, const RSA::PublicKey& key)
+DirResponse RequestHandler::HandleDirRequest(std::vector<unsigned char>& data)
 {
-	std::vector<unsigned char> decryptedData = DecryptRSA(data, key);
+	DirResponse request;
+	switch (DetermineDirRequest(data))
+	{
+	case DirRequests::Keys:
+		return HandleKeyRequest();
+	}
+	return request;
+}
+
+DirRequests RequestHandler::DetermineDirRequest(std::vector<unsigned char>& data)
+{
+	const int RequestTypeIndex = 4;
+
+	switch (data[RequestTypeIndex])
+	{
+	case '1':
+		return DirRequests::Keys;
+	}
+}
+
+DirResponse RequestHandler::HandleKeyRequest()
+{
+	DirResponse res;
+
+	res.data = std::vector<unsigned char>();
+
+	json j;
+	j["Modulus"] = _pubKey.GetModulus().ConvertToLong();
+	j["Exponent"] = _pubKey.GetPublicExponent().ConvertToLong();
+	
+	auto jsonString = j.dump();
+
+	auto stringSizeInBytes = split_uint32_to_bytes(jsonString.size());
+	for (const auto& byte : stringSizeInBytes)
+		res.data.push_back(byte);
+
+	for (const auto& byte : jsonString)
+		res.data.push_back(byte);
+
+	return res;
+}
+
+std::vector<unsigned char> RequestHandler::DecryptData(const std::vector<unsigned char>& data)
+{
+	std::vector<unsigned char> decryptedData = DecryptRSA(data);
 	decryptedData = DecryptAES(decryptedData);
 
 	return decryptedData;
@@ -50,19 +97,14 @@ std::string RequestHandler::ExtractIP(std::vector<unsigned char>& data)
 	return ip;
 }
 
-std::vector<unsigned char> RequestHandler::DecryptAES(const std::vector<unsigned char>& data)
+std::vector<unsigned char> RequestHandler::DecryptAES(const std::vector<unsigned char>& datadd)
 {
 	return std::vector<unsigned char>();
 }
 
-RSA::PublicKey RequestHandler::GetKeyFromHandshake(std::vector<unsigned char>& data)
+std::vector<unsigned char> RequestHandler::DecryptRSA(const std::vector<unsigned char>& data)
 {
-	RSA::PublicKey key;
-	return key;
-}
-
-std::vector<unsigned char> RequestHandler::DecryptRSA(const std::vector<unsigned char>& data, const RSA::PublicKey& key)
-{
+	/*
 	std::vector<unsigned char> dercyptedText;
 	const int StandardKeySize = 2048;
 
@@ -78,6 +120,8 @@ std::vector<unsigned char> RequestHandler::DecryptRSA(const std::vector<unsigned
 	VectorSource(data, true, new PK_EncryptorFilter(prng, d, new VectorSink(dercyptedText)));
 
 	return dercyptedText;
+	*/
+	return std::vector<unsigned char>();
 }
 
 std::string hex_to_string(const std::string& input)
@@ -101,4 +145,13 @@ std::string hex_to_string(const std::string& input)
 		output.push_back(((p - hexChars) << 4) | (q - hexChars));
 	}
 	return output;
+}
+
+std::array<uint8_t, 4> RequestHandler::split_uint32_to_bytes(uint32_t input)
+{
+	std::array<uint8_t, 4> bytes;
+	for (int i = 0; i < 4; i++) {
+		bytes[i] = (input >> (i * 8)) & 0xFF;
+	}
+	return bytes;
 }
