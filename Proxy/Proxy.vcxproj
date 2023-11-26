@@ -20,11 +20,14 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Communicator.cpp" />
+    <ClCompile Include="NetworkHandler.cpp" />
     <ClCompile Include="Source.cpp" />
     <ClCompile Include="WSAInitializer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Communicator.h" />
+    <ClInclude Include="NetworkHandler.h" />
+    <ClInclude Include="Relay.h" />
     <ClInclude Include="WSAInitializer.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
