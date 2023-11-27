@@ -7,7 +7,7 @@ int main()
 	WSAInitializer wsa_init;
 	NetworkHandler nwh;
 
-	if (!nwh.isConnected())
+	if (!nwh.IsConnected())
 		return 1;
 
 	auto comm = Communicator(nwh);

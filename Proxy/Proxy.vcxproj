@@ -26,6 +26,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Communicator.h" />
+    <ClInclude Include="Directory.h" />
+    <ClInclude Include="json.hpp" />
     <ClInclude Include="NetworkHandler.h" />
     <ClInclude Include="Relay.h" />
     <ClInclude Include="WSAInitializer.h" />
