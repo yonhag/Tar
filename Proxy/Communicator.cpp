@@ -5,3 +5,11 @@ Communicator::Communicator(const NetworkHandler& nwh) :
 {
 
 }
+
+Communicator::~Communicator()
+{
+}
+
+void Communicator::UseNetwork()
+{
+}

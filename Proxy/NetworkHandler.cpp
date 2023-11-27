@@ -1,4 +1,5 @@
-#include "WSAInitializer.h"
+#include <WinSock2.h>
+#include <Windows.h>
 #include <Ws2tcpip.h>
 #include <codecvt>
 #include "NetworkHandler.h"
@@ -6,7 +7,8 @@
 
 using json = nlohmann::json;
 
-NetworkHandler::NetworkHandler()
+NetworkHandler::NetworkHandler() :
+    _dirFile(this->_dirFileName)
 {
     if (!this->_dirFile.is_open())
         throw std::exception("File not opening");
@@ -32,7 +34,7 @@ bool NetworkHandler::IsConnected() const
 
 Directory NetworkHandler::GetNextDir()
 {
-    Directory dir{ nullptr };
+    Directory dir;
     std::string line;
 
     std::getline(this->_dirFile, line);
@@ -58,7 +60,6 @@ Directory NetworkHandler::GetNextDir()
 bool NetworkHandler::GetRelays()
 {
     // Creating socket
-    WSAInitializer wsa_init;
 
     SOCKET sock = socket(AF_INET, SOCK_STREAM, 0);
     if (sock = INVALID_SOCKET)
