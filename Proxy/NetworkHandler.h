@@ -9,10 +9,11 @@ class NetworkHandler
 {
 public:
 	NetworkHandler();
+	NetworkHandler(const NetworkHandler& nwh);
 	bool IsConnected() const;
 
 private:
-	Directory GetNextDir() const;
+	Directory GetNextDir();
 	bool GetRelays();
 	std::vector<unsigned char> GetRelayRequest();
 	bool ReceiveRelays(SOCKET sock);

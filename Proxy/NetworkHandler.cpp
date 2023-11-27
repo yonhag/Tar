@@ -1,21 +1,28 @@
-#include <WinSock2.h>
-#include <Windows.h>
-#include "NetworkHandler.h"
 #include "WSAInitializer.h"
+#include <Ws2tcpip.h>
+#include <codecvt>
+#include "NetworkHandler.h"
 #include "json.hpp"
 
 using json = nlohmann::json;
 
-NetworkHandler::NetworkHandler() :
-    _dirFile(this->_dirFileName, 'r')
+NetworkHandler::NetworkHandler()
 {
+    if (!this->_dirFile.is_open())
+        throw std::exception("File not opening");
+
     bool hasFoundDir = false;
     while (!hasFoundDir)
     {
         this->_dir = GetNextDir();
         hasFoundDir = GetRelays();
     }
-    
+}
+
+NetworkHandler::NetworkHandler(const NetworkHandler& nwh) :
+    _isConnected(nwh._isConnected), _relays(nwh._relays), _dir(nwh._dir), _dirFile(this->_dirFileName)
+{
+
 }
 
 bool NetworkHandler::IsConnected() const
@@ -23,7 +30,7 @@ bool NetworkHandler::IsConnected() const
     return this->_isConnected;
 }
 
-Directory NetworkHandler::GetNextDir() const
+Directory NetworkHandler::GetNextDir()
 {
     Directory dir{ nullptr };
     std::string line;
@@ -60,7 +67,14 @@ bool NetworkHandler::GetRelays()
     sockaddr_in serverAddress;
     serverAddress.sin_family = AF_INET;
     serverAddress.sin_port = htons(this->_dir._port);
-    serverAddress.sin_addr.s_addr = inet_addr(this->_dir._ip.c_str());
+
+    std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
+    PCWSTR ip = converter.from_bytes(this->_dir._ip).c_str();
+    if (InetPton(AF_INET, ip, &(serverAddress.sin_addr)) != 1)
+    {
+        closesocket(sock);
+        return false;
+    }
 
     // Connecting
     if (connect(sock, (struct sockaddr*)&serverAddress, sizeof(serverAddress)) == SOCKET_ERROR)
