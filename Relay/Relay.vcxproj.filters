@@ -53,5 +53,8 @@
     <ClInclude Include="Consts.h">
       <Filter>Header Files\Consts</Filter>
     </ClInclude>
+    <ClInclude Include="json.hpp">
+      <Filter>Header Files\External</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

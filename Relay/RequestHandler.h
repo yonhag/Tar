@@ -1,20 +1,31 @@
 #include "Request.h"
 #include "cryptopp/rsa.h"
+#include "cryptopp/osrng.h"
 #include "cryptopp/aes.h"
 #include <iostream>
+
+enum class DirRequests { Keys };
 
 using namespace CryptoPP;
 
 class RequestHandler
 {
 public:
-	static Request HandleRequest(std::vector<unsigned char>& data, const RSA::PublicKey& key);
-	static RSA::PublicKey GetKeyFromHandshake(std::vector<unsigned char>& data);
+	static Request HandleRequest(std::vector<unsigned char>& data);
+	static DirResponse HandleDirRequest(std::vector<unsigned char>& data);
 private:
+	// Directory
+	static DirRequests DetermineDirRequest(std::vector<unsigned char>& data);
+	static DirResponse HandleKeyRequest();
+
 	// Decryption
-	static std::vector<unsigned char> DecryptData(const std::vector<unsigned char>& data, const RSA::PublicKey& key);
-	static std::vector<unsigned char> DecryptRSA(const std::vector<unsigned char>& data, const RSA::PublicKey& key);
+	static std::vector<unsigned char> DecryptData(const std::vector<unsigned char>& data);
+	static std::vector<unsigned char> DecryptRSA(const std::vector<unsigned char>& data);
 	static std::vector<unsigned char> DecryptAES(const std::vector<unsigned char>& data);
 
 	static std::string ExtractIP(std::vector<unsigned char>& data);
+	static std::array<uint8_t, 4> split_uint32_to_bytes(uint32_t input);
+
+	// Variables
+	static RSA::PublicKey _pubKey;
 };
