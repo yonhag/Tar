@@ -5,7 +5,8 @@
 #include <exception>
 #include <iostream>
 
-Communicator::Communicator()
+Communicator::Communicator(const NetworkHandler& nwh) :
+	_nwhandler(nwh)
 {
 	this->_serverSocket = socket(AF_INET, SOCK_STREAM, 0);
 	if (this->_serverSocket == INVALID_SOCKET)
@@ -102,4 +103,9 @@ void Communicator::SendData(SOCKET sock, const std::vector<unsigned char>& data)
 	{
 		throw std::exception("Error while sending message to client");
 	}
+}
+
+void Communicator::UseNetwork()
+{
+	
 }

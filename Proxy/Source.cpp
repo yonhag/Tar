@@ -1,14 +1,17 @@
 #include "Communicator.h"
+#include "NetworkHandler.h"
 #include "WSAInitializer.h"
 
 int main()
 {
 	WSAInitializer wsa_init;
-	auto comm = Communicator();
-	if (!comm.ConnectToNetwork())
-		// throw exception
-		NULL;
-	
+	NetworkHandler nwh;
+
+	if (!nwh.IsConnected())
+		return 1;
+
+	auto comm = Communicator(nwh);
+
 	while (true)
 	{
 		comm.UseNetwork();
