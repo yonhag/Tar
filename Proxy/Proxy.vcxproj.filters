@@ -13,11 +13,8 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Header Files\Structs">
-      <UniqueIdentifier>{aa9ea352-c7b1-4e93-9db3-14aac33aada3}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\External">
-      <UniqueIdentifier>{d9fab898-7693-4699-9903-e26b5b4c9ba5}</UniqueIdentifier>
+    <Filter Include="Header Files\Consts">
+      <UniqueIdentifier>{aba69fc8-cf25-4699-943b-5344b8a2b546}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -30,7 +27,10 @@
     <ClCompile Include="Communicator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="NetworkHandler.cpp">
+    <ClCompile Include="Consts.h">
+      <Filter>Header Files\Consts</Filter>
+    </ClCompile>
+    <ClCompile Include="RequestHandler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
