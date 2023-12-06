@@ -85,11 +85,13 @@ void Communicator::HandleClient(SOCKET sock)
 	
 	if (IsDirectoryMessage(message))
 	{
+		RequestHandler()
 		DirResponse request = RequestHandler::HandleDirRequest(message);
 		SendData(sock, request.data);
 	}
 	else
 	{
+		RequestHandler handler()
 		Request request = RequestHandler::HandleRequest(message);
 		SendData(sock, request.data);
 	}

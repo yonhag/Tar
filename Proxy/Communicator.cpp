@@ -1,6 +1,6 @@
 #include "Communicator.h"
 #include "Protocol.h"
-#include "RequestHandler.h"
+#include "Consts.h"
 #include <thread>
 #include <exception>
 #include <iostream>
@@ -44,7 +44,7 @@ void Communicator::RunServer()
 
 void Communicator::bindAndListen()
 {
-	struct sockaddr_in sda = { 0 };
+	struct sockaddr_in sa = { 0 };
 
 	sa.sin_port = htons(port);
 	sa.sin_family = AF_INET;
@@ -65,8 +65,9 @@ void Communicator::HandleClient(SOCKET sock)
 	// Recieving the message
 	unsigned char buffer[max_message_size];
 	int len = recv(sock, reinterpret_cast<char*>(buffer), max_message_size, NULL);
-
-	if (len <= 0) // If connection isn't right
+	
+	// If connection isn't right
+	if (len <= 0) 
 	{
 		if (len == 0)
 		{
@@ -84,17 +85,7 @@ void Communicator::HandleClient(SOCKET sock)
 	// Dealing with the message
 	std::vector<unsigned char> message(buffer, buffer + len);
 
-	if (this->_user_list.find(sock) != this->_user_list.end())
-	{
-		Request request = RequestHandler::HandleRequest(message, this->_user_list.find(sock)->second);
-		SendData(sock, request.data);
-	}
-	else
-	{
-		RequestHandler handler(message);
-		this->_user_list.insert(std::pair<SOCKET, RequestHandler>(sock, handler));
-		SendData(sock, std::vector<unsigned char>(Protocol::CODES::C_OK));
-	}
+	this->_
 }
 
 void Communicator::SendData(SOCKET sock, const std::vector<unsigned char>& data)

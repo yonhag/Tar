@@ -19,9 +19,7 @@ private:
 	void SendData(SOCKET sock, const std::vector<unsigned char>& data);
 	void UseNetwork();
 
-	
 	SOCKET _serverSocket;
-	std::map<SOCKET, RequestHandler> _user_list;
 	NetworkHandler _nwhandler;
 
 	const u_short port = 8200;

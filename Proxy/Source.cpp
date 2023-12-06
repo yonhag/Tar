@@ -14,7 +14,7 @@ int main()
 
 	while (true)
 	{
-		comm.UseNetwork();
+		comm.RunServer();
 	}
 
 	return 0;

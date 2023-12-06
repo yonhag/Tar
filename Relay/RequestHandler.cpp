@@ -46,6 +46,8 @@ DirResponse RequestHandler::HandleKeyRequest()
 	json j;
 	
 	auto jsonString = j.dump();
+	
+	// ADD INFO
 
 	auto stringSizeInBytes = split_uint32_to_bytes(jsonString.size());
 	for (const auto& byte : stringSizeInBytes)

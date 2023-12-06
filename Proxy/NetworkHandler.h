@@ -1,6 +1,7 @@
 #pragma once
 #include "Relay.h"
 #include "Directory.h"
+#include <optional>
 #include <vector>
 #include <fstream>
 
@@ -10,13 +11,21 @@ public:
 	NetworkHandler();
 	NetworkHandler(const NetworkHandler& nwh);
 	bool IsConnected() const;
+	
+	std::optional<std::vector<unsigned char>> SendMessage(const std::vector<unsigned char>& message);
 
 private:
+	// Network connection
 	Directory GetNextDir();
 	bool GetRelays();
 	std::vector<unsigned char> GetRelayRequest();
 	bool ReceiveRelays(SOCKET sock);
-	bool DecodeMessage(const std::vector<unsigned char>& message);
+	bool DecodeConnectionMessage(const std::vector<unsigned char>& message);
+
+	// Network usage
+	std::vector<unsigned char> EncryptMessage(const std::vector<unsigned char>& message);
+	std::vector<unsigned char> EncryptAES(const std::vector<unsigned char>& message);
+	std::vector<unsigned char> EncryptRSA(const std::vector<unsigned char>& message);
 
 	bool _isConnected;
 	std::vector<Relay> _relays;
