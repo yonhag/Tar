@@ -117,7 +117,7 @@ void Communicator::SendMessages()
 	}
 
 	// Connecting
-	if (connect(relaySocket, reinterpret_cast<sockaddr*>(&addr), sizeof(addr)) == INVALID_SOCKET)
+	if (connect(relaySocket, reinterpret_cast<sockaddr*>(&serverAddress), sizeof(serverAddress)) == INVALID_SOCKET)
 		throw std::exception("Relay socket failed");
 
 	while (true)
