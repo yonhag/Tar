@@ -7,24 +7,40 @@
 
 using json = nlohmann::json;
 
-NetworkHandler::NetworkHandler() :
-    _dirFile(this->_dirFileName)
+NetworkHandler::NetworkHandler()
 {
-    if (!this->_dirFile.is_open())
+    std::ifstream dirFile(this->_dirFileName);
+
+    if (!dirFile.is_open())
         throw std::exception("File not opening");
 
     bool hasFoundDir = false;
     while (!hasFoundDir)
     {
-        this->_dir = GetNextDir();
+        this->_dir = GetNextDir(dirFile);
         hasFoundDir = GetRelays();
     }
+    dirFile.close();
 }
 
 NetworkHandler::NetworkHandler(const NetworkHandler& nwh) :
-    _isConnected(nwh._isConnected), _relays(nwh._relays), _dir(nwh._dir), _dirFile(this->_dirFileName)
+    _isConnected(nwh._isConnected), _relays(nwh._relays), _dir(nwh._dir)
 {
+    if (this->_relays.empty())
+    {
+        std::ifstream dirFile(this->_dirFileName);
 
+        if (!dirFile.is_open())
+            throw std::exception("File not opening");
+
+        bool hasFoundDir = false;
+        while (!hasFoundDir)
+        {
+            this->_dir = GetNextDir(dirFile);
+            hasFoundDir = GetRelays();
+        }
+        dirFile.close();
+    }
 }
 
 bool NetworkHandler::IsConnected() const
@@ -32,12 +48,12 @@ bool NetworkHandler::IsConnected() const
     return this->_isConnected;
 }
 
-Directory NetworkHandler::GetNextDir()
+Directory NetworkHandler::GetNextDir(std::ifstream& dirFile)
 {
     Directory dir;
     std::string line;
 
-    std::getline(this->_dirFile, line);
+    std::getline(dirFile, line);
 
     // Extracting the ip
     bool isPort = false;

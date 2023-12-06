@@ -9,13 +9,13 @@ class NetworkHandler
 public:
 	NetworkHandler();
 	NetworkHandler(const NetworkHandler& nwh);
-	bool IsConnected() const;
 
+	bool IsConnected() const;
 	std::vector<unsigned char> EncryptMessage(const MessageRequest& message);
 
 private:
 	// Network connection
-	Directory GetNextDir();
+	Directory GetNextDir(std::ifstream& dirFile);
 	bool GetRelays();
 	std::vector<unsigned char> GetRelayRequest() const; 
 	bool ReceiveRelays(SOCKET sock);
@@ -27,7 +27,7 @@ private:
 	static std::vector<unsigned char> EncryptRSA(const std::vector<unsigned char>& message, const unsigned long key);
 
 	// Decryption
-
+	
 	// Helper functions
 	static PCWSTR StringToPCWSTR(const std::string& str);
 
@@ -37,5 +37,4 @@ private:
 
 	// Directory Finding
 	const std::string _dirFileName = "dirlist.txt";
-	std::ifstream _dirFile;
 };
