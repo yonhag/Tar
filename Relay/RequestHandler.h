@@ -1,12 +1,7 @@
 #include "Request.h"
-#include "cryptopp/rsa.h"
-#include "cryptopp/osrng.h"
-#include "cryptopp/aes.h"
 #include <iostream>
 
 enum class DirRequests { Keys };
-
-using namespace CryptoPP;
 
 class RequestHandler
 {
@@ -25,7 +20,4 @@ private:
 
 	static std::string ExtractIP(std::vector<unsigned char>& data);
 	static std::array<uint8_t, 4> split_uint32_to_bytes(uint32_t input);
-
-	// Variables
-	static RSA::PublicKey _pubKey;
 };

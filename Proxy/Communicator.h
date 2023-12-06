@@ -3,13 +3,12 @@
 #include <vector>
 #include <map>
 #include <string>
-#include "cryptopp/rsa.h"
 #include "NetworkHandler.h"
 
 class Communicator
 {
 public:
-	Communicator(const NetworkHandler& nwh);
+	explicit Communicator(const NetworkHandler& nwh);
 	~Communicator();
 
 	[[noreturn]] void RunServer();
@@ -22,7 +21,7 @@ private:
 
 	
 	SOCKET _serverSocket;
-	std::vector<SOCKET> _user_list;
+	std::map<SOCKET, RequestHandler> _user_list;
 	NetworkHandler _nwhandler;
 
 	const u_short port = 8200;

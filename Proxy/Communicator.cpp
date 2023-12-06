@@ -44,7 +44,7 @@ void Communicator::RunServer()
 
 void Communicator::bindAndListen()
 {
-	struct sockaddr_in sa = { 0 };
+	struct sockaddr_in sda = { 0 };
 
 	sa.sin_port = htons(port);
 	sa.sin_family = AF_INET;
@@ -91,9 +91,9 @@ void Communicator::HandleClient(SOCKET sock)
 	}
 	else
 	{
-		RSA::PublicKey key = RequestHandler::GetKeyFromHandshake(message);
-		this->_user_list.insert(std::pair<SOCKET, RSA::PublicKey>(sock, key));
-		SendData(sock, std::vector<unsigned char>(Protocol::OK));
+		RequestHandler handler(message);
+		this->_user_list.insert(std::pair<SOCKET, RequestHandler>(sock, handler));
+		SendData(sock, std::vector<unsigned char>(Protocol::CODES::C_OK));
 	}
 }
 

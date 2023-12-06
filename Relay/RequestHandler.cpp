@@ -1,9 +1,5 @@
 #include "RequestHandler.h"
 #include "json.hpp"
-#include "cryptopp/osrng.h"
-#include "cryptopp/base64.h"
-#include "cryptopp/hex.h"
-#include "cryptopp/files.h"
 
 using json = nlohmann::json;
 using nlohmann::json;
@@ -48,8 +44,6 @@ DirResponse RequestHandler::HandleKeyRequest()
 	res.data = std::vector<unsigned char>();
 
 	json j;
-	j["Modulus"] = _pubKey.GetModulus().ConvertToLong();
-	j["Exponent"] = _pubKey.GetPublicExponent().ConvertToLong();
 	
 	auto jsonString = j.dump();
 
@@ -101,23 +95,6 @@ std::vector<unsigned char> RequestHandler::DecryptAES(const std::vector<unsigned
 
 std::vector<unsigned char> RequestHandler::DecryptRSA(const std::vector<unsigned char>& data)
 {
-	/*
-	std::vector<unsigned char> dercyptedText;
-	const int StandardKeySize = 2048;
-
-	// Creating the keys
-	AutoSeededRandomPool prng;
-	InvertibleRSAFunction params;
-
-	params.GenerateRandomWithKeySize(prng, StandardKeySize);
-
-	RSAES_OAEP_SHA256_Encryptor d(key);
-	HexEncoder encoder(new FileSink(std::cout));
-
-	VectorSource(data, true, new PK_EncryptorFilter(prng, d, new VectorSink(dercyptedText)));
-
-	return dercyptedText;
-	*/
 	return std::vector<unsigned char>();
 }
 

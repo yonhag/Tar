@@ -1,27 +1,25 @@
 #include "RequestHandler.h"
-#include "cryptopp/osrng.h"
-#include "cryptopp/base64.h"
-#include "cryptopp/hex.h"
-#include "cryptopp/files.h"
-
-#include "cryptopp/filters.h"
-#include "cryptopp/strciphr.h"
 
 
-Request RequestHandler::HandleRequest(std::vector<unsigned char>& data, const RSA::PublicKey& key)
+RequestHandler::RequestHandler(std::vector<unsigned char> handshake)
+{
+	GetKeyFromHandshake(handshake);
+}
+
+Request RequestHandler::HandleRequest(std::vector<unsigned char>& data)
 {
 	Request request;
 
-	DecryptData(data, key);
+	DecryptData(data);
 	request.dest_ip = ExtractIP(data);
 	request.data = data;
 
 	return request;
 }
 
-std::vector<unsigned char> RequestHandler::DecryptData(const std::vector<unsigned char>& data, const RSA::PublicKey& key)
+std::vector<unsigned char> RequestHandler::DecryptData(const std::vector<unsigned char>& data)
 {
-	std::vector<unsigned char> decryptedData = DecryptRSA(data, key);
+	std::vector<unsigned char> decryptedData = DecryptRSA(data);
 	decryptedData = DecryptAES(decryptedData);
 
 	return decryptedData;
@@ -55,27 +53,16 @@ std::vector<unsigned char> RequestHandler::DecryptAES(const std::vector<unsigned
 	return std::vector<unsigned char>();
 }
 
-RSA::PublicKey RequestHandler::GetKeyFromHandshake(std::vector<unsigned char>& data)
+int RequestHandler::GetKeyFromHandshake(std::vector<unsigned char>& data)
 {
-	RSA::PublicKey key;
-	return key;
+	// Should assign both RSA and AES keys
+	return 0;
 }
 
-std::vector<unsigned char> RequestHandler::DecryptRSA(const std::vector<unsigned char>& data, const RSA::PublicKey& key)
+std::vector<unsigned char> RequestHandler::DecryptRSA(const std::vector<unsigned char>& data)
 {
-	std::vector<unsigned char> dercyptedText;
 	const int StandardKeySize = 2048;
-
-	// Creating the keys
-	AutoSeededRandomPool prng;
-	InvertibleRSAFunction params;
-
-	params.GenerateRandomWithKeySize(prng, StandardKeySize);
-
-	RSAES_OAEP_SHA256_Encryptor d(key);
-	HexEncoder encoder(new FileSink(std::cout));
-
-	VectorSource(data, true, new PK_EncryptorFilter(prng, d, new VectorSink(dercyptedText)));
+	std::vector<unsigned char> dercyptedText;
 
 	return dercyptedText;
 }

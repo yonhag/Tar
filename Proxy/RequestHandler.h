@@ -1,20 +1,23 @@
+#pragma once
 #include "Request.h"
-#include "cryptopp/rsa.h"
-#include "cryptopp/aes.h"
 #include <iostream>
-
-using namespace CryptoPP;
 
 class RequestHandler
 {
 public:
-	static Request HandleRequest(std::vector<unsigned char>& data, const RSA::PublicKey& key);
-	static RSA::PublicKey GetKeyFromHandshake(std::vector<unsigned char>& data);
+	RequestHandler(std::vector<unsigned char> handshake);
+
+	Request HandleRequest(std::vector<unsigned char>& data);
 private:
 	// Decryption
-	static std::vector<unsigned char> DecryptData(const std::vector<unsigned char>& data, const RSA::PublicKey& key);
-	static std::vector<unsigned char> DecryptRSA(const std::vector<unsigned char>& data, const RSA::PublicKey& key);
-	static std::vector<unsigned char> DecryptAES(const std::vector<unsigned char>& data);
+	std::vector<unsigned char> DecryptData(const std::vector<unsigned char>& data);
+	std::vector<unsigned char> DecryptRSA(const std::vector<unsigned char>& data);
+	std::vector<unsigned char> DecryptAES(const std::vector<unsigned char>& data);
 
-	static std::string ExtractIP(std::vector<unsigned char>& data);
-}; #pragma once
+
+	int GetKeyFromHandshake(std::vector<unsigned char>& data); // int should be a key
+	std::string ExtractIP(std::vector<unsigned char>& data);
+
+	int RSAKey;
+	int AESKey;
+}; 
