@@ -141,6 +141,7 @@ std::vector<unsigned char> NetworkHandler::EncryptMessage(const std::vector<unsi
 
     for (const auto& relay : this->_relays)
     {
+        encrypted = AddIP(encrypted);
         encrypted = EncryptAES(encrypted, relay._publicAESKey);
         encrypted = EncryptRSA(encrypted, relay._publicRSAKey);
     }

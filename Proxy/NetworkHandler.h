@@ -22,6 +22,7 @@ private:
 	bool DecodeConnectionMessage(const std::vector<unsigned char>& message);
 
 	// Encryption
+	static std::vector<unsigned char> AddIP(const std::vector<unsigned char>& message);
 	static std::vector<unsigned char> EncryptAES(const std::vector<unsigned char>& message, const unsigned long key);
 	static std::vector<unsigned char> EncryptRSA(const std::vector<unsigned char>& message, const unsigned long key);
 

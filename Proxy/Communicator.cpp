@@ -25,6 +25,8 @@ Communicator::~Communicator()
 void Communicator::RunServer()
 {
 	bindAndListen();
+	std::thread sendingThread(&Communicator::SendMessages, this);
+	sendingThread.detach();
 
 	while (true)
 	{
@@ -85,18 +87,11 @@ void Communicator::HandleClient(SOCKET sock)
 	// Dealing with the message
 	std::vector<unsigned char> message(buffer, buffer + len);
 
-	this->_
+	std::vector<unsigned char> encrypted = this->_nwhandler.EncryptMessage(message);
 }
 
-void Communicator::SendData(SOCKET sock, const std::vector<unsigned char>& data)
+void Communicator::SendMessages()
 {
-	if (send(sock, reinterpret_cast<const char*>(data.data()), data.size(), 0) == INVALID_SOCKET)
-	{
-		throw std::exception("Error while sending message to client");
-	}
-}
+	// Creating a socket with the relays
 
-void Communicator::UseNetwork()
-{
-	
 }
