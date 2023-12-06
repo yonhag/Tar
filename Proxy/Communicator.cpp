@@ -92,6 +92,8 @@ void Communicator::HandleClient(SOCKET sock)
 	MessageRequest request = JsonDecoder::DecodeClientMessage(message);
 
 	std::vector<unsigned char> encrypted = this->_nwhandler.EncryptMessage(request);
+
+	this->_messageQueue.push(encrypted);
 }
 
 void Communicator::SendMessages()
