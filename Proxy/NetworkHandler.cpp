@@ -170,7 +170,11 @@ std::vector<unsigned char> NetworkHandler::EncryptMessage(const MessageRequest& 
 
 std::vector<unsigned char> NetworkHandler::AddIP(const std::vector<unsigned char>& message, const std::string& ip)
 {
-    return std::vector<unsigned char>();
+    std::vector<unsigned char> updatedMessage = message;
+
+
+
+    return updatedMessage;
 }
 
 std::vector<unsigned char> NetworkHandler::EncryptAES(const std::vector<unsigned char>& message, const unsigned long key)
