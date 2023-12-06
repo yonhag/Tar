@@ -89,7 +89,7 @@ bool NetworkHandler::GetRelays()
     return ReceiveRelays(sock);
 }
 
-std::vector<unsigned char> NetworkHandler::GetRelayRequest()
+std::vector<unsigned char> NetworkHandler::GetRelayRequest() const
 {
     std::vector<unsigned char> request;
     request.push_back('1');
@@ -135,15 +135,19 @@ bool NetworkHandler::DecodeConnectionMessage(const std::vector<unsigned char>& m
     return this->_relays.size() == 3;
 }
 
-std::vector<unsigned char> NetworkHandler::EncryptMessage(const std::vector<unsigned char>& message)
+std::vector<unsigned char> NetworkHandler::EncryptMessage(const MessageRequest& message)
 {
-    std::vector<unsigned char> encrypted;
+    std::vector<unsigned char> encrypted = message._data;
 
-    for (const auto& relay : this->_relays)
+    // Starting from the third, we add all the relay's IPs and encrypt with their keys.
+    encrypted = AddIP(encrypted, message._destIP);
+    for (int i = this->_relays.size(); i > 0; i--)
     {
-        encrypted = AddIP(encrypted);
-        encrypted = EncryptAES(encrypted, relay._publicAESKey);
-        encrypted = EncryptRSA(encrypted, relay._publicRSAKey);
+        encrypted = EncryptAES(encrypted, this->_relays[i]._publicAESKey);
+        encrypted = EncryptRSA(encrypted, this->_relays[i]._publicRSAKey);
+        
+        if (i != 1) // To not add the first relay
+            encrypted = AddIP(encrypted, this->_relays[i]._ip);
     }
 
     return encrypted;

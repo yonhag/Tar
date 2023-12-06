@@ -86,8 +86,10 @@ void Communicator::HandleClient(SOCKET sock)
 
 	// Dealing with the message
 	std::vector<unsigned char> message(buffer, buffer + len);
+	
+	// # TODO: ADD IP GETTING WITH JSON
 
-	std::vector<unsigned char> encrypted = this->_nwhandler.EncryptMessage(message);
+	std::vector<unsigned char> encrypted = this->_nwhandler.EncryptMessage();
 }
 
 void Communicator::SendMessages()
