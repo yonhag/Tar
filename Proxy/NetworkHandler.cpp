@@ -48,7 +48,7 @@ bool NetworkHandler::IsConnected() const
     return this->_isConnected;
 }
 
-Directory NetworkHandler::GetNextDir(std::ifstream& dirFile)
+Directory NetworkHandler::GetNextDir(std::ifstream& dirFile) const
 {
     Directory dir;
     std::string line;
@@ -183,6 +183,11 @@ std::vector<unsigned char> NetworkHandler::EncryptMessage(const MessageRequest& 
     }
 
     return encrypted;
+}
+
+std::string NetworkHandler::GetFirstRelayIP() const
+{
+    return this->_relays[0]._ip;
 }
 
 std::vector<unsigned char> NetworkHandler::AddIP(const std::vector<unsigned char>& message, const std::string& ip)

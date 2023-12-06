@@ -25,5 +25,6 @@ private:
 	SOCKET _serverSocket;
 	NetworkHandler _nwhandler;
 
-	const u_short port = 8200;
+	const u_short server_port = 8200;
+	const u_short relay_port = 16400;
 };

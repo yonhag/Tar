@@ -12,10 +12,11 @@ public:
 
 	bool IsConnected() const;
 	std::vector<unsigned char> EncryptMessage(const MessageRequest& message);
+	std::string GetFirstRelayIP() const;
 
 private:
 	// Network connection
-	Directory GetNextDir(std::ifstream& dirFile);
+	Directory GetNextDir(std::ifstream& dirFile) const;
 	bool GetRelays();
 	std::vector<unsigned char> GetRelayRequest() const; 
 	bool ReceiveRelays(SOCKET sock);
