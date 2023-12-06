@@ -115,10 +115,10 @@ bool NetworkHandler::ReceiveRelays(SOCKET sock)
 
     std::vector<unsigned char> message(buffer, buffer + len);
 
-    return DecodeMessage(message);
+    return DecodeConnectionMessage(message);
 }
 
-bool NetworkHandler::DecodeMessage(const std::vector<unsigned char>& message)
+bool NetworkHandler::DecodeConnectionMessage(const std::vector<unsigned char>& message)
 {
     json j = json::parse(message);
 
@@ -133,4 +133,29 @@ bool NetworkHandler::DecodeMessage(const std::vector<unsigned char>& message)
     }
 
     return this->_relays.size() == 3;
+}
+
+std::vector<unsigned char> NetworkHandler::EncryptMessage(const std::vector<unsigned char>& message)
+{
+    std::vector<unsigned char> encrypted;
+
+    for (const auto& relay : this->_relays)
+    {
+        encrypted = EncryptAES(encrypted, relay._publicAESKey);
+        encrypted = EncryptRSA(encrypted, relay._publicRSAKey);
+    }
+
+    return encrypted;
+}
+
+std::vector<unsigned char> NetworkHandler::EncryptAES(const std::vector<unsigned char>& message, const unsigned long key)
+{
+    std::vector<unsigned char> encrypted = message;
+    return encrypted;
+}
+
+std::vector<unsigned char> NetworkHandler::EncryptRSA(const std::vector<unsigned char>& message, const unsigned long key)
+{
+    std::vector<unsigned char> encrypted = message;
+    return encrypted;
 }
