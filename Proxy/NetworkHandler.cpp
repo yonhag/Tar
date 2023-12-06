@@ -1,30 +1,46 @@
 #include <WinSock2.h>
 #include <Windows.h>
 #include <Ws2tcpip.h>
-#include <codecvt>
+#include "Consts.h"
 #include "NetworkHandler.h"
 #include "json.hpp"
 
 using json = nlohmann::json;
 
-NetworkHandler::NetworkHandler() :
-    _dirFile(this->_dirFileName)
+NetworkHandler::NetworkHandler()
 {
-    if (!this->_dirFile.is_open())
+    std::ifstream dirFile(this->_dirFileName);
+
+    if (!dirFile.is_open())
         throw std::exception("File not opening");
 
     bool hasFoundDir = false;
     while (!hasFoundDir)
     {
-        this->_dir = GetNextDir();
+        this->_dir = GetNextDir(dirFile);
         hasFoundDir = GetRelays();
     }
+    dirFile.close();
 }
 
 NetworkHandler::NetworkHandler(const NetworkHandler& nwh) :
-    _isConnected(nwh._isConnected), _relays(nwh._relays), _dir(nwh._dir), _dirFile(this->_dirFileName)
+    _isConnected(nwh._isConnected), _relays(nwh._relays), _dir(nwh._dir)
 {
+    if (this->_relays.empty())
+    {
+        std::ifstream dirFile(this->_dirFileName);
 
+        if (!dirFile.is_open())
+            throw std::exception("File not opening");
+
+        bool hasFoundDir = false;
+        while (!hasFoundDir)
+        {
+            this->_dir = GetNextDir(dirFile);
+            hasFoundDir = GetRelays();
+        }
+        dirFile.close();
+    }
 }
 
 bool NetworkHandler::IsConnected() const
@@ -32,12 +48,12 @@ bool NetworkHandler::IsConnected() const
     return this->_isConnected;
 }
 
-Directory NetworkHandler::GetNextDir()
+Directory NetworkHandler::GetNextDir(std::ifstream& dirFile) const
 {
     Directory dir;
     std::string line;
 
-    std::getline(this->_dirFile, line);
+    std::getline(dirFile, line);
 
     // Extracting the ip
     bool isPort = false;
@@ -69,8 +85,7 @@ bool NetworkHandler::GetRelays()
     serverAddress.sin_family = AF_INET;
     serverAddress.sin_port = htons(this->_dir._port);
 
-    std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
-    PCWSTR ip = converter.from_bytes(this->_dir._ip).c_str();
+    PCWSTR ip = StringToPCWSTR(this->_dir._ip);
     if (InetPton(AF_INET, ip, &(serverAddress.sin_addr)) != 1)
     {
         closesocket(sock);
@@ -89,7 +104,24 @@ bool NetworkHandler::GetRelays()
     return ReceiveRelays(sock);
 }
 
-std::vector<unsigned char> NetworkHandler::GetRelayRequest()
+// Helper function
+PCWSTR NetworkHandler::StringToPCWSTR(const std::string& str)
+{
+    // Convert std::string to wide string using the system's default code page
+    int bufferSize = MultiByteToWideChar(CP_ACP, 0, str.c_str(), -1, nullptr, 0);
+    if (bufferSize == 0)
+        throw std::exception("Error in StringToPCWSTR");
+
+    std::wstring wideBuffer(bufferSize, L'\0');
+
+    // Convert std::string to wide string
+    if (MultiByteToWideChar(CP_ACP, 0, str.c_str(), -1, &wideBuffer[0], bufferSize) == 0)
+        throw std::exception("Error in StringToPCWSTR");
+
+    return wideBuffer.c_str();
+}
+
+std::vector<unsigned char> NetworkHandler::GetRelayRequest() const
 {
     std::vector<unsigned char> request;
     request.push_back('1');
@@ -115,10 +147,10 @@ bool NetworkHandler::ReceiveRelays(SOCKET sock)
 
     std::vector<unsigned char> message(buffer, buffer + len);
 
-    return DecodeMessage(message);
+    return DecodeConnectionMessage(message);
 }
 
-bool NetworkHandler::DecodeMessage(const std::vector<unsigned char>& message)
+bool NetworkHandler::DecodeConnectionMessage(const std::vector<unsigned char>& message)
 {
     json j = json::parse(message);
 
@@ -133,4 +165,49 @@ bool NetworkHandler::DecodeMessage(const std::vector<unsigned char>& message)
     }
 
     return this->_relays.size() == 3;
+}
+
+std::vector<unsigned char> NetworkHandler::EncryptMessage(const MessageRequest& message)
+{
+    std::vector<unsigned char> encrypted = message._data;
+
+    // Starting from the third, we add all the relay's IPs and encrypt with their keys.
+    encrypted = AddIP(encrypted, message._destIP);
+    for (int i = this->_relays.size(); i > 0; i--)
+    {
+        encrypted = EncryptAES(encrypted, this->_relays[i]._publicAESKey);
+        encrypted = EncryptRSA(encrypted, this->_relays[i]._publicRSAKey);
+        
+        if (i != 1) // To not add the first relay
+            encrypted = AddIP(encrypted, this->_relays[i]._ip);
+    }
+
+    return encrypted;
+}
+
+std::string NetworkHandler::GetFirstRelayIP() const
+{
+    return this->_relays[0]._ip;
+}
+
+std::vector<unsigned char> NetworkHandler::AddIP(const std::vector<unsigned char>& message, const std::string& ip)
+{
+    std::vector<unsigned char> updatedMessage = message;
+
+    for (int i = 0; i < ip_size; i++)
+        updatedMessage.push_back(ip[i]);
+
+    return updatedMessage;
+}
+
+std::vector<unsigned char> NetworkHandler::EncryptAES(const std::vector<unsigned char>& message, const unsigned long key)
+{
+    std::vector<unsigned char> encrypted = message;
+    return encrypted;
+}
+
+std::vector<unsigned char> NetworkHandler::EncryptRSA(const std::vector<unsigned char>& message, const unsigned long key)
+{
+    std::vector<unsigned char> encrypted = message;
+    return encrypted;
 }

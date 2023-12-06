@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClCompile Include="Communicator.cpp" />
     <ClCompile Include="Consts.h" />
+    <ClCompile Include="JsonDecoder.cpp" />
     <ClCompile Include="NetworkHandler.cpp" />
     <ClCompile Include="Protocol.cpp" />
     <ClCompile Include="Source.cpp" />
@@ -29,8 +30,12 @@
   <ItemGroup>
     <ClInclude Include="Communicator.h" />
     <ClInclude Include="json.hpp" />
+    <ClInclude Include="JsonDecoder.h" />
+    <ClInclude Include="JsonEncoder.h" />
+    <ClInclude Include="MessageRequest.h" />
     <ClInclude Include="NetworkHandler.h" />
     <ClInclude Include="Protocol.h" />
+    <ClInclude Include="Relay.h" />
     <ClInclude Include="Request.h" />
     <ClInclude Include="WSAInitializer.h" />
   </ItemGroup>
@@ -120,6 +125,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

@@ -1,7 +1,7 @@
 #include <WinSock2.h>
 #include <Windows.h>
 #include <vector>
-#include <map>
+#include <queue>
 #include <string>
 #include "NetworkHandler.h"
 
@@ -14,13 +14,17 @@ public:
 	[[noreturn]] void RunServer();
 
 private:
+	// Server socket
 	void bindAndListen();
 	void HandleClient(SOCKET clientSocket);
-	void SendData(SOCKET sock, const std::vector<unsigned char>& data);
-	void UseNetwork();
 
+	// Message Sending
+	void SendMessages();
+
+	std::queue <std::vector<unsigned char>> _messageQueue;
 	SOCKET _serverSocket;
 	NetworkHandler _nwhandler;
 
-	const u_short port = 8200;
+	const u_short server_port = 8200;
+	const u_short relay_port = 16400;
 };

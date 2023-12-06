@@ -71,20 +71,21 @@ std::string RequestHandler::ExtractIP(std::vector<unsigned char>& data)
 {
 	std::string ip = "";
 
-	// Extracting the ip
-	for (int i = 0; i < ip_size && !data.empty(); i++)
+	int startIndex = data.size() - ip_size;
+	for (int i = 0; i < 15 && !data.empty(); i++)
 	{
-		ip += data[0];
-		data.erase(data.begin());
+		ip += data[startIndex];
+		data.erase(data.begin() + startIndex);
 	}
 
-	// Removing the paddding
-	for (const char& i : ip)
+	// Removing the padding
+	for (int i = 0; i < ip_size && ip.size() > i; i++)
 	{
-		if (i == ip_padding)
-			ip.erase(ip.begin());
-		else
-			break;
+		if (ip[i] == ',')
+		{
+			ip.erase(i, 1);
+			--i;
+		}
 	}
 
 	return ip;

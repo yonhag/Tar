@@ -1,9 +1,12 @@
 #include "Communicator.h"
 #include "Protocol.h"
 #include "Consts.h"
+#include "JsonDecoder.h"
+#include <WS2tcpip.h>
 #include <thread>
 #include <exception>
 #include <iostream>
+#include <chrono>
 
 Communicator::Communicator(const NetworkHandler& nwh) :
 	_nwhandler(nwh)
@@ -25,6 +28,8 @@ Communicator::~Communicator()
 void Communicator::RunServer()
 {
 	bindAndListen();
+	std::thread sendingThread(&Communicator::SendMessages, this);
+	sendingThread.detach();
 
 	while (true)
 	{
@@ -46,7 +51,7 @@ void Communicator::bindAndListen()
 {
 	struct sockaddr_in sa = { 0 };
 
-	sa.sin_port = htons(port);
+	sa.sin_port = htons(server_port);
 	sa.sin_family = AF_INET;
 	sa.sin_addr.s_addr = INADDR_ANY;
 
@@ -57,7 +62,7 @@ void Communicator::bindAndListen()
 	// Start listening for incoming requests of clients
 	if (::listen(_serverSocket, SOMAXCONN) == SOCKET_ERROR)
 		throw std::exception(__FUNCTION__ " - listen");
-	std::cout << "Listening on port " << port << std::endl;
+	std::cout << "Listening on port " << server_port << std::endl;
 }
 
 void Communicator::HandleClient(SOCKET sock)
@@ -84,19 +89,49 @@ void Communicator::HandleClient(SOCKET sock)
 
 	// Dealing with the message
 	std::vector<unsigned char> message(buffer, buffer + len);
-
-	this->_
-}
-
-void Communicator::SendData(SOCKET sock, const std::vector<unsigned char>& data)
-{
-	if (send(sock, reinterpret_cast<const char*>(data.data()), data.size(), 0) == INVALID_SOCKET)
-	{
-		throw std::exception("Error while sending message to client");
-	}
-}
-
-void Communicator::UseNetwork()
-{
 	
+	MessageRequest request = JsonDecoder::DecodeClientMessage(message);
+
+	std::vector<unsigned char> encrypted = this->_nwhandler.EncryptMessage(request);
+
+	this->_messageQueue.push(encrypted);
+}
+
+void Communicator::SendMessages()
+{
+	// Creating a socket with the relays
+	SOCKET relaySocket = socket(AF_INET, SOCK_STREAM, 0);
+	if (relaySocket = INVALID_SOCKET)
+		throw std::exception("Relay socket failed");
+
+	// Socket Specifiers
+	sockaddr_in serverAddress;
+	serverAddress.sin_family = AF_INET;
+	serverAddress.sin_port = htons(this->relay_port);
+
+	PCWSTR ip = NetworkHandler::StringToPCWSTR(this->_nwhandler.GetFirstRelayIP());
+	if (InetPton(AF_INET, ip, &(serverAddress.sin_addr)) != 1)
+	{
+		closesocket(relaySocket);
+		throw std::exception("Relay socket failed");
+	}
+
+	// Connecting
+	if (connect(relaySocket, reinterpret_cast<sockaddr*>(&serverAddress), sizeof(serverAddress)) == INVALID_SOCKET)
+		throw std::exception("Relay socket failed");
+
+	while (true)
+	{
+		// Sleep is queue is empty
+		if (this->_messageQueue.empty())
+			std::this_thread::sleep_for(std::chrono::seconds(3));
+
+		// Getting the message
+		std::vector<unsigned char> message = this->_messageQueue.front();
+		this->_messageQueue.pop();
+		
+		// Sending the message
+		if (send(relaySocket, reinterpret_cast<const char*>(message.data()), message.size(), 0) == INVALID_SOCKET)
+			throw std::exception("Error while sending message to client");
+	}
 }

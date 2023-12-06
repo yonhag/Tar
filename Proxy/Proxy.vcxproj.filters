@@ -13,11 +13,20 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Header Files\Consts">
-      <UniqueIdentifier>{aba69fc8-cf25-4699-943b-5344b8a2b546}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\External">
       <UniqueIdentifier>{e9b64246-6dbd-40ec-a5bd-8b64246966bd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Encoding">
+      <UniqueIdentifier>{c4ffc80c-83a0-40cd-8b77-286d2a7a995e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Structs">
+      <UniqueIdentifier>{fd7c69c8-3b6d-453c-b149-a6014d19d01b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Structs\Consts">
+      <UniqueIdentifier>{aba69fc8-cf25-4699-943b-5344b8a2b546}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Encoding">
+      <UniqueIdentifier>{133d9c76-9762-4563-b3d9-c5421a635915}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -31,13 +40,16 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Consts.h">
-      <Filter>Header Files\Consts</Filter>
+      <Filter>Header Files\Structs\Consts</Filter>
     </ClCompile>
     <ClCompile Include="Protocol.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="NetworkHandler.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="JsonDecoder.cpp">
+      <Filter>Source Files\Encoding</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -51,13 +63,25 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Request.h">
-      <Filter>Header Files\Consts</Filter>
+      <Filter>Header Files\Structs\Consts</Filter>
     </ClInclude>
     <ClInclude Include="NetworkHandler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="json.hpp">
       <Filter>Header Files\External</Filter>
+    </ClInclude>
+    <ClInclude Include="Relay.h">
+      <Filter>Header Files\Structs</Filter>
+    </ClInclude>
+    <ClInclude Include="MessageRequest.h">
+      <Filter>Header Files\Structs</Filter>
+    </ClInclude>
+    <ClInclude Include="JsonDecoder.h">
+      <Filter>Header Files\Encoding</Filter>
+    </ClInclude>
+    <ClInclude Include="JsonEncoder.h">
+      <Filter>Header Files\Encoding</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
