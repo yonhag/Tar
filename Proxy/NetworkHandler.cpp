@@ -1,6 +1,7 @@
 #include <WinSock2.h>
 #include <Windows.h>
 #include <Ws2tcpip.h>
+#include "Consts.h"
 #include "NetworkHandler.h"
 #include "json.hpp"
 
@@ -172,7 +173,8 @@ std::vector<unsigned char> NetworkHandler::AddIP(const std::vector<unsigned char
 {
     std::vector<unsigned char> updatedMessage = message;
 
-
+    for (int i = 0; i < ip_size; i++)
+        updatedMessage.push_back(ip[i]);
 
     return updatedMessage;
 }
