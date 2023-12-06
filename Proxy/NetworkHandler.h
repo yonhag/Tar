@@ -14,6 +14,9 @@ public:
 	std::vector<unsigned char> EncryptMessage(const MessageRequest& message);
 	std::string GetFirstRelayIP() const;
 
+	// Helper functions
+	static PCWSTR StringToPCWSTR(const std::string& str);
+
 private:
 	// Network connection
 	Directory GetNextDir(std::ifstream& dirFile) const;
@@ -29,8 +32,6 @@ private:
 
 	// Decryption
 	
-	// Helper functions
-	static PCWSTR StringToPCWSTR(const std::string& str);
 
 	bool _isConnected;
 	std::vector<Relay> _relays;

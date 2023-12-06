@@ -2,6 +2,7 @@
 #include "Protocol.h"
 #include "Consts.h"
 #include "JsonDecoder.h"
+#include <WS2tcpip.h>
 #include <thread>
 #include <exception>
 #include <iostream>
@@ -104,10 +105,16 @@ void Communicator::SendMessages()
 		throw std::exception("Relay socket failed");
 
 	// Socket Specifiers
-	sockaddr_in addr;
-	addr.sin_family = AF_INET;
-	addr.sin_port = htons(relay_port);
-	addr.sin_addr.s_addr = inet_addr(this->_nwhandler.GetFirstRelayIP().c_str());
+	sockaddr_in serverAddress;
+	serverAddress.sin_family = AF_INET;
+	serverAddress.sin_port = htons(this->relay_port);
+
+	PCWSTR ip = NetworkHandler::StringToPCWSTR(this->_nwhandler.GetFirstRelayIP());
+	if (InetPton(AF_INET, ip, &(serverAddress.sin_addr)) != 1)
+	{
+		closesocket(relaySocket);
+		throw std::exception("Relay socket failed");
+	}
 
 	// Connecting
 	if (connect(relaySocket, reinterpret_cast<sockaddr*>(&addr), sizeof(addr)) == INVALID_SOCKET)
