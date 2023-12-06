@@ -1,6 +1,7 @@
 #include "Communicator.h"
 #include "Protocol.h"
 #include "Consts.h"
+#include "JsonDecoder.h"
 #include <thread>
 #include <exception>
 #include <iostream>
@@ -87,9 +88,9 @@ void Communicator::HandleClient(SOCKET sock)
 	// Dealing with the message
 	std::vector<unsigned char> message(buffer, buffer + len);
 	
-	// # TODO: ADD IP GETTING WITH JSON
+	MessageRequest request = JsonDecoder::DecodeClientMessage(message);
 
-	std::vector<unsigned char> encrypted = this->_nwhandler.EncryptMessage();
+	std::vector<unsigned char> encrypted = this->_nwhandler.EncryptMessage(request);
 }
 
 void Communicator::SendMessages()
