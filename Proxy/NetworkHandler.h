@@ -28,6 +28,9 @@ private:
 
 	// Decryption
 
+	// Helper functions
+	static PCWSTR StringToPCWSTR(const std::string& str);
+
 	bool _isConnected;
 	std::vector<Relay> _relays;
 	Directory _dir;

@@ -1,7 +1,6 @@
 #include <WinSock2.h>
 #include <Windows.h>
 #include <Ws2tcpip.h>
-#include <codecvt>
 #include "NetworkHandler.h"
 #include "json.hpp"
 
@@ -69,8 +68,7 @@ bool NetworkHandler::GetRelays()
     serverAddress.sin_family = AF_INET;
     serverAddress.sin_port = htons(this->_dir._port);
 
-    std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
-    PCWSTR ip = converter.from_bytes(this->_dir._ip).c_str();
+    PCWSTR ip = StringToPCWSTR(this->_dir._ip);
     if (InetPton(AF_INET, ip, &(serverAddress.sin_addr)) != 1)
     {
         closesocket(sock);
@@ -87,6 +85,23 @@ bool NetworkHandler::GetRelays()
         return false;
     
     return ReceiveRelays(sock);
+}
+
+// Helper function
+PCWSTR NetworkHandler::StringToPCWSTR(const std::string& str)
+{
+    // Convert std::string to wide string using the system's default code page
+    int bufferSize = MultiByteToWideChar(CP_ACP, 0, str.c_str(), -1, nullptr, 0);
+    if (bufferSize == 0)
+        throw std::exception("Error in StringToPCWSTR");
+
+    std::wstring wideBuffer(bufferSize, L'\0');
+
+    // Convert std::string to wide string
+    if (MultiByteToWideChar(CP_ACP, 0, str.c_str(), -1, &wideBuffer[0], bufferSize) == 0)
+        throw std::exception("Error in StringToPCWSTR");
+
+    return wideBuffer.c_str();
 }
 
 std::vector<unsigned char> NetworkHandler::GetRelayRequest() const
@@ -151,6 +166,11 @@ std::vector<unsigned char> NetworkHandler::EncryptMessage(const MessageRequest& 
     }
 
     return encrypted;
+}
+
+std::vector<unsigned char> NetworkHandler::AddIP(const std::vector<unsigned char>& message, const std::string& ip)
+{
+    return std::vector<unsigned char>();
 }
 
 std::vector<unsigned char> NetworkHandler::EncryptAES(const std::vector<unsigned char>& message, const unsigned long key)
