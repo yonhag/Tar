@@ -5,5 +5,9 @@
 class RequestHandler
 {
 public:
-	static Response HandleRequest(Request request);
+	static Response HandleRequest(const Request& request);
+	
+private:
+	static Response SerializeResponse(const std::vector<unsigned char>& data);
+	static void AddDirSignature(std::vector<unsigned char>& data);
 };
