@@ -23,7 +23,7 @@ private:
 	bool GetRelays();
 	std::vector<unsigned char> GetRelayRequest() const; 
 	bool ReceiveRelays(SOCKET sock);
-	bool DecodeConnectionMessage(const std::vector<unsigned char>& message);
+	bool HandleConnectionMessage(const std::vector<unsigned char>& message);
 
 	// Encryption
 	static std::vector<unsigned char> AddIP(const std::vector<unsigned char>& message, const std::string& ip);

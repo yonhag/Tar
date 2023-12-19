@@ -3,9 +3,7 @@
 #include <Ws2tcpip.h>
 #include "Consts.h"
 #include "NetworkHandler.h"
-#include "json.hpp"
-
-using json = nlohmann::json;
+#include "JsonDecoder.h"
 
 NetworkHandler::NetworkHandler()
 {
@@ -131,7 +129,7 @@ std::vector<unsigned char> NetworkHandler::GetRelayRequest() const
 
 bool NetworkHandler::ReceiveRelays(SOCKET sock)
 {
-    const int max_message_size = 2048;
+    const int max_message_size = 4096;
     
     unsigned char buffer[max_message_size];
     int len = recv(sock, reinterpret_cast<char*>(buffer), max_message_size, NULL);
@@ -147,22 +145,12 @@ bool NetworkHandler::ReceiveRelays(SOCKET sock)
 
     std::vector<unsigned char> message(buffer, buffer + len);
 
-    return DecodeConnectionMessage(message);
+    return HandleConnectionMessage(message);
 }
 
-bool NetworkHandler::DecodeConnectionMessage(const std::vector<unsigned char>& message)
+bool NetworkHandler::HandleConnectionMessage(const std::vector<unsigned char>& message)
 {
-    json j = json::parse(message);
-
-    for (char i = '1'; i < '4'; i++)
-    {
-        Relay rel;
-        rel._ip = j["IP" + i];
-        rel._publicAESKey["AES" + i];
-        rel._publicRSAKey["RSA" + i];
-
-        this->_relays.push_back(rel);
-    }
+    this->_relays = JsonDecoder::DecodeGetRelaysResponse(message);
 
     return this->_relays.size() == 3;
 }
