@@ -128,13 +128,18 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Communicator.cpp" />
+    <ClCompile Include="JsonRequestDeserializer.h" />
+    <ClCompile Include="NetworkHandler.cpp" />
     <ClCompile Include="RequestHandler.cpp" />
     <ClCompile Include="Source.cpp" />
     <ClCompile Include="WSAInitializer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Communicator.h" />
+    <ClInclude Include="json.hpp" />
+    <ClInclude Include="NetworkHandler.h" />
     <ClInclude Include="Protocol.h" />
+    <ClInclude Include="Relay.h" />
     <ClInclude Include="Request.h" />
     <ClInclude Include="RequestHandler.h" />
     <ClInclude Include="Response.h" />

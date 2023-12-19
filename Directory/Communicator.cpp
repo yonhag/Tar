@@ -83,10 +83,7 @@ void Communicator::HandleClient(SOCKET sock)
 	// Dealing with the message
 	std::vector<unsigned char> message(buffer, buffer + len);
 
-	Request request;
-	request.data = message;
-
-	Response response = RequestHandler::HandleRequest(request);
+	Response response = RequestHandler::HandleRequest(message);
 	SendData(sock, response.data);
 }
 

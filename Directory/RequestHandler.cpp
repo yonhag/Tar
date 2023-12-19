@@ -1,11 +1,19 @@
 #include "RequestHandler.h"
+#include "JsonRequestDeserializer.h"
 
-Response RequestHandler::HandleRequest(const Request& request)
+Response RequestHandler::HandleRequest(const std::vector<unsigned char>& message)
 {
     Response response;
-    
-    
+    Request request;
 
+    if (message[request_type_index] == '1')
+    {
+        request = JsonRequestDeserializer::DeserializeGetRelaysRequests(message);
+        response = 
+    }
+
+    // TODO: 
+    // Encrypt the response using the key
 
     return response;
 }

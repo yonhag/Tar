@@ -3,5 +3,6 @@
 
 struct Request
 {
+	int key;
 	std::vector<unsigned char> data;
 };
