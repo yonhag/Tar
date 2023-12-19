@@ -19,8 +19,8 @@ std::vector<DedicatedRelay> NetworkManager::GetRelays()
     std::random_device rd;
     std::mt19937 mt{ rd() };
 
-    // Setting the distribution - which is the this->_relays index range
-    std::uniform_int_distribution<int> dist{ 0, _relays.size() - 1 };
+    // Setting the distribution - which is the _relays index range
+    std::uniform_int_distribution<int> dist{ 0, (static_cast<int>(_relays.size()) - 1) }; // Static cast is fine since number shouldn't be too high
 
     for (int i = 0; i < relays_per_user; i++)
     {
