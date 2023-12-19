@@ -5,11 +5,10 @@
 class NetworkHandler
 {
 public:
-	std::vector<Relay> GetRelays();
-	bool JoinNetwork();
-
+	static std::vector<Relay> GetRelays();
+	static bool JoinNetwork();
 
 private:
-	std::vector<Relay> _relays;
+	static std::vector<Relay> _relays;
 	static const int relays_per_user = 3;
 };

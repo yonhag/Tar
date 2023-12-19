@@ -2,10 +2,14 @@
 #include <random>
 #include <algorithm>
 
+// Initializing the relay vector
+// Value can be changed for testing
+std::vector<Relay> NetworkHandler::_relays;
+
 std::vector<Relay> NetworkHandler::GetRelays()
 {
     // Making sure there are enough relays avilable
-    if (this->_relays.size() < 3)
+    if (_relays.size() < 3)
         return std::vector<Relay>();
 
     std::vector<Relay> relays;
@@ -16,7 +20,7 @@ std::vector<Relay> NetworkHandler::GetRelays()
     std::mt19937 mt{ rd() };
 
     // Setting the distribution - which is the this->_relays index range
-    std::uniform_int_distribution<int> dist{ 0, this->_relays.size() - 1 };
+    std::uniform_int_distribution<int> dist{ 0, _relays.size() - 1 };
 
     for (int i = 0; i < relays_per_user; i++)
     {
@@ -33,6 +37,6 @@ std::vector<Relay> NetworkHandler::GetRelays()
         } while (true); // While (true) to avoid declaring {it} before the loop
 
         // Pushing back a number
-        relays.push_back(this->_relays[current_index]);
+        relays.push_back(_relays[current_index]);
     }
 }
