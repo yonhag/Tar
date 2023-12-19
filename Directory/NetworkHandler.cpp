@@ -1,18 +1,18 @@
-#include "NetworkHandler.h"
+#include "NetworkManager.h"
 #include <random>
 #include <algorithm>
 
 // Initializing the relay vector
 // Value can be changed for testing
-std::vector<Relay> NetworkHandler::_relays;
+std::vector<Relay> NetworkManager::_relays;
 
-std::vector<Relay> NetworkHandler::GetRelays()
+std::vector<DedicatedRelay> NetworkManager::GetRelays()
 {
     // Making sure there are enough relays avilable
     if (_relays.size() < 3)
-        return std::vector<Relay>();
+        return std::vector<DedicatedRelay>();
 
-    std::vector<Relay> relays;
+    std::vector<DedicatedRelay> relays;
     std::vector<int> used_relays;
 
     // Setting the seed for randomizer
@@ -37,6 +37,18 @@ std::vector<Relay> NetworkHandler::GetRelays()
         } while (true); // While (true) to avoid declaring {it} before the loop
 
         // Pushing back a number
-        relays.push_back(_relays[current_index]);
+        relays.push_back(DedicateRelay(_relays[current_index]));
     }
+
+    return relays;
+}
+
+DedicatedRelay NetworkManager::DedicateRelay(const Relay& relay)
+{
+    DedicatedRelay drel;
+    drel.ip = relay.ip;
+
+    //TODO: Send a request through Communicator
+
+    return drel;
 }

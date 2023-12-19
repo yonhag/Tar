@@ -3,6 +3,5 @@
 
 class JsonRequestDeserializer
 {
-public:
-	static Request DeserializeGetRelaysRequests(const std::vector<unsigned char>& request);
+
 };

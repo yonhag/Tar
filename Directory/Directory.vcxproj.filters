@@ -19,6 +19,9 @@
     <Filter Include="Header Files\Structs">
       <UniqueIdentifier>{98f626ac-3a73-4890-abf3-31e4912f1aa1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Serialization">
+      <UniqueIdentifier>{e2d1cfb2-21de-4874-b7a1-d60289a7c8a5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source.cpp">
@@ -33,10 +36,16 @@
     <ClCompile Include="RequestHandler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="JsonRequestDeserializer.h">
-      <Filter>Header Files</Filter>
-    </ClCompile>
     <ClCompile Include="NetworkHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="JsonRequestDeserializer.h">
+      <Filter>Header Files\Serialization</Filter>
+    </ClCompile>
+    <ClCompile Include="JsonResponseSerializer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="JsonRequestDeserializer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -65,8 +74,14 @@
     <ClInclude Include="Relay.h">
       <Filter>Header Files\Structs</Filter>
     </ClInclude>
-    <ClInclude Include="NetworkHandler.h">
+    <ClInclude Include="NetworkManager.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="JsonResponseSerializer.h">
+      <Filter>Header Files\Serialization</Filter>
+    </ClInclude>
+    <ClInclude Include="DedicatedRelay.h">
+      <Filter>Header Files\Structs</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

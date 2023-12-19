@@ -1,7 +1,8 @@
 #pragma once
 #include <vector>
 
-struct Response
+class Response
 {
+public:
 	std::vector<unsigned char> data;
 };
