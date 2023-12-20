@@ -13,9 +13,7 @@ int main()
 	auto comm = Communicator(nwh);
 
 	while (true)
-	{
 		comm.RunServer();
-	}
 
 	return 0;
 }

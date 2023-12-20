@@ -124,6 +124,8 @@ std::vector<unsigned char> NetworkHandler::GetRelayRequest() const
     std::vector<unsigned char> request;
     request.push_back('1');
 
+    // TODO: Add Key: in JSON, with both AES and RSA keys.
+
     return request;
 }
 
