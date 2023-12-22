@@ -79,7 +79,6 @@ bool NetworkHandler::GetRelays()
         throw std::exception("Invalid Socket Creation");
 
     sockaddr_in serverAddress;
-    std::string b = "";
     serverAddress.sin_family = AF_INET;
     serverAddress.sin_port = htons(this->_dir._port);
 
