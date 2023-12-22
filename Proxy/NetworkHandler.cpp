@@ -74,17 +74,17 @@ Directory NetworkHandler::GetNextDir(std::ifstream& dirFile) const
 bool NetworkHandler::GetRelays()
 {
     // Creating socket
-
     SOCKET sock = socket(AF_INET, SOCK_STREAM, 0);
-    if (sock = INVALID_SOCKET)
+    if (sock == INVALID_SOCKET)
         throw std::exception("Invalid Socket Creation");
 
     sockaddr_in serverAddress;
+    std::string b = "";
     serverAddress.sin_family = AF_INET;
     serverAddress.sin_port = htons(this->_dir._port);
 
     PCWSTR ip = StringToPCWSTR(this->_dir._ip);
-    if (InetPton(AF_INET, ip, &(serverAddress.sin_addr)) != 1)
+    if (InetPton(AF_INET, ip, &serverAddress.sin_addr) != 1)
     {
         closesocket(sock);
         return false;
