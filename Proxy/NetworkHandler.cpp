@@ -101,7 +101,6 @@ bool NetworkHandler::GetRelays()
     return ReceiveRelays(sock);
 }
 
-// Helper function
 PCWSTR NetworkHandler::StringToPCWSTR(const std::string& str)
 {
     // Convert std::string to wide string using the system's default code page
@@ -123,7 +122,7 @@ std::vector<unsigned char> NetworkHandler::GetRelayRequest() const
     std::vector<unsigned char> request;
     request.push_back('1');
 
-    // TODO: Add Key: in JSON, with both AES and RSA keys.
+    // TODO: Add RSAKey and AESKey in JSON to the request.
 
     return request;
 }
