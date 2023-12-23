@@ -1,4 +1,4 @@
-#include "JsonResponseSerializer.h"
+#include "JsonSerializer.h"
 
 using json = nlohmann::json;
 
@@ -11,7 +11,7 @@ void to_json(json& j, const DedicatedRelay& relay)
 	};
 }
 
-Response JsonResponseSerializer::SerializeGetRelaysResponse(const std::vector<DedicatedRelay>& relays)
+Response JsonSerializer::SerializeGetRelaysResponse(const std::vector<DedicatedRelay>& relays)
 {
 	Response response;
 	std::vector<unsigned char> buffer;
@@ -34,7 +34,17 @@ Response JsonResponseSerializer::SerializeGetRelaysResponse(const std::vector<De
 	return response;
 }
 
-char JsonResponseSerializer::DigitToChar(const int integer)
+std::vector<unsigned char> JsonSerializer::SerializeRelayConnectionRequest()
+{
+	std::vector<unsigned char> vec;
+
+	const char* signature = "DIR1";
+	vec.insert(vec.begin(), signature, signature + sizeof(signature) - 1);
+
+	return vec;
+}
+
+char JsonSerializer::DigitToChar(const int integer)
 {
 	if (integer > 9 && integer < 0)
 		throw std::exception("Must be a digit");

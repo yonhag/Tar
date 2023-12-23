@@ -1,4 +1,8 @@
 #include "NetworkManager.h"
+#include "Response.h"
+#include "Communicator.h"
+#include "JsonSerializer.h"
+#include "JsonDeserializer.h"
 #include <random>
 #include <algorithm>
 
@@ -45,10 +49,12 @@ std::vector<DedicatedRelay> NetworkManager::GetRelays()
 
 DedicatedRelay NetworkManager::DedicateRelay(const Relay& relay)
 {
-    DedicatedRelay drel;
+    // Sending the request
+    Response response = Communicator::SendRelayConnectionRequest(relay, JsonSerializer::SerializeRelayConnectionRequest());
+    
+    // Receiving the answer
+    DedicatedRelay drel = JsonDeserializer::DeserializeRelayConnectionResponse(response);
     drel.ip = relay.ip;
-
-    //TODO: Send a request through Communicator
 
     return drel;
 }

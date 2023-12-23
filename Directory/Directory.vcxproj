@@ -128,8 +128,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Communicator.cpp" />
+    <ClCompile Include="JsonDeserializer.cpp" />
     <ClCompile Include="JsonRequestDeserializer.cpp" />
-    <ClCompile Include="JsonRequestDeserializer.h" />
+    <ClCompile Include="JsonDeserializer.h" />
     <ClCompile Include="JsonResponseSerializer.cpp" />
     <ClCompile Include="NetworkHandler.cpp" />
     <ClCompile Include="RequestHandler.cpp" />
@@ -139,7 +140,7 @@
   <ItemGroup>
     <ClInclude Include="Communicator.h" />
     <ClInclude Include="json.hpp" />
-    <ClInclude Include="JsonResponseSerializer.h" />
+    <ClInclude Include="JsonSerializer.h" />
     <ClInclude Include="NetworkManager.h" />
     <ClInclude Include="Protocol.h" />
     <ClInclude Include="Relay.h" />
