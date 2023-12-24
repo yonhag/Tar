@@ -52,7 +52,7 @@ Response Communicator::SendRelayConnectionRequest(const Relay& relay, const std:
 	// Setting the socket
 	sockaddr_in serverAddress;
 	serverAddress.sin_family = AF_INET;
-	serverAddress.sin_port = htons(relay_port);
+	serverAddress.sin_port = htons(Communicator::relay_port);
 
 	if (InetPton(AF_INET, StringToPCWSTR(relay.ip), &serverAddress.sin_addr) != 1)
 	{
@@ -69,7 +69,7 @@ Response Communicator::SendRelayConnectionRequest(const Relay& relay, const std:
 		throw std::exception("Sending failed");
 
 	// Receiving
-	char buffer[max_message_size];
+	char buffer[Communicator::max_message_size];
 	int len = recv(sock, buffer, sizeof(buffer), NULL);
 
 	if (len <= 0)

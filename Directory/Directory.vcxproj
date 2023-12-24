@@ -129,9 +129,8 @@
   <ItemGroup>
     <ClCompile Include="Communicator.cpp" />
     <ClCompile Include="JsonDeserializer.cpp" />
-    <ClCompile Include="JsonRequestDeserializer.cpp" />
     <ClCompile Include="JsonDeserializer.h" />
-    <ClCompile Include="JsonResponseSerializer.cpp" />
+    <ClCompile Include="JsonSerializer.cpp" />
     <ClCompile Include="NetworkHandler.cpp" />
     <ClCompile Include="RequestHandler.cpp" />
     <ClCompile Include="Source.cpp" />

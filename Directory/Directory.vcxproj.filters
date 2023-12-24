@@ -42,10 +42,7 @@
     <ClCompile Include="JsonDeserializer.h">
       <Filter>Header Files\Serialization</Filter>
     </ClCompile>
-    <ClCompile Include="JsonResponseSerializer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="JsonRequestDeserializer.cpp">
+    <ClCompile Include="JsonSerializer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="JsonDeserializer.cpp">
