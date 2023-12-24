@@ -39,13 +39,13 @@
     <ClCompile Include="NetworkHandler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="JsonRequestDeserializer.h">
+    <ClCompile Include="JsonDeserializer.h">
       <Filter>Header Files\Serialization</Filter>
     </ClCompile>
-    <ClCompile Include="JsonResponseSerializer.cpp">
+    <ClCompile Include="JsonSerializer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="JsonRequestDeserializer.cpp">
+    <ClCompile Include="JsonDeserializer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -77,7 +77,7 @@
     <ClInclude Include="NetworkManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="JsonResponseSerializer.h">
+    <ClInclude Include="JsonSerializer.h">
       <Filter>Header Files\Serialization</Filter>
     </ClInclude>
     <ClInclude Include="DedicatedRelay.h">
