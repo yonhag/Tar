@@ -22,6 +22,12 @@
     <Filter Include="Header Files\Structs">
       <UniqueIdentifier>{f331bf0f-250b-4eab-b08f-14232ae90990}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Serialization">
+      <UniqueIdentifier>{3f741d31-d14d-439d-b7b8-1ab93a29ba6c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Serialization">
+      <UniqueIdentifier>{8335b1d0-1c70-447c-8042-f48a5db368c3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Communicator.cpp">
@@ -42,6 +48,12 @@
     <ClCompile Include="Protocol.h">
       <Filter>Header Files\Consts</Filter>
     </ClCompile>
+    <ClCompile Include="JsonDeserializer.cpp">
+      <Filter>Source Files\Serialization</Filter>
+    </ClCompile>
+    <ClCompile Include="JsonSerializer.cpp">
+      <Filter>Source Files\Serialization</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Communicator.h">
@@ -58,6 +70,12 @@
     </ClInclude>
     <ClInclude Include="Request.h">
       <Filter>Header Files\Structs</Filter>
+    </ClInclude>
+    <ClInclude Include="JsonSerializer.h">
+      <Filter>Header Files\Serialization</Filter>
+    </ClInclude>
+    <ClInclude Include="JsonDeserializer.h">
+      <Filter>Header Files\Serialization</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -1,6 +1,5 @@
 #include "Communicator.h"
 #include "Protocol.h"
-#include "RequestHandler.h"
 #include <thread>
 #include <exception>
 #include <iostream>
@@ -61,40 +60,48 @@ void Communicator::BindAndListen()
 
 void Communicator::HandleClient(SOCKET sock)
 {
-	// Recieving the message
-	unsigned char buffer[max_message_size];
-	int len = recv(sock, reinterpret_cast<char*>(buffer), max_message_size, NULL);
-
-	if (len <= 0) // If connection isn't right
+	try
 	{
-		if (len == 0)
+		while (true)
 		{
-			// Client closed the socket
-			std::cout << "Client closed the connection" << std::endl;
-		}
-		else
-		{
-			// Error occurred, handle it accordingly
-			std::cout << "Error in receiving data from client" << std::endl;
-		}
-		return;
-	}
+			// Recieving the message
+			unsigned char buffer[max_message_size];
+			int len = recv(sock, reinterpret_cast<char*>(buffer), max_message_size, NULL);
 
-	// Dealing with the message
-	std::vector<unsigned char> message(buffer, buffer + len);
-	
-	if (IsDirectoryMessage(message))
-	{
-		RequestHandler()
-		DirResponse request = RequestHandler::HandleDirRequest(message);
-		SendData(sock, request.data);
+			if (len <= 0) // If connection isn't right
+			{
+				if (len == 0)
+				{
+					// Client closed the socket
+					std::cout << "Client closed the connection" << std::endl;
+				}
+				else
+				{
+					// Error occurred, handle it accordingly
+					std::cout << "Error in receiving data from client" << std::endl;
+				}
+				return;
+			}
+
+			// Dealing with the message
+			std::vector<unsigned char> message(buffer, buffer + len);
+
+			if (IsDirectoryMessage(message))
+			{
+				RequestHandler handler(message);
+				DirResponse response = handler.HandleDirRequest(message);
+				SendData(sock, response.data);
+				return;
+			}
+			else
+			{
+				// Move to different function?
+				Request request = handler.HandleRequest(message);
+				SendData(sock, request.data);
+			}
+		}
 	}
-	else
-	{
-		RequestHandler handler()
-		Request request = RequestHandler::HandleRequest(message);
-		SendData(sock, request.data);
-	}
+	catch (...) {  } // Socket closed
 }
 
 bool Communicator::IsDirectoryMessage(const std::vector<unsigned char>& message)

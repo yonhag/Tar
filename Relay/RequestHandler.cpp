@@ -1,8 +1,12 @@
 #include "RequestHandler.h"
-#include "json.hpp"
+#include "JsonDeserializer.h"
+#include "JsonSerializer.h"
+#include <array>
 
-using json = nlohmann::json;
-using nlohmann::json;
+RequestHandler::RequestHandler(const std::vector<unsigned char>& data)
+{
+	JsonDeserializer::DeserializeDirectoryConnectionRequest(data, this->_RSAKey, this->_AESKey);
+}
 
 Request RequestHandler::HandleRequest(std::vector<unsigned char>& data)
 {
@@ -26,7 +30,7 @@ DirResponse RequestHandler::HandleDirRequest(std::vector<unsigned char>& data)
 	return request;
 }
 
-DirRequests RequestHandler::DetermineDirRequest(std::vector<unsigned char>& data)
+DirRequests RequestHandler::DetermineDirRequest(std::vector<unsigned char>& data) const
 {
 	const int RequestTypeIndex = 4;
 
@@ -37,24 +41,11 @@ DirRequests RequestHandler::DetermineDirRequest(std::vector<unsigned char>& data
 	}
 }
 
-DirResponse RequestHandler::HandleKeyRequest()
+DirResponse RequestHandler::HandleKeyRequest() const
 {
 	DirResponse res;
 
-	res.data = std::vector<unsigned char>();
-
-	json j;
-	
-	auto jsonString = j.dump();
-	
-	// ADD INFO
-
-	auto stringSizeInBytes = split_uint32_to_bytes(jsonString.size());
-	for (const auto& byte : stringSizeInBytes)
-		res.data.push_back(byte);
-
-	for (const auto& byte : jsonString)
-		res.data.push_back(byte);
+	res.data = JsonSerializer::SerializeDirectoryConnectionResponse(this->_AESKey, this->_RSAKey);
 
 	return res;
 }
@@ -91,7 +82,7 @@ std::string RequestHandler::ExtractIP(std::vector<unsigned char>& data)
 	return ip;
 }
 
-std::vector<unsigned char> RequestHandler::DecryptAES(const std::vector<unsigned char>& datadd)
+std::vector<unsigned char> RequestHandler::DecryptAES(const std::vector<unsigned char>& data)
 {
 	return std::vector<unsigned char>();
 }
@@ -122,13 +113,4 @@ std::string hex_to_string(const std::string& input)
 		output.push_back(((p - hexChars) << 4) | (q - hexChars));
 	}
 	return output;
-}
-
-std::array<uint8_t, 4> RequestHandler::split_uint32_to_bytes(uint32_t input)
-{
-	std::array<uint8_t, 4> bytes;
-	for (int i = 0; i < 4; i++) {
-		bytes[i] = (input >> (i * 8)) & 0xFF;
-	}
-	return bytes;
 }

@@ -3,6 +3,7 @@
 #include <vector>
 #include <map>
 #include <string>
+#include "RequestHandler.h"
 
 class Communicator
 {
@@ -21,7 +22,7 @@ private:
 	void SendData(SOCKET sock, const std::vector<unsigned char>& data);
 
 	SOCKET _serverSocket;
-	std::vector<SOCKET> _user_list;
+	std::map<SOCKET, RequestHandler> _user_list;
 
 	const u_short port = 8200;
 };
