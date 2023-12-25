@@ -15,3 +15,10 @@ DedicatedRelay JsonDeserializer::DeserializeRelayConnectionResponse(const Respon
 
     return relay;
 }
+
+bool JsonDeserializer::DeserializeUpdateDirectoriesResponse(const std::vector<unsigned char>& response)
+{
+    if (response.size() != 2)
+        return false;
+    return response[0] == 'O' && response[1] == 'K';
+}
