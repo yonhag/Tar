@@ -137,9 +137,7 @@ std::vector<unsigned char> Communicator::SendDataThroughNewClientSocket(const st
 	if (connect(sock, (struct sockaddr*)&serverAddress, sizeof(serverAddress)) == SOCKET_ERROR)
 		throw std::exception("Connection Failed");
 
-	// Sending
-	if (send(sock, reinterpret_cast<const char*>(data.data()), data.size(), 0) == INVALID_SOCKET)
-		throw std::exception("Sending failed");
+	SendData(sock, data);
 
 	// Receiving
 	char buffer[Communicator::max_message_size];

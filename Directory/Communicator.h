@@ -17,14 +17,15 @@ public:
 	static Response SendRelayConnectionRequest(const Relay& relay, const std::vector<unsigned char>& request);
 	static unsigned int UpdateOtherDirectories(const Request& relayRequest);
 
-
 private:
 	void BindAndListen();
 	void HandleClient(SOCKET clientSocket);
 
+	// Helper functions
 	static std::vector<unsigned char> SendDataThroughNewClientSocket(const std::string& ip, const u_short port, const std::vector<unsigned char>& data);
-	void SendData(SOCKET sock, const std::vector<unsigned char>& data);
+	static void SendData(SOCKET sock, const std::vector<unsigned char>& data);
 	static PCWSTR StringToPCWSTR(const std::string& str);
+
 
 	SOCKET _serverSocket;
 	std::vector<SOCKET> _user_list;
