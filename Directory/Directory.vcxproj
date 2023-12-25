@@ -128,6 +128,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Communicator.cpp" />
+    <ClCompile Include="FileHandler.cpp" />
     <ClCompile Include="JsonDeserializer.cpp" />
     <ClCompile Include="JsonDeserializer.h" />
     <ClCompile Include="JsonSerializer.cpp" />
@@ -138,6 +139,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Communicator.h" />
+    <ClInclude Include="FileHandler.h" />
     <ClInclude Include="json.hpp" />
     <ClInclude Include="JsonSerializer.h" />
     <ClInclude Include="NetworkManager.h" />

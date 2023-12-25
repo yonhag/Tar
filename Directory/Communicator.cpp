@@ -84,6 +84,15 @@ Response Communicator::SendRelayConnectionRequest(const Relay& relay, const std:
 	return response;
 }
 
+int Communicator::UpdateOtherDirectories(const Relay& newRelay)
+{
+	while (true)
+	{
+		std::string ip = ;
+	}
+	return 0;
+}
+
 void Communicator::BindAndListen()
 {
 	struct sockaddr_in sa = { 0 };

@@ -54,7 +54,9 @@ void NetworkManager::JoinNetwork(const std::string& ip, const unsigned int bandw
     newRelay.bandwidth = bandwidth;
 
     _relays.push_back(newRelay);
-    Communicator::
+
+    Communicator::UpdateOtherDirectories(newRelay);
+    // TODO: Add a check on function return value
 }
 
 DedicatedRelay NetworkManager::DedicateRelay(const Relay& relay)

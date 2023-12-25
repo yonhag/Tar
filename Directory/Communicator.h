@@ -14,6 +14,7 @@ public:
 
 	[[noreturn]] void RunServer();
 	static Response SendRelayConnectionRequest(const Relay& relay, const std::vector<unsigned char>& request);
+	static int UpdateOtherDirectories(const Relay& newRelay);
 
 
 private:
