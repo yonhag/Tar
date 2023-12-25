@@ -1,3 +1,3 @@
 #pragma once
 
-enum class DirectoryCodes { RelayConnection = 1, UpdateDirectories = 2 };
+enum class DirectoryCodes { RelayConnection = 1, AddRelay, RemoveRelay, JoinNetwork };

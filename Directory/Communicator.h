@@ -26,7 +26,6 @@ private:
 	static void SendData(SOCKET sock, const std::vector<unsigned char>& data);
 	static PCWSTR StringToPCWSTR(const std::string& str);
 
-
 	SOCKET _serverSocket;
 	std::vector<SOCKET> _user_list;
 

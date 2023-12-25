@@ -97,22 +97,19 @@ void Communicator::HandleClient(SOCKET sock)
 	if (len <= 0) // If connection isn't right
 	{
 		if (len == 0)
-		{
 			// Client closed the socket
 			std::cout << "Client closed the connection" << std::endl;
-		}
 		else
-		{
 			// Error occurred, handle it accordingly
 			std::cout << "Error in receiving data from client" << std::endl;
-		}
 		return;
 	}
 
 	// Dealing with the message
 	std::vector<unsigned char> message(buffer, buffer + len);
-
+	
 	Response response = RequestHandler::HandleRequest(message);
+	
 	SendData(sock, response.data);
 }
 

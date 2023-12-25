@@ -59,6 +59,20 @@ void NetworkManager::JoinNetwork(const std::string& ip, const unsigned int bandw
     // TODO: Add a check on function return value
 }
 
+bool NetworkManager::AddRelay(const Relay& relay)
+{
+    // TODO: make sure if this can fail
+    _relays.push_back(relay);
+    return true;
+}
+
+bool NetworkManager::RemoveRelay(const Relay& relay)
+{
+    int size = _relays.size();
+    _relays.erase(std::remove_if(_relays.begin(), _relays.end(), [=](const Relay& rel) { return rel.ip == relay.ip && rel.bandwidth == relay.bandwidth; }));
+    return size == _relays.size();
+}
+
 DedicatedRelay NetworkManager::DedicateRelay(const Relay& relay)
 {
     // Sending the request
