@@ -152,3 +152,23 @@ void AES_ShiftRows(AES_Block_t state) {
     state[1][3] = state[0][3];
     state[0][3] = temp0;
 }
+
+void AES_AddRoundKey(AES_Block_t state, const AES_Block_t roundKey) {
+    for (size_t col = 0; col < 4; col++) {
+        for (size_t row = 0; row < 4; row++) {
+            state[col][row] ^= roundKey[col][row];
+        }
+    }
+}
+void AES_MixColumns(AES_Block_t state) {
+    AES_Column_t temp = { 0 };
+
+    for (size_t i = 0; i < 4; i++) {
+        temp[0] = GF_Mult(0x02, state[i][0]) ^ GF_Mult(0x03, state[i][1]) ^ state[i][2] ^ state[i][3];
+        temp[1] = state[i][0] ^ GF_Mult(0x02, state[i][1]) ^ GF_Mult(0x03, state[i][2]) ^ state[i][3];
+        temp[2] = state[i][0] ^ state[i][1] ^ GF_Mult(0x02, state[i][2]) ^ GF_Mult(0x03, state[i][3]);
+        temp[3] = GF_Mult(0x03, state[i][0]) ^ state[i][1] ^ state[i][2] ^ GF_Mult(0x02, state[i][3]);
+
+        state[i][0] = temp[0]; state[i][1] = temp[1]; state[i][2] = temp[2]; state[i][3] = temp[3];
+    }
+}
