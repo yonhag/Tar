@@ -139,6 +139,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Communicator.h" />
+    <ClInclude Include="DirectoryCodes.h" />
     <ClInclude Include="FileHandler.h" />
     <ClInclude Include="json.hpp" />
     <ClInclude Include="JsonSerializer.h" />

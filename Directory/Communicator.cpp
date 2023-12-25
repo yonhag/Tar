@@ -55,6 +55,7 @@ unsigned int Communicator::UpdateOtherDirectories(const Request& relayRequest)
 {
 	FileHandler fh;
 	unsigned int directoriesUpdated = 0;
+
 	while (true)
 	{
 		std::string ip = fh.GetNextDirectoryIP();
