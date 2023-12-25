@@ -1,4 +1,5 @@
 #include "NetworkManager.h"
+#include "Communicator.h"
 #include <random>
 #include <algorithm>
 
@@ -41,6 +42,16 @@ std::vector<DedicatedRelay> NetworkManager::GetRelays()
     }
 
     return relays;
+}
+
+void NetworkManager::JoinNetwork(const std::string& ip, const unsigned int bandwidth)
+{
+    Relay newRelay;
+    newRelay.ip = ip;
+    newRelay.bandwidth = bandwidth;
+
+    _relays.push_back(newRelay);
+    Communicator::
 }
 
 DedicatedRelay NetworkManager::DedicateRelay(const Relay& relay)
