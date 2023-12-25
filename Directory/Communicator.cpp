@@ -58,12 +58,15 @@ unsigned int Communicator::UpdateOtherDirectories(const Request& relayRequest)
 	while (true)
 	{
 		std::string ip = fh.GetNextDirectoryIP();
+		if (ip == "")
+			break;
+
 		std::vector<unsigned char> response = SendDataThroughNewClientSocket(ip, Communicator::network_listening_port, relayRequest.data);
 		
 		if (JsonDeserializer::DeserializeUpdateDirectoriesResponse(response))
 			directoriesUpdated++;
 	}
-	return 0;
+	return directoriesUpdated;
 }
 
 void Communicator::BindAndListen()

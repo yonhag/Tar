@@ -16,7 +16,8 @@ FileHandler::~FileHandler()
 std::string FileHandler::GetNextDirectoryIP()
 {
 	std::string ip;
-	std::getline(this->_directoryListFile, ip);
-	return ip;
+	if(std::getline(this->_directoryListFile, ip))
+		return ip;
+	return std::string();
 }
 
