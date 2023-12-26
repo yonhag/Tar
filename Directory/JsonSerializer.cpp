@@ -1,6 +1,9 @@
 #include "JsonSerializer.h"
+#include "DirectoryCodes.h"
 
 using json = nlohmann::json;
+
+
 
 void to_json(json& j, const DedicatedRelay& relay)
 {
@@ -8,6 +11,14 @@ void to_json(json& j, const DedicatedRelay& relay)
 		{ "IP", relay.ip },
 		{ "AESKey", relay.AESKey },
 		{ "RSAKey", relay.RSAKey }
+	};
+}
+
+void to_json(json& j, const Relay& relay)
+{
+	j = json{
+		{"IP", relay.ip},
+		{"Bandwidth", relay.bandwidth}
 	};
 }
 
@@ -34,11 +45,35 @@ Response JsonSerializer::SerializeGetRelaysResponse(const std::vector<DedicatedR
 	return response;
 }
 
+Request JsonSerializer::SerializeUpdateDirectoryRequest(const Relay& newRelay)
+{
+	Request request;
+	std::vector<unsigned char> buffer;
+
+	// Adding signature
+	const char* signature = "DIR" + (int)DirectoryCodes::AddRelay;
+	buffer.insert(buffer.begin(), signature, signature + sizeof(signature) - 1);
+	
+	// Creating JSON object
+	json j;
+	j["Relay"] = newRelay;
+
+	// Turning the json object to a byte vector
+	auto jsonString = j.dump();
+
+	// Adding to the initial vector
+	for (const auto& byte : jsonString)
+		buffer.push_back(byte);
+
+	request.data = buffer;
+	return request;
+}
+
 std::vector<unsigned char> JsonSerializer::SerializeRelayConnectionRequest()
 {
 	std::vector<unsigned char> vec;
 
-	const char* signature = "DIR1";
+	const char* signature = "DIR" + (int)DirectoryCodes::RelayConnection;
 	vec.insert(vec.begin(), signature, signature + sizeof(signature) - 1);
 
 	return vec;
