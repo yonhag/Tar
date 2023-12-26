@@ -53,7 +53,7 @@ void NetworkManager::JoinNetwork(const std::string& ip, const unsigned int bandw
     newRelay.ip = ip;
     newRelay.bandwidth = bandwidth;
 
-    _relays.push_back(newRelay);
+    AddRelay(newRelay);
 
     Communicator::UpdateOtherDirectories(JsonSerializer::SerializeUpdateDirectoryRequest(newRelay));
     // TODO: Add a check on function return value
