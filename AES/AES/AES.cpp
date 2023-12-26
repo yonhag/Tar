@@ -172,3 +172,76 @@ void AES_MixColumns(AES_Block_t state) {
         state[i][0] = temp[0]; state[i][1] = temp[1]; state[i][2] = temp[2]; state[i][3] = temp[3];
     }
 }
+
+void AES_InvShiftRows(AES_Block_t state) {
+    uint8_t temp0;
+    uint8_t temp1;
+    temp0 = state[3][1];
+    state[3][1] = state[2][1];
+    state[2][1] = state[1][1];
+    state[1][1] = state[0][1];
+    state[0][1] = temp0;
+    temp0 = state[0][2];
+    temp1 = state[1][2];
+    state[0][2] = state[2][2];
+    state[1][2] = state[3][2];
+    state[2][2] = temp0;
+    state[3][2] = temp1;
+    temp0 = state[0][3];
+    state[0][3] = state[1][3];
+    state[1][3] = state[2][3];
+    state[2][3] = state[3][3];
+    state[3][3] = temp0;
+}
+
+void AES_InvMixColumns(AES_Block_t state) {
+    AES_Column_t temp = { 0 };
+
+    for (size_t i = 0; i < 4; i++) {
+        temp[0] = GF_Mult(0x0e, state[i][0]) ^ GF_Mult(0x0b, state[i][1]) ^ GF_Mult(0x0d, state[i][2]) ^ GF_Mult(0x09, state[i][3]);
+        temp[1] = GF_Mult(0x09, state[i][0]) ^ GF_Mult(0x0e, state[i][1]) ^ GF_Mult(0x0b, state[i][2]) ^ GF_Mult(0x0d, state[i][3]);
+        temp[2] = GF_Mult(0x0d, state[i][0]) ^ GF_Mult(0x09, state[i][1]) ^ GF_Mult(0x0e, state[i][2]) ^ GF_Mult(0x0b, state[i][3]);
+        temp[3] = GF_Mult(0x0b, state[i][0]) ^ GF_Mult(0x0d, state[i][1]) ^ GF_Mult(0x09, state[i][2]) ^ GF_Mult(0x0e, state[i][3]);
+
+        state[i][0] = temp[0]; state[i][1] = temp[1]; state[i][2] = temp[2]; state[i][3] = temp[3];
+    }
+}
+
+void AES_AddRoundKey(AES_Block_t state, const AES_Block_t roundKey) {
+    for (size_t col = 0; col < 4; col++) {
+        for (size_t row = 0; row < 4; row++) {
+            state[col][row] ^= roundKey[col][row];
+        }
+    }
+}
+
+void AES_EncryptBlock(AES_Block_t state, const AES_Block_t* keySchedule) {
+    AES_Block_t* roundKey = (AES_Block_t*)keySchedule;
+    AES_AddRoundKey(state, *roundKey++);
+
+    for (size_t i = 1; i < NUM_ROUND_KEYS_128; i++) {
+        AES_SubBytes(state, sbox_encrypt);
+        AES_ShiftRows(state);
+        if (i < NUM_ROUND_KEYS_128 - 1) {
+            AES_MixColumns(state);
+        }
+
+        AES_AddRoundKey(state, *roundKey++);
+    }
+}
+
+void AES_DecryptBlock(AES_Block_t state, const AES_Block_t* keySchedule) {
+    AES_Block_t* roundKey = (AES_Block_t*)keySchedule + NUM_ROUND_KEYS_128 - 1;
+
+    for (size_t i = 1; i < NUM_ROUND_KEYS_128; i++) {
+        AES_AddRoundKey(state, *roundKey--);
+        if (i != 1) 
+        {
+            AES_InvMixColumns(state);
+        }
+
+        AES_InvShiftRows(state);
+        AES_SubBytes(state, sbox_decrypt);
+    }
+    AES_AddRoundKey(state, *roundKey);
+}
