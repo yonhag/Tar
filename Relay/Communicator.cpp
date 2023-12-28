@@ -34,7 +34,7 @@ void Communicator::RunServer()
 		std::cout << "Accepting client..." << std::endl;
 
 		// Detaching client handling to a different thread
-		std::thread tr(&Communicator::HandleClient, this, std::ref(client_socket));
+		std::thread tr(&Communicator::HandleConnection, this, std::ref(client_socket));
 		tr.detach();
 	}
 
@@ -58,50 +58,93 @@ void Communicator::BindAndListen()
 	std::cout << "Listening on port " << port << std::endl;
 }
 
-void Communicator::HandleClient(SOCKET sock)
+void Communicator::HandleConnection(SOCKET sock)
 {
-	try
+	// Setting the timeout
+	setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, reinterpret_cast<const char*>(&this->socket_timeout), sizeof(this->socket_timeout));
+
+	while (true)
 	{
-		while (true)
+		std::vector<unsigned char> message = ReceiveSocketMessageAsVector(sock);
+
+		if (IsDirectoryMessage(message))
 		{
-			// Recieving the message
-			unsigned char buffer[max_message_size];
-			int len = recv(sock, reinterpret_cast<char*>(buffer), max_message_size, NULL);
+			RequestHandler handler(message);
 
-			if (len <= 0) // If connection isn't right
-			{
-				if (len == 0)
-				{
-					// Client closed the socket
-					std::cout << "Client closed the connection" << std::endl;
-				}
-				else
-				{
-					// Error occurred, handle it accordingly
-					std::cout << "Error in receiving data from client" << std::endl;
-				}
-				return;
-			}
-
-			// Dealing with the message
-			std::vector<unsigned char> message(buffer, buffer + len);
-
-			if (IsDirectoryMessage(message))
-			{
-				RequestHandler handler(message);
-				DirResponse response = handler.HandleDirRequest(message);
-				SendData(sock, response.data);
-				return;
-			}
-			else
-			{
-				// Move to different function?
-				Request request = handler.HandleRequest(message);
-				SendData(sock, request.data);
-			}
+			DirResponse response = handler.HandleDirRequest(message);
+			
+			try { SendData(sock, response.data); }
+			catch (std::exception&) {} // No need to do anything
+			
+			::closesocket(sock);
+			return;
+		}
+		else
+		{
+			RequestHandler handler(message);
+			Request request = handler.HandleRequest(message);
+			ServeClient(sock, request);
 		}
 	}
-	catch (...) {  } // Socket closed
+}
+
+void Communicator::ServeClient(SOCKET incomingSocket, const Request& initialRequest)
+{
+	SOCKET targetSocket = socket(AF_INET, SOCK_STREAM, NULL);
+	if (targetSocket == INVALID_SOCKET)
+		throw std::exception("targetSocket creation failed");
+
+	sockaddr_in sa;
+	sa.sin_family = AF_INET;
+	sa.sin_port = htons(8200);
+	inet_pton(AF_INET, initialRequest.dest_ip.c_str(), &(sa.sin_addr));
+
+	// Setting socket time to get the response
+	setsockopt(targetSocket, SOL_SOCKET, SO_RCVTIMEO, reinterpret_cast<const char*>(&this->socket_timeout), sizeof(this->socket_timeout));
+
+	if (connect(targetSocket, reinterpret_cast<sockaddr*>(&sa), sizeof(sa)) == SOCKET_ERROR) 
+		throw std::exception("targetSocket connection failed");
+
+	SendData(targetSocket, initialRequest.data); // Throws an exception on its own
+
+	while (true)
+	{
+		try
+		{
+			std::vector<unsigned char> message = ReceiveSocketMessageAsVector(targetSocket);
+
+			// TODO: ENCRYPT THE MESSAGE
+
+			SendData(incomingSocket, message);
+
+
+			message = ReceiveSocketMessageAsVector(incomingSocket);
+
+			// TODO: DECRYPT THE MESSAGE
+
+			SendData(targetSocket, message);
+		}
+		catch (std::exception&) { ::closesocket(targetSocket); ::closesocket(incomingSocket); }
+	}
+}
+
+std::vector<unsigned char> Communicator::ReceiveSocketMessageAsVector(SOCKET sock)
+{
+	char buffer[max_message_size];
+	int len = recv(sock, buffer, max_message_size, NULL);
+
+	// Check connection
+	if (len <= 0)
+	{
+		if (len == SOCKET_ERROR && WSAGetLastError() == WSAETIMEDOUT)
+			throw std::exception("Timeout");
+		else
+			throw std::exception("Connection closed");
+	}
+
+	std::vector<unsigned char> response(buffer, buffer + len);
+
+	return response;
 }
 
 bool Communicator::IsDirectoryMessage(const std::vector<unsigned char>& message)
@@ -110,6 +153,7 @@ bool Communicator::IsDirectoryMessage(const std::vector<unsigned char>& message)
 		return true;
 	return false;
 }
+
 
 void Communicator::SendData(SOCKET sock, const std::vector<unsigned char>& data)
 {
