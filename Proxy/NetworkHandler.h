@@ -12,7 +12,7 @@ public:
 
 	bool IsConnected() const;
 	std::vector<unsigned char> EncryptMessage(const MessageRequest& message);
-	std::string GetFirstRelayIP() const;
+	std::string d() const;
 
 	// Helper functions
 	static PCWSTR StringToPCWSTR(const std::string& str);

@@ -2,6 +2,7 @@
 #include <Windows.h>
 #include <Ws2tcpip.h>
 #include "Consts.h"
+#include "JsonSerializer.h"
 #include "NetworkHandler.h"
 #include "JsonDeserializer.h"
 
@@ -119,12 +120,7 @@ PCWSTR NetworkHandler::StringToPCWSTR(const std::string& str)
 
 std::vector<unsigned char> NetworkHandler::GetRelayRequest() const
 {
-    std::vector<unsigned char> request;
-    request.push_back('1');
-
-    // TODO: Add RSAKey and AESKey in JSON to the request.
-
-    return request;
+    return JsonSerializer::SerializeGetRelaysRequest();
 }
 
 bool NetworkHandler::ReceiveRelays(SOCKET sock)
