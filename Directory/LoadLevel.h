@@ -1,0 +1,1 @@
+enum class LoadLevel { Low, Medium, High };

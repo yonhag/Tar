@@ -22,6 +22,7 @@
     <ClCompile Include="Communicator.cpp" />
     <ClCompile Include="Consts.h" />
     <ClCompile Include="JsonDecoder.cpp" />
+    <ClCompile Include="JsonSerializer.cpp" />
     <ClCompile Include="NetworkHandler.cpp" />
     <ClCompile Include="Protocol.cpp" />
     <ClCompile Include="Source.cpp" />
@@ -30,8 +31,9 @@
   <ItemGroup>
     <ClInclude Include="Communicator.h" />
     <ClInclude Include="json.hpp" />
-    <ClInclude Include="JsonDecoder.h" />
-    <ClInclude Include="JsonEncoder.h" />
+    <ClInclude Include="JsonDeserializer.h" />
+    <ClInclude Include="JsonSerializer.h" />
+    <ClInclude Include="LoadLevel.h" />
     <ClInclude Include="MessageRequest.h" />
     <ClInclude Include="NetworkHandler.h" />
     <ClInclude Include="Protocol.h" />
