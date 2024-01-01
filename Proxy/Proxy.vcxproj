@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClCompile Include="Communicator.cpp" />
     <ClCompile Include="Consts.h" />
+    <ClCompile Include="DirRequestCodes.h" />
     <ClCompile Include="JsonDeserializer.cpp" />
     <ClCompile Include="JsonSerializer.cpp" />
     <ClCompile Include="NetworkHandler.cpp" />

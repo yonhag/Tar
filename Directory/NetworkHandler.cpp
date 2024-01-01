@@ -17,8 +17,7 @@ std::vector<DedicatedRelay> NetworkManager::GetRelays(const LoadLevel loadlevel)
         return std::vector<DedicatedRelay>();
 
     std::vector<DedicatedRelay> relays;
-    std::vector<int> used_relays;
-
+    
     // Setting the seed for randomizer
     std::random_device rd;
     std::mt19937 mt{ rd() };

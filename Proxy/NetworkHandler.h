@@ -2,17 +2,18 @@
 #include "Relay.h"
 #include "Directory.h"
 #include "MessageRequest.h"
+#include "LoadLevel.h"
 #include <fstream>
 
 class NetworkHandler
 {
 public:
-	NetworkHandler();
-	NetworkHandler(const NetworkHandler& nwh);
+	explicit NetworkHandler(const LoadLevel loadlevel);
+	NetworkHandler(const NetworkHandler& nwh, const LoadLevel loadlevel);
 
 	bool IsConnected() const;
 	std::vector<unsigned char> EncryptMessage(const MessageRequest& message);
-	std::string d() const;
+	std::string GetFirstRelayIP() const;
 
 	// Helper functions
 	static PCWSTR StringToPCWSTR(const std::string& str);
@@ -20,8 +21,8 @@ public:
 private:
 	// Network connection
 	Directory GetNextDir(std::ifstream& dirFile) const;
-	bool GetRelays();
-	std::vector<unsigned char> GetRelayRequest() const; 
+	bool GetRelays(const LoadLevel loadlevel);
+	std::vector<unsigned char> GetRelayRequest(const LoadLevel loadlevel) const; 
 	bool ReceiveRelays(SOCKET sock);
 	bool HandleConnectionMessage(const std::vector<unsigned char>& message);
 
