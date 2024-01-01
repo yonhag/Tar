@@ -48,6 +48,9 @@
     <ClCompile Include="JsonDeserializer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="LoadLevel.h">
+      <Filter>Header Files\Structs</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Communicator.h">

@@ -10,7 +10,7 @@ Response RequestHandler::HandleRequest(const std::vector<unsigned char>& message
     if (message[request_type_index] == '1')
     {
         LoadLevel llevel = JsonDeserializer::DeserializeGetRelaysRequest(message);
-        std::vector<DedicatedRelay> relays = NetworkManager::GetRelays();
+        std::vector<DedicatedRelay> relays = NetworkManager::GetRelays(llevel);
         response = JsonSerializer::SerializeGetRelaysResponse(relays);
     }
 
