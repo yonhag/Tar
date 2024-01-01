@@ -1,4 +1,4 @@
-#include "JsonDecoder.h"
+#include "JsonDeserializer.h"
 #include "json.hpp"
 #include <codecvt>
 
@@ -11,7 +11,7 @@ void from_json(const json& j, Relay& relay)
 	relay._publicRSAKey = j["RSAKey"];
 }
 
-MessageRequest JsonDecoder::DecodeClientMessage(const std::vector<unsigned char>& message)
+MessageRequest JsonDeserializer::DeserializeClientMessage(const std::vector<unsigned char>& message)
 {
 	MessageRequest request;
 
@@ -24,7 +24,7 @@ MessageRequest JsonDecoder::DecodeClientMessage(const std::vector<unsigned char>
 	return request;
 }
 
-std::vector<Relay> JsonDecoder::DecodeGetRelaysResponse(const std::vector<unsigned char>& response)
+std::vector<Relay> JsonDeserializer::DeserializeGetRelaysResponse(const std::vector<unsigned char>& response)
 {
 	std::vector<Relay> relays;
 	

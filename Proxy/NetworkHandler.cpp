@@ -3,7 +3,7 @@
 #include <Ws2tcpip.h>
 #include "Consts.h"
 #include "NetworkHandler.h"
-#include "JsonDecoder.h"
+#include "JsonDeserializer.h"
 
 NetworkHandler::NetworkHandler()
 {
@@ -150,7 +150,7 @@ bool NetworkHandler::ReceiveRelays(SOCKET sock)
 
 bool NetworkHandler::HandleConnectionMessage(const std::vector<unsigned char>& message)
 {
-    this->_relays = JsonDecoder::DecodeGetRelaysResponse(message);
+    this->_relays = JsonDeserializer::DeserializeGetRelaysResponse(message);
 
     return this->_relays.size() == 3;
 }

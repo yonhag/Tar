@@ -1,7 +1,7 @@
 #include "Communicator.h"
 #include "Protocol.h"
 #include "Consts.h"
-#include "JsonDecoder.h"
+#include "JsonDeserializer.h"
 #include <WS2tcpip.h>
 #include <thread>
 #include <exception>
@@ -90,7 +90,7 @@ void Communicator::HandleClient(SOCKET sock)
 	// Dealing with the message
 	std::vector<unsigned char> message(buffer, buffer + len);
 	
-	MessageRequest request = JsonDecoder::DecodeClientMessage(message);
+	MessageRequest request = JsonDeserializer::DeserializeClientMessage(message);
 
 	std::vector<unsigned char> encrypted = this->_nwhandler.EncryptMessage(request);
 

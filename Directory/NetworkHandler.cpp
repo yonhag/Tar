@@ -10,7 +10,7 @@
 // Value can be changed for testing
 std::vector<Relay> NetworkManager::_relays;
 
-std::vector<DedicatedRelay> NetworkManager::GetRelays()
+std::vector<DedicatedRelay> NetworkManager::GetRelays(const LoadLevel loadlevel)
 {
     // Making sure there are enough relays avilable
     if (_relays.size() < 3)

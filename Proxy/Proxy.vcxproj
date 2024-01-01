@@ -30,8 +30,9 @@
   <ItemGroup>
     <ClInclude Include="Communicator.h" />
     <ClInclude Include="json.hpp" />
-    <ClInclude Include="JsonDecoder.h" />
-    <ClInclude Include="JsonEncoder.h" />
+    <ClInclude Include="JsonDeserializer.h" />
+    <ClInclude Include="JsonSerializer.h" />
+    <ClInclude Include="LoadLevel.h" />
     <ClInclude Include="MessageRequest.h" />
     <ClInclude Include="NetworkHandler.h" />
     <ClInclude Include="Protocol.h" />

@@ -1,5 +1,6 @@
 #include "RequestHandler.h"
 #include "JsonSerializer.h"
+#include "JsonDeserializer.h"
 #include "NetworkManager.h"
 
 Response RequestHandler::HandleRequest(const std::vector<unsigned char>& message)
@@ -8,8 +9,9 @@ Response RequestHandler::HandleRequest(const std::vector<unsigned char>& message
     
     if (message[request_type_index] == '1')
     {
-         std::vector<DedicatedRelay> relays = NetworkManager::GetRelays();
-         response = JsonSerializer::SerializeGetRelaysResponse(relays);
+        LoadLevel llevel = JsonDeserializer::DeserializeGetRelaysRequest(message);
+        std::vector<DedicatedRelay> relays = NetworkManager::GetRelays();
+        response = JsonSerializer::SerializeGetRelaysResponse(relays);
     }
 
     // TODO: 

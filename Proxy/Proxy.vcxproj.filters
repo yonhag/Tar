@@ -77,11 +77,14 @@
     <ClInclude Include="MessageRequest.h">
       <Filter>Header Files\Structs</Filter>
     </ClInclude>
-    <ClInclude Include="JsonDecoder.h">
+    <ClInclude Include="JsonDeserializer.h">
       <Filter>Header Files\Encoding</Filter>
     </ClInclude>
-    <ClInclude Include="JsonEncoder.h">
+    <ClInclude Include="JsonSerializer.h">
       <Filter>Header Files\Encoding</Filter>
+    </ClInclude>
+    <ClInclude Include="LoadLevel.h">
+      <Filter>Header Files\Structs</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
