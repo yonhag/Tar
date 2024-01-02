@@ -21,28 +21,25 @@ std::vector<DedicatedRelay> NetworkManager::GetRelays(const LoadLevel loadlevel)
     
 
 
-    for (int i = 0; i < relays_per_user; i++)
+    if (loadlevel == LoadLevel::High)
     {
-        if (loadlevel == LoadLevel::High)
+        for (size_t i = 0; i < relays_per_user; i++)
         {
-            for (size_t i = 0; i < relays_per_user; i++)
-            {
-                relays.push_back(DedicateRelay(_relays[i]));
-                _relays[i].assigned_users += AssignedUserWeight::High;
-            }
+            relays.push_back(DedicateRelay(_relays[i]));
+            _relays[i].assigned_users += AssignedUserWeight::High;
         }
-        else if (loadlevel == LoadLevel::Low)
+    }
+    else if (loadlevel == LoadLevel::Low)
+    {
+        for (size_t i = _relays.size() - 1; i < _relays.size() - 4; i++)
         {
-            for (size_t i = _relays.size() - 1; i < _relays.size() - 4; i++)
-            {
-                relays.push_back(DedicateRelay(_relays[i]));
-                _relays[i].assigned_users += AssignedUserWeight::High;
-            }
+            relays.push_back(DedicateRelay(_relays[i]));
+            _relays[i].assigned_users += AssignedUserWeight::High;
         }
-        else
-        {
-
-        }
+    }
+    else
+    {
+        // TODO: Determine an effective way to return medium load level relays
     }
 
     return relays;
