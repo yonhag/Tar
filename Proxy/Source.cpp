@@ -12,7 +12,10 @@ int main()
 	int lvl;
 	std::cout << "Enter load level:\n0: Low\n1: Medium\n2: High\nType: ";
 	std::cin >> lvl;
-	loadlevel = (LoadLevel)lvl;
+	if (lvl < 0 || lvl > 2)
+		loadlevel = LoadLevel::High;
+	else
+		loadlevel = (LoadLevel)lvl;
 	NetworkHandler nwh(loadlevel);
 
 	if (!nwh.IsConnected())

@@ -3,12 +3,13 @@
 #include "Communicator.h"
 #include "JsonSerializer.h"
 #include "JsonDeserializer.h"
-#include <random>
 #include <algorithm>
 
 // Initializing the relay vector
 // Value can be changed for testing
 std::vector<Relay> NetworkManager::_relays;
+
+enum AssignedUserWeight { Low = 1, Medium = 2, High = 4 };
 
 std::vector<DedicatedRelay> NetworkManager::GetRelays(const LoadLevel loadlevel)
 {
@@ -18,29 +19,30 @@ std::vector<DedicatedRelay> NetworkManager::GetRelays(const LoadLevel loadlevel)
 
     std::vector<DedicatedRelay> relays;
     
-    // Setting the seed for randomizer
-    std::random_device rd;
-    std::mt19937 mt{ rd() };
 
-    // Setting the distribution - which is the _relays index range
-    std::uniform_int_distribution<int> dist{ 0, (static_cast<int>(_relays.size()) - 1) }; // Static cast is fine since number shouldn't be too high
 
     for (int i = 0; i < relays_per_user; i++)
     {
-        int current_index;
+        if (loadlevel == LoadLevel::High)
+        {
+            for (size_t i = 0; i < relays_per_user; i++)
+            {
+                relays.push_back(DedicateRelay(_relays[i]));
+                _relays[i].assigned_users += AssignedUserWeight::High;
+            }
+        }
+        else if (loadlevel == LoadLevel::Low)
+        {
+            for (size_t i = _relays.size() - 1; i < _relays.size() - 4; i++)
+            {
+                relays.push_back(DedicateRelay(_relays[i]));
+                _relays[i].assigned_users += AssignedUserWeight::High;
+            }
+        }
+        else
+        {
 
-        do {
-            // Generating the number
-            current_index = dist(mt);
-
-            // Making sure it hasn't been used yet
-            auto it = std::find(relays.begin(), relays.end(), current_index);
-            if (it == relays.end())
-                break;
-        } while (true); // While (true) to avoid declaring {it} before the loop
-
-        // Pushing back a number
-        relays.push_back(DedicateRelay(_relays[current_index]));
+        }
     }
 
     return relays;
@@ -51,7 +53,7 @@ void NetworkManager::JoinNetwork(const std::string& ip, const unsigned int bandw
     Relay newRelay;
     newRelay.ip = ip;
     newRelay.bandwidth = bandwidth;
-
+    
     AddRelay(newRelay);
 
     Communicator::UpdateOtherDirectories(JsonSerializer::SerializeUpdateDirectoryRequest(newRelay));
@@ -60,8 +62,12 @@ void NetworkManager::JoinNetwork(const std::string& ip, const unsigned int bandw
 
 bool NetworkManager::AddRelay(const Relay& relay)
 {
-    // TODO: make sure if this can fail
+    // TODO: test if this can fail
     _relays.push_back(relay);
+
+    // Sorted by bandwidth ascending - Lower bandwidth -> Higher banwidth
+    std::sort(_relays.begin(), _relays.end(), [](const Relay& a, const Relay& b) { return a.bandwidth < b.bandwidth; });
+
     return true;
 }
 

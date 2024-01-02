@@ -4,6 +4,8 @@
 #include "LoadLevel.h"
 #include <vector>
 
+enum class LevelBandwidths { Low = 10, Medium = 100, High = 1000 };
+
 class NetworkManager
 {
 public:
@@ -15,5 +17,6 @@ public:
 private:
 	static DedicatedRelay DedicateRelay(const Relay& relay);
 
+	// Sorted by bandwidth ascending - Lower bandwidth -> Higher banwidth
 	static std::vector<Relay> _relays;
 };
