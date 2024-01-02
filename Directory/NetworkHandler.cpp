@@ -34,8 +34,8 @@ std::vector<DedicatedRelay> NetworkManager::GetRelays(const LoadLevel loadlevel)
             current_index = dist(mt);
 
             // Making sure it hasn't been used yet
-            auto it = std::find(used_relays.begin(), used_relays.end(), current_index);
-            if (it == used_relays.end())
+            auto it = std::find(relays.begin(), relays.end(), current_index);
+            if (it == relays.end())
                 break;
         } while (true); // While (true) to avoid declaring {it} before the loop
 
