@@ -2,6 +2,7 @@
 #include "NetworkHandler.h"
 #include "WSAInitializer.h"
 #include "LoadLevel.h"
+#include <exception>
 #include <iostream>
 
 int main()
@@ -16,15 +17,19 @@ int main()
 		loadlevel = LoadLevel::High;
 	else
 		loadlevel = (LoadLevel)lvl;
-	NetworkHandler nwh(loadlevel);
+	try
+	{
+		NetworkHandler nwh(loadlevel);
 
-	if (!nwh.IsConnected())
-		return 1;
+		if (!nwh.IsConnected())
+			return 1;
 
-	auto comm = Communicator(nwh);
+		auto comm = Communicator(nwh);
 
-	while (true)
-		comm.RunServer();
+		while (true)
+			comm.RunServer();
+	}
+	catch (std::exception& e) { std::cout << e.what(); }
 
 	return 0;
 }

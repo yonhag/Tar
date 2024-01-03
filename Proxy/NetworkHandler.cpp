@@ -17,6 +17,11 @@ NetworkHandler::NetworkHandler(const LoadLevel loadlevel)
     while (!hasFoundDir)
     {
         this->_dir = GetNextDir(dirFile);
+        
+        // If file is over
+        if (dirFile.eof())
+            throw std::exception("Reached EOF");
+
         hasFoundDir = GetRelays(loadlevel);
     }
     dirFile.close();
