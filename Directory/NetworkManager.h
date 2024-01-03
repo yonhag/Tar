@@ -16,6 +16,7 @@ public:
 
 private:
 	static DedicatedRelay DedicateRelay(const Relay& relay);
+	static std::vector<DedicatedRelay> DedicateRelaysForNormalLoadUser();
 
 	// Sorted by bandwidth ascending - Lower bandwidth -> Higher banwidth
 	static std::vector<Relay> _relays;
