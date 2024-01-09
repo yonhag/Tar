@@ -10,41 +10,36 @@
 // Value can be changed for testing
 std::vector<Relay> NetworkManager::_relays;
 
-std::vector<DedicatedRelay> NetworkManager::GetRelays()
+enum AssignedUserWeight { Low = 1, Medium = 2, High = 4 };
+
+std::vector<DedicatedRelay> NetworkManager::GetRelays(const LoadLevel loadlevel)
 {
     // Making sure there are enough relays avilable
     if (_relays.size() < 3)
         return std::vector<DedicatedRelay>();
 
-    std::vector<DedicatedRelay> relays;
-    std::vector<int> used_relays;
+    std::vector<DedicatedRelay> dedicated_relays;
 
-    // Setting the seed for randomizer
-    std::random_device rd;
-    std::mt19937 mt{ rd() };
-
-    // Setting the distribution - which is the _relays index range
-    std::uniform_int_distribution<int> dist{ 0, (static_cast<int>(_relays.size()) - 1) }; // Static cast is fine since number shouldn't be too high
-
-    for (int i = 0; i < relays_per_user; i++)
+    if (loadlevel == LoadLevel::High)
     {
-        int current_index;
-
-        do {
-            // Generating the number
-            current_index = dist(mt);
-
-            // Making sure it hasn't been used yet
-            auto it = std::find(used_relays.begin(), used_relays.end(), current_index);
-            if (it == used_relays.end())
-                break;
-        } while (true); // While (true) to avoid declaring {it} before the loop
-
-        // Pushing back a number
-        relays.push_back(DedicateRelay(_relays[current_index]));
+        for (size_t i = 0; i < relays_per_user; i++)
+        {
+            dedicated_relays.push_back(DedicateRelay(_relays[i]));
+            _relays[i].assigned_users += AssignedUserWeight::High;
+        }
     }
+    else if (loadlevel == LoadLevel::Low)
+    {
+        for (size_t i = _relays.size() - 1; i < _relays.size() - 4; i++)
+        {
+            dedicated_relays.push_back(DedicateRelay(_relays[i]));
+            _relays[i].assigned_users += AssignedUserWeight::Low;
+        }
+    }
+    else
+        dedicated_relays = DedicateRelaysForNormalLoadUser();
 
-    return relays;
+    return dedicated_relays;
 }
 
 void NetworkManager::JoinNetwork(const std::string& ip, const unsigned int bandwidth)
@@ -52,7 +47,7 @@ void NetworkManager::JoinNetwork(const std::string& ip, const unsigned int bandw
     Relay newRelay;
     newRelay.ip = ip;
     newRelay.bandwidth = bandwidth;
-
+    
     AddRelay(newRelay);
 
     Communicator::UpdateOtherDirectories(JsonSerializer::SerializeUpdateDirectoryRequest(newRelay));
@@ -61,8 +56,12 @@ void NetworkManager::JoinNetwork(const std::string& ip, const unsigned int bandw
 
 bool NetworkManager::AddRelay(const Relay& relay)
 {
-    // TODO: make sure if this can fail
+    // TODO: test if this can fail
     _relays.push_back(relay);
+
+    // Sorted by bandwidth ascending - Lower bandwidth -> Higher banwidth
+    std::sort(_relays.begin(), _relays.end(), [](const Relay& a, const Relay& b) { return a.bandwidth < b.bandwidth; });
+
     return true;
 }
 
@@ -83,4 +82,36 @@ DedicatedRelay NetworkManager::DedicateRelay(const Relay& relay)
     drel.ip = relay.ip;
 
     return drel;
+}
+
+std::vector<DedicatedRelay> NetworkManager::DedicateRelaysForNormalLoadUser()
+{
+    std::vector<DedicatedRelay> dedicated_relays;
+
+    // Setting the seed for randomizer
+    std::random_device rd;
+    std::mt19937 mt{ rd() };
+    std::uniform_int_distribution<int> dist;
+
+    if (_relays.size() > 10)
+        // Relays - 7, removing 3 highest capacity, 3 lowest capacity, and 1 since index starts from 0
+        std::uniform_int_distribution<int> dist{ 0, (static_cast<int>(_relays.size()) - 7) }; // Static cast is fine since number shouldn't be too high
+    else
+        std::uniform_int_distribution<int> dist{ 0, static_cast<int>(_relays.size() - 1) };
+    
+    // Dedicating the relays
+    while (dedicated_relays.size() < 3)
+    {
+        int index = dist(mt);
+        auto it = std::find(dedicated_relays.begin(), dedicated_relays.end(), _relays[index]);
+
+        // If relay wasn't already dedicated
+        if (it != dedicated_relays.end())
+        {
+            dedicated_relays.push_back(DedicateRelay(_relays[index]));
+            _relays[index].assigned_users += AssignedUserWeight::Medium;
+        }
+    }
+
+    return dedicated_relays;
 }

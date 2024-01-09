@@ -133,6 +133,7 @@
     <ClCompile Include="JsonDeserializer.cpp" />
     <ClCompile Include="JsonDeserializer.h" />
     <ClCompile Include="JsonSerializer.cpp" />
+    <ClCompile Include="LoadLevel.h" />
     <ClCompile Include="NetworkHandler.cpp" />
     <ClCompile Include="RequestHandler.cpp" />
     <ClCompile Include="Source.cpp" />

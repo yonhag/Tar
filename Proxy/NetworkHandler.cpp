@@ -1,11 +1,12 @@
 #include <WinSock2.h>
 #include <Windows.h>
 #include <Ws2tcpip.h>
-#include "Consts.h"
+#include "JsonSerializer.h"
 #include "NetworkHandler.h"
-#include "JsonDecoder.h"
+#include "JsonDeserializer.h"
+#include "Consts.h"
 
-NetworkHandler::NetworkHandler()
+NetworkHandler::NetworkHandler(const LoadLevel loadlevel)
 {
     std::ifstream dirFile(this->_dirFileName);
 
@@ -16,12 +17,17 @@ NetworkHandler::NetworkHandler()
     while (!hasFoundDir)
     {
         this->_dir = GetNextDir(dirFile);
-        hasFoundDir = GetRelays();
+        
+        // If file is over
+        if (dirFile.eof())
+            throw std::exception("Reached EOF");
+
+        hasFoundDir = GetRelays(loadlevel);
     }
     dirFile.close();
 }
 
-NetworkHandler::NetworkHandler(const NetworkHandler& nwh) :
+NetworkHandler::NetworkHandler(const NetworkHandler& nwh, const LoadLevel loadlevel) :
     _isConnected(nwh._isConnected), _relays(nwh._relays), _dir(nwh._dir)
 {
     if (this->_relays.empty())
@@ -35,7 +41,7 @@ NetworkHandler::NetworkHandler(const NetworkHandler& nwh) :
         while (!hasFoundDir)
         {
             this->_dir = GetNextDir(dirFile);
-            hasFoundDir = GetRelays();
+            hasFoundDir = GetRelays(loadlevel);
         }
         dirFile.close();
     }
@@ -71,7 +77,7 @@ Directory NetworkHandler::GetNextDir(std::ifstream& dirFile) const
     return dir;
 }
 
-bool NetworkHandler::GetRelays()
+bool NetworkHandler::GetRelays(const LoadLevel loadlevel)
 {
     // Creating the socket
     SOCKET sock = socket(AF_INET, SOCK_STREAM, 0);
@@ -94,7 +100,7 @@ bool NetworkHandler::GetRelays()
         throw std::exception("Connection Failed");
 
     // Sending
-    std::vector<unsigned char> request = this->GetRelayRequest();
+    std::vector<unsigned char> request = this->GetRelayRequest(loadlevel);
     if (send(sock, reinterpret_cast<const char*>(request.data()), request.size(), 0) == INVALID_SOCKET)
         return false;
     
@@ -117,14 +123,9 @@ PCWSTR NetworkHandler::StringToPCWSTR(const std::string& str)
     return wideBuffer.c_str();
 }
 
-std::vector<unsigned char> NetworkHandler::GetRelayRequest() const
+std::vector<unsigned char> NetworkHandler::GetRelayRequest(const LoadLevel loadlevel) const
 {
-    std::vector<unsigned char> request;
-    request.push_back('1');
-
-    // TODO: Add RSAKey and AESKey in JSON to the request.
-
-    return request;
+    return JsonSerializer::SerializeGetRelaysRequest(loadlevel);
 }
 
 bool NetworkHandler::ReceiveRelays(SOCKET sock)
@@ -150,7 +151,7 @@ bool NetworkHandler::ReceiveRelays(SOCKET sock)
 
 bool NetworkHandler::HandleConnectionMessage(const std::vector<unsigned char>& message)
 {
-    this->_relays = JsonDecoder::DecodeGetRelaysResponse(message);
+    this->_relays = JsonDeserializer::DeserializeGetRelaysResponse(message);
 
     return this->_relays.size() == 3;
 }

@@ -11,8 +11,9 @@ Response RequestHandler::HandleRequest(const std::vector<unsigned char>& request
         response = HandleDirRequest(request);
     if (request[request_type_index] == '1')
     {
-         std::vector<DedicatedRelay> relays = NetworkManager::GetRelays();
-         response = JsonSerializer::SerializeGetRelaysResponse(relays);
+        LoadLevel llevel = JsonDeserializer::DeserializeGetRelaysRequest(request);
+        std::vector<DedicatedRelay> relays = NetworkManager::GetRelays(llevel);
+        response = JsonSerializer::SerializeGetRelaysResponse(relays);
     }
 
     // TODO: 
