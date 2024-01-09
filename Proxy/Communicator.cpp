@@ -41,8 +41,7 @@ void Communicator::RunServer()
 		std::cout << "Accepting client..." << std::endl;
 
 		// Detaching client handling to a different thread
-		std::thread tr(&Communicator::HandleClient, this, std::ref(client_socket));
-		tr.detach();
+		this->HandleClient(client_socket);
 	}
 
 }
