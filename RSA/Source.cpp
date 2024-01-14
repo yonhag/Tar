@@ -3,6 +3,5 @@
 
 int main()
 {
-	std::cout << RSA::IsPrime(7912);
 	return 0;
 }

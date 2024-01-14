@@ -1,15 +1,24 @@
 #include "RSA.h"
 #include <random> // Used for randomizing primes
 
-void RSA::GeneratePrimeNumbers(Prime& P, Prime& Q)
+void RSA::GeneratePrimes(Prime& P, Prime& Q)
 {
+    const unsigned long min_prime = 10000000;
 	// Preparing the RNG
 	std::random_device rd;
 	std::mt19937 gen(rd());
-	std::uniform_int_distribution<int> distribution(7, sizeof(Integer));
+	std::uniform_int_distribution<int> distribution(7, sizeof(Integer)); // TODO: Integrate min_prime
 
+    do 
+    {
+        P = distribution(gen);
+    } while (!IsPrime(P));
 
-
+    do
+    {
+        Q = distribution(gen);
+    } while (!IsPrime(Q));
+    // TODO: Add a test for if P and Q have a large difference between each other
 }
 
 bool RSA::IsPrime(const PossiblePrime num)

@@ -18,7 +18,7 @@ public:
 
 private:
 	// Main methods
-	void GeneratePrimeNumbers(Prime& P, Prime& Q); // P and Q are outputs
+	void GeneratePrimes(Prime& P, Prime& Q); // P and Q are outputs
 	Product CalculateProduct(const long& P, const long& Q);
 	Totient CalculateTotient(const long& P, const long& Q);
 
