@@ -1,6 +1,20 @@
 #include "RSA.h"
 #include <random> // Used for randomizing primes
 
+RSA::RSA()
+{
+    Prime P = 0, Q = 0;
+
+    GeneratePrimes(P, Q);
+
+    this->_product = CalculateProduct(P, Q);
+
+    Totient t = CalculateTotient(P, Q);
+
+    SelectPublicKey(t);
+    SelectPrivateKey(t);
+}
+
 void RSA::GeneratePrimes(Prime& P, Prime& Q) const
 {
     const unsigned long min_prime = 10000000;
@@ -31,7 +45,7 @@ Totient RSA::CalculateTotient(const Prime P, const Prime Q) const
     return (P - 1) * (Q - 1);
 }
 
-PublicKey RSA::SelectPublicKey(const Totient t)
+void RSA::SelectPublicKey(const Totient t)
 {
     std::random_device rd;
     std::mt19937 gen(rd());
@@ -43,6 +57,11 @@ PublicKey RSA::SelectPublicKey(const Totient t)
         if (CheckPublicKeyValidity(t))
             break;
     }
+}
+
+void RSA::SelectPrivateKey(const Totient t)
+{
+
 }
 
 bool RSA::IsPrime(const PossiblePrime num)
@@ -72,4 +91,11 @@ bool RSA::CheckPublicKeyValidity(const Totient t) const
     if (t % this->_PublicKey == 0)
         return false;
     return true;
+}
+
+bool RSA::CheckPrivateKeyValidity(const Totient t) const
+{
+    if ((this->_PublicKey + this->_PrivateKey) % t == 1)
+        return true;
+    return false;
 }

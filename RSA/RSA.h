@@ -1,5 +1,4 @@
 #pragma once
-#include <stdint.h> // Used for int types
 
 using PublicKey		= unsigned long;
 using PrivateKey	= unsigned long;
@@ -22,14 +21,18 @@ private:
 	Product CalculateProduct(const Prime P, const Prime Q) const;
 	Totient CalculateTotient(const Prime P, const Prime Q) const;
 
-	PublicKey SelectPublicKey(const Totient t);
-	PrivateKey SelectPrivateKey(const Totient t);
+	void SelectPublicKey(const Totient t);
+	void SelectPrivateKey(const Totient t);
 	
 	// Assistance methods
 	static bool IsPrime(const PossiblePrime num);
 	bool CheckPublicKeyValidity(const Totient t) const;
+	bool CheckPrivateKeyValidity(const Totient t) const;
 
 	// Members
-	PublicKey _PublicKey;
-	PrivateKey _PrivateKey;
+	// Keys
+		PublicKey _PublicKey;
+		PrivateKey _PrivateKey;
+	// Additionals
+		Product _product;
 };
