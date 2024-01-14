@@ -1,4 +1,5 @@
 #pragma once
+#include <vector>
 
 using PublicKey		= unsigned long;
 using PrivateKey	= unsigned long;
@@ -14,6 +15,8 @@ public:
 	RSA();
 	RSA(const PublicKey& pubk, const PrivateKey& privk);
 
+	std::vector<unsigned char> Encrypt(const std::vector<unsigned char>& message);
+	std::vector<unsigned char> Decrypt(const std::vector<unsigned char>& cipher);
 
 private:
 	// Main methods

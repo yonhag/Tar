@@ -3,7 +3,8 @@
 
 RSA::RSA()
 {
-    Prime P = 0, Q = 0;
+    Prime P = 0;
+    Prime Q = 0;
 
     GeneratePrimes(P, Q);
 
@@ -61,7 +62,7 @@ void RSA::SelectPublicKey(const Totient t)
 
 void RSA::SelectPrivateKey(const Totient t)
 {
-
+    // TODO: Understand if this is randomally generated or a solution of the equation in CheckValidity
 }
 
 bool RSA::IsPrime(const PossiblePrime num)
