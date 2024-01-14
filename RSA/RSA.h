@@ -22,11 +22,12 @@ private:
 	Product CalculateProduct(const Prime P, const Prime Q) const;
 	Totient CalculateTotient(const Prime P, const Prime Q) const;
 
-	PublicKey SelectPublicKey(const Totient& t);
-	PrivateKey SelectPrivateKey(const Totient& t, const PublicKey& pk);
+	PublicKey SelectPublicKey(const Totient t);
+	PrivateKey SelectPrivateKey(const Totient t);
 	
 	// Assistance methods
 	static bool IsPrime(const PossiblePrime num);
+	bool CheckPublicKeyValidity(const Totient t) const;
 
 	// Members
 	PublicKey _PublicKey;

@@ -31,9 +31,18 @@ Totient RSA::CalculateTotient(const Prime P, const Prime Q) const
     return (P - 1) * (Q - 1);
 }
 
-PublicKey RSA::SelectPublicKey(const Totient& t)
+PublicKey RSA::SelectPublicKey(const Totient t)
 {
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<int> distribution(7, ULLONG_MAX); // TODO: Integrate min_prime, ULLONG / ULONG
 
+    while (true)
+    {
+        this->_PublicKey = distribution(gen);
+        if (CheckPublicKeyValidity(t))
+            break;
+    }
 }
 
 bool RSA::IsPrime(const PossiblePrime num)
@@ -48,5 +57,19 @@ bool RSA::IsPrime(const PossiblePrime num)
             return false;
     }
 
+    return true;
+}
+
+bool RSA::CheckPublicKeyValidity(const Totient t) const
+{
+    // If larger than totient
+    if (!(t < this->_PublicKey))
+        return false;
+    // If not prime itself
+    if (!IsPrime(this->_PublicKey))
+        return false;
+    // If key is a factor of totient
+    if (t % this->_PublicKey == 0)
+        return false;
     return true;
 }
