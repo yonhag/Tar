@@ -18,9 +18,9 @@ public:
 
 private:
 	// Main methods
-	void GeneratePrimes(Prime& P, Prime& Q); // P and Q are outputs
-	Product CalculateProduct(const long& P, const long& Q);
-	Totient CalculateTotient(const long& P, const long& Q);
+	void GeneratePrimes(Prime& P, Prime& Q) const; // P and Q are outputs
+	Product CalculateProduct(const Prime P, const Prime Q) const;
+	Totient CalculateTotient(const Prime P, const Prime Q) const;
 
 	PublicKey SelectPublicKey(const Totient& t);
 	PrivateKey SelectPrivateKey(const Totient& t, const PublicKey& pk);
