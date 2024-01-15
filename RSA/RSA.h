@@ -3,8 +3,8 @@
 
 using PublicKey		= unsigned long;
 using PrivateKey	= unsigned long;
-using Totient		= unsigned long;
-using Product		= unsigned long;
+using Totient		= unsigned long long;
+using Product		= unsigned long long;
 using Prime			= unsigned long;
 using PossiblePrime = unsigned long;
 using Integer		= unsigned long;

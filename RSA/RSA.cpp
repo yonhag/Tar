@@ -1,5 +1,6 @@
 #include "RSA.h"
 #include <random> // Used for randomizing primes
+#include <iostream>
 
 RSA::RSA()
 {
@@ -11,9 +12,12 @@ RSA::RSA()
     this->_product = CalculateProduct(P, Q);
 
     Totient t = CalculateTotient(P, Q);
-
+    
     SelectPublicKey(t);
     SelectPrivateKey(t);
+    std::cout << this->_PrivateKey << std::endl;
+    std::cout << this->_PublicKey << std::endl;
+    std::cout << this->_product << std::endl;
 }
 
 void RSA::GeneratePrimes(Prime& P, Prime& Q) const
@@ -22,7 +26,7 @@ void RSA::GeneratePrimes(Prime& P, Prime& Q) const
 	// Preparing the RNG
 	std::random_device rd;
 	std::mt19937 gen(rd());
-	std::uniform_int_distribution<int> distribution(7, ULLONG_MAX); // TODO: Integrate min_prime, ULLONG / ULONG
+	std::uniform_int_distribution<Prime> distribution(7, ULONG_MAX); // TODO: Integrate min_prime, ULLONG / ULONG
 
     do 
     {
@@ -38,19 +42,19 @@ void RSA::GeneratePrimes(Prime& P, Prime& Q) const
 
 Product RSA::CalculateProduct(const Prime P, const Prime Q) const
 {
-    return P * Q;
+    return static_cast<Product>(P) * static_cast<Product>(Q);
 }
 
 Totient RSA::CalculateTotient(const Prime P, const Prime Q) const
 {
-    return (P - 1) * (Q - 1);
+    return (static_cast<Totient>(P) - 1) * (static_cast<Totient>(Q) - 1);
 }
 
 void RSA::SelectPublicKey(const Totient t)
 {
     std::random_device rd;
     std::mt19937 gen(rd());
-    std::uniform_int_distribution<int> distribution(7, ULLONG_MAX); // TODO: Integrate min_prime, ULLONG / ULONG
+    std::uniform_int_distribution<PublicKey> distribution(7, ULLONG_MAX); // TODO: Integrate min_prime, ULLONG / ULONG
 
     while (true)
     {
