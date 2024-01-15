@@ -87,7 +87,7 @@ bool RSA::IsPrime(const PossiblePrime num)
 bool RSA::CheckPublicKeyValidity(const Totient t) const
 {
     // If larger than totient
-    if (!(t < this->_PublicKey))
+    if (t < this->_PublicKey)
         return false;
     // If not prime itself
     if (!IsPrime(this->_PublicKey))

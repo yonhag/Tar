@@ -1,8 +1,8 @@
 #pragma once
 #include <vector>
 
-using PublicKey		= unsigned long;
-using PrivateKey	= unsigned long;
+using PublicKey		= unsigned long long;
+using PrivateKey	= unsigned long long;
 using Totient		= unsigned long long;
 using Product		= unsigned long long;
 using Prime			= unsigned long;
