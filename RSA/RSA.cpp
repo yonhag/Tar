@@ -89,11 +89,11 @@ bool RSA::CheckPublicKeyValidity(const Totient t) const
     // If larger than totient
     if (t < this->_PublicKey)
         return false;
-    // If not prime itself
-    if (!IsPrime(this->_PublicKey))
-        return false;
     // If key is a factor of totient
     if (t % this->_PublicKey == 0)
+        return false;
+    // If not prime itself
+    if (!IsPrime(this->_PublicKey))
         return false;
     return true;
 }

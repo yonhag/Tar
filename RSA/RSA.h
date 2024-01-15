@@ -6,7 +6,7 @@ using PrivateKey	= unsigned long long;
 using Totient		= unsigned long long;
 using Product		= unsigned long long;
 using Prime			= unsigned long;
-using PossiblePrime = unsigned long;
+using PossiblePrime = unsigned long long;
 using Integer		= unsigned long;
 
 class RSA
