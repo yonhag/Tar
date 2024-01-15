@@ -66,7 +66,11 @@ void RSA::SelectPublicKey(const Totient t)
 
 void RSA::SelectPrivateKey(const Totient t)
 {
-    // TODO: Understand if this is randomally generated or a solution of the equation in CheckValidity
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<PrivateKey> distribution(7, ULONG_MAX);
+
+    this->_PrivateKey;
 }
 
 bool RSA::IsPrime(const PossiblePrime num)
@@ -100,7 +104,7 @@ bool RSA::CheckPublicKeyValidity(const Totient t) const
 
 bool RSA::CheckPrivateKeyValidity(const Totient t) const
 {
-    if ((this->_PublicKey + this->_PrivateKey) % t == 1)
+    if ((this->_PublicKey * this->_PrivateKey) % t == 1)
         return true;
     return false;
 }
