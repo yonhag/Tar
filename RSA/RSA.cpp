@@ -15,9 +15,9 @@ RSA::RSA()
     
     SelectPublicKey(t);
     SelectPrivateKey(t);
-    std::cout << this->_PrivateKey << std::endl;
     std::cout << this->_PublicKey << std::endl;
-    std::cout << this->_product << std::endl;
+    std::cout << this->_PrivateKey << std::endl;
+    std::cout << t << std::endl;
 }
 
 void RSA::GeneratePrimes(Prime& P, Prime& Q) const
@@ -64,13 +64,31 @@ void RSA::SelectPublicKey(const Totient t)
     }
 }
 
-void RSA::SelectPrivateKey(const Totient t)
+void RSA::SelectPrivateKey(Totient totient)
 {
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_int_distribution<PrivateKey> distribution(7, ULONG_MAX);
+        SignedInteger originalTotient = totient, temp, quotient;
+        SignedInteger prevCoeff = 0, currCoeff = 1;
 
-    this->_PrivateKey;
+        if (totient == 1) {
+            this->_PrivateKey = 0;
+            return;
+        }
+
+        SignedInteger publicKeyCopy = this->_PublicKey;
+        while (publicKeyCopy > 1) {
+            quotient = publicKeyCopy / totient;
+            temp = totient;
+            totient = publicKeyCopy % totient;
+            publicKeyCopy = temp;
+            temp = prevCoeff;
+            prevCoeff = currCoeff - quotient * prevCoeff;
+            currCoeff = temp;
+        }
+
+        if (currCoeff < 0)
+            currCoeff += originalTotient;
+
+        this->_PrivateKey = currCoeff;
 }
 
 bool RSA::IsPrime(const PossiblePrime num)
@@ -100,11 +118,4 @@ bool RSA::CheckPublicKeyValidity(const Totient t) const
     if (!IsPrime(this->_PublicKey))
         return false;
     return true;
-}
-
-bool RSA::CheckPrivateKeyValidity(const Totient t) const
-{
-    if ((this->_PublicKey * this->_PrivateKey) % t == 1)
-        return true;
-    return false;
 }

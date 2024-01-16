@@ -8,6 +8,7 @@ using Product		= unsigned long long;
 using Prime			= unsigned long;
 using PossiblePrime = unsigned long long;
 using Integer		= unsigned long;
+using SignedInteger = long long;
 
 class RSA
 {
@@ -30,7 +31,6 @@ private:
 	// Assistance methods
 	static bool IsPrime(const PossiblePrime num);
 	bool CheckPublicKeyValidity(const Totient t) const;
-	bool CheckPrivateKeyValidity(const Totient t) const;
 
 	// Members
 	// Keys
