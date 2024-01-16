@@ -50,11 +50,10 @@ std::vector<unsigned char> RSA::Decrypt(const std::vector<unsigned char>& cipher
 
 void RSA::GeneratePrimes(Prime& P, Prime& Q) const
 {
-    const unsigned long min_prime = 10000000;
 	// Preparing the RNG
 	std::random_device rd;
 	std::mt19937 gen(rd());
-	std::uniform_int_distribution<Prime> distribution(7, 100); // TODO: Integrate min_prime, ULLONG / ULONG
+	std::uniform_int_distribution<Prime> distribution(7, 100); // TODO: Integrate min_prime
 
     do 
     {
