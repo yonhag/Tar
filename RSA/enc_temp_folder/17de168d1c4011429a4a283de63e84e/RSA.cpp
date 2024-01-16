@@ -136,7 +136,9 @@ bool RSA::IsPrime(const PossiblePrime num)
 
 bool RSA::CheckPublicKeyValidity(const Totient t) const
 {
-    // Guarenteed to be larger than totient, since generation
+    // If larger than totient
+    if (t < this->_PublicKey)
+        return false;
     // If key is a factor of totient
     if (t % this->_PublicKey == 0)
         return false;
