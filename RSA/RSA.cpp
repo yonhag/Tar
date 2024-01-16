@@ -53,7 +53,7 @@ void RSA::GeneratePrimes(Prime& P, Prime& Q) const
 	// Preparing the RNG
 	std::random_device rd;
 	std::mt19937 gen(rd());
-	std::uniform_int_distribution<Prime> distribution(7, 100); // TODO: Integrate min_prime
+	std::uniform_int_distribution<Prime> distribution(7, 100);
 
     do 
     {
