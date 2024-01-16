@@ -7,7 +7,7 @@ using Totient		= unsigned long long;
 using Product		= unsigned long long;
 using Prime			= unsigned long;
 using PossiblePrime = unsigned long long;
-using Integer		= unsigned long;
+using Integer		= unsigned long long;
 using SignedInteger = long long;
 
 class RSA
@@ -16,8 +16,8 @@ public:
 	RSA();
 	RSA(const PublicKey& pubk, const PrivateKey& privk);
 
-	std::vector<unsigned char> Encrypt(const std::vector<unsigned char>& message);
-	std::vector<unsigned char> Decrypt(const std::vector<unsigned char>& cipher);
+	std::vector<unsigned char> Encrypt(const std::vector<unsigned char>& message) const;
+	std::vector<unsigned char> Decrypt(const std::vector<unsigned char>& cipher) const;
 
 private:
 	// Main methods

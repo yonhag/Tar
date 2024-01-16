@@ -20,6 +20,34 @@ RSA::RSA()
     std::cout << t << std::endl;
 }
 
+std::vector<unsigned char> RSA::Encrypt(const std::vector<unsigned char>& message) const
+{
+    std::vector<unsigned char> cipher;
+    
+    for (const auto& uc : message)
+    {
+        Integer n = uc;
+        n = (n ^ this->_PublicKey) % this->_product;
+        cipher.push_back(n);
+    }
+
+    return cipher;
+}
+
+std::vector<unsigned char> RSA::Decrypt(const std::vector<unsigned char>& cipher) const
+{
+    std::vector<unsigned char> message;
+
+    for (const auto& val : cipher)
+    {
+        Integer n = val;
+        n = (n ^ this->_PrivateKey) % this->_product;
+        message.push_back(n);
+    }
+
+    return message;
+}
+
 void RSA::GeneratePrimes(Prime& P, Prime& Q) const
 {
     const unsigned long min_prime = 10000000;
