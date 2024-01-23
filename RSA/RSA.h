@@ -1,4 +1,5 @@
 #pragma once
+#include "boost_1_84_0/boost/multiprecision/cpp_int.hpp"
 #include <vector>
 
 using PublicKey		= unsigned long long;
@@ -38,4 +39,6 @@ private:
 		PrivateKey _PrivateKey;
 	// Additionals
 		Product _product;
+
+		const int MAX_PRIMES = 7;
 };

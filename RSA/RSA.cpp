@@ -15,9 +15,10 @@ RSA::RSA()
     
     SelectPublicKey(t);
     SelectPrivateKey(t);
-    std::cout << this->_PublicKey << std::endl;
-    std::cout << this->_PrivateKey << std::endl;
-    std::cout << t << std::endl;
+    std::cout << "Public: " << this->_PublicKey << std::endl;
+    std::cout << "Private: " << this->_PrivateKey << std::endl;
+    std::cout << "Totient: " << t << std::endl;
+    std::cout << "Product: " << this->_product << std::endl;
 }
 
 std::vector<unsigned char> RSA::Encrypt(const std::vector<unsigned char>& message) const
@@ -53,7 +54,7 @@ void RSA::GeneratePrimes(Prime& P, Prime& Q) const
 	// Preparing the RNG
 	std::random_device rd;
 	std::mt19937 gen(rd());
-	std::uniform_int_distribution<Prime> distribution(7, 100);
+	std::uniform_int_distribution<Prime> distribution(7, this->MAX_PRIMES);
 
     do 
     {

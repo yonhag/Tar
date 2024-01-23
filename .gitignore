@@ -1,6 +1,8 @@
 # Created by https://www.toptal.com/developers/gitignore/api/c++,windows,visualstudio
 # Edit at https://www.toptal.com/developers/gitignore?templates=c++,windows,visualstudio
 
+RSA/boost_1_84_0/*
+
 ### C++ ###
 # Prerequisites
 *.d
