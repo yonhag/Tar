@@ -1,8 +1,7 @@
 #include "json.hpp"
 #include "Request.h"
 #include "Response.h"
-#include "DedicatedRelay.h"
-#include "Relay.h"
+#include "DedicatedRelay.h" // Relay included here
 #include "LoadLevel.h"
 
 class JsonDeserializer

@@ -7,31 +7,28 @@
 #include <exception>
 #include <iostream>
 
+const std::chrono::seconds Communicator::timeout = std::chrono::seconds(5);
+
 Communicator::Communicator()
 {
-	this->_serverSocket = socket(AF_INET, SOCK_STREAM, 0);
-	if (this->_serverSocket == INVALID_SOCKET)
-		throw std::exception("Invalid Socket Creation");
+	if (this->_serverSocket.listen(Communicator::network_listening_port) != sf::Socket::Done)
+		throw std::exception("Invalid server socket");
 }
 
 Communicator::~Communicator()
 {
-	try
-	{
-		::closesocket(_serverSocket);
-	}
-	catch (...) {}
+	this->_serverSocket.close();
 }
 
 void Communicator::RunServer()
 {
-	BindAndListen();
+	std::cout << "Listening on port " << Communicator::network_listening_port << std::endl;
 
 	while (true)
 	{
 		// Accepting clients
-		auto client_socket = std::unique_ptr<sf::TcpSocket>();
-
+		auto client_socket = std::make_unique<sf::TcpSocket>();
+		
 		// If connection is fine
 		if (this->_serverSocket.accept(*client_socket) == sf::Socket::Status::Done)
 		{
@@ -72,50 +69,28 @@ unsigned int Communicator::UpdateOtherDirectories(const Request& relayRequest)
 	return directoriesUpdated;
 }
 
-void Communicator::BindAndListen()
-{
-	struct sockaddr_in sa = { 0 };
-
-	sa.sin_port = htons(network_listening_port);
-	sa.sin_family = AF_INET;
-	sa.sin_addr.s_addr = INADDR_ANY;
-
-	// Connects between the socket and the configuration (port and etc..)
-	if (::bind(_serverSocket, (struct sockaddr*)&sa, sizeof(sa)) == SOCKET_ERROR)
-		throw std::exception(__FUNCTION__ " - bind");
-
-	// Start listening for incoming requests of clients
-	if (::listen(_serverSocket, SOMAXCONN) == SOCKET_ERROR)
-		throw std::exception(__FUNCTION__ " - listen");
-	std::cout << "Listening on port " << network_listening_port << std::endl;
-}
-
 void Communicator::HandleClient(std::unique_ptr<sf::TcpSocket> sock)
 {
 	// Recieving the message
-	unsigned char buffer[Communicator::max_message_size];
-	int len = recv(sock, reinterpret_cast<char*>(buffer), Communicator::max_message_size, NULL);
-
-	if (len <= 0) // If connection isn't right
-	{
-		if (len == 0)
-			// Client closed the socket
-			std::cout << "Client closed the connection" << std::endl;
-		else
-			// Error occurred, handle it accordingly
-			std::cout << "Error in receiving data from client" << std::endl;
-		return;
+	try {
+		auto message = this->ReceiveWithTimeout(*sock);
+		Response response = RequestHandler::HandleRequest(message);
+		Communicator::SendData(*sock, response.data);
 	}
-
-	// Dealing with the message
-	std::vector<unsigned char> message(buffer, buffer + len);
-	
-	Response response = RequestHandler::HandleRequest(message);
-	
-	SendData(sock, response.data);
+	catch (...) { return; }
 }
 
-sf::TcpSocket::Status Communicator::SendData(sf::TcpSocket& socket, const std::vector<unsigned char>& data) const
+std::vector<unsigned char> Communicator::SendDataThroughNewClientSocket(const std::string& ip, const unsigned short port, const std::vector<unsigned char>& data)
+{
+	sf::TcpSocket sock;
+	if (sock.connect(ip, port) != sf::Socket::Status::Done)
+		throw std::exception("Connection failed");
+
+	Communicator::SendData(sock, data);
+	return ReceiveWithTimeout(sock);
+}
+
+sf::TcpSocket::Status Communicator::SendData(sf::TcpSocket& socket, const std::vector<unsigned char>& data)
 {
 	return socket.send(data.data(), data.size());
 }
@@ -137,7 +112,7 @@ std::vector<unsigned char> Communicator::ReceiveWithTimeout(sf::TcpSocket& socke
 		}
 		else if (status == sf::Socket::NotReady) // No data yet
 		{
-			if (this->HasTimeoutPassed(start_time))
+			if (Communicator::HasTimeoutPassed(start_time))
 			{
 				socket.setBlocking(true);
 				throw std::exception("Timeout passed");
@@ -147,9 +122,14 @@ std::vector<unsigned char> Communicator::ReceiveWithTimeout(sf::TcpSocket& socke
 		}
 		else // Socket error
 		{
-			std::cout << status;
 			socket.setBlocking(true);
-			throw std::exception("Socket Error");
+			throw std::exception("Socket error");
 		}
 	}
+}
+
+
+bool Communicator::HasTimeoutPassed(const std::chrono::steady_clock::time_point& start_time)
+{
+	return std::chrono::steady_clock::now() - start_time > Communicator::timeout;
 }

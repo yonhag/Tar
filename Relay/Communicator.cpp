@@ -130,16 +130,16 @@ std::vector<unsigned char> Communicator::ReceiveWithTimeout(sf::TcpSocket& socke
 			if (this->HasTimeoutPassed(start_time))
 			{
 				socket.setBlocking(true);
-				throw std::exception("Timeout passed");
+				std::cout << "Timeout passed";
 			}
 			// Sleeping for 0.5s to avoid excessive CPU usage
 			std::this_thread::sleep_for(std::chrono::milliseconds(500));
 		}
 		else // Socket error
 		{
-			std::cout << status;
 			socket.setBlocking(true);
-			throw std::exception("Socket Error");
+			std::cout << "Socket error";
+			return;
 		}
 	}
 }
