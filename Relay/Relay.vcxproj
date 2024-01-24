@@ -70,6 +70,9 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <IncludePath>..\SFML-2.6.1\include;</IncludePath>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -105,12 +108,13 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>..\SFML-2.6.1\include</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>..\SFML-2.6.1\lib</AdditionalLibraryDirectories>
-      <AdditionalDependencies>flac.lib;freetype.lib;ogg.lib;openal32.lib;sfml-audio-d.lib;sfml-audio-s-d.lib;sfml-audio-s.lib;sfml-audio.lib;sfml-graphics-d.lib;sfml-graphics-s-d.lib;sfml-graphics-s.lib;sfml-graphics.lib;sfml-main-d.lib;sfml-main.lib;sfml-network-d.lib;sfml-network-s-d.lib;sfml-network-s.lib;sfml-network.lib;sfml-system-d.lib;sfml-system-s-d.lib;sfml-system-s.lib;sfml-system.lib;sfml-window-d.lib;sfml-window-s-d.lib;sfml-window-s.lib;sfml-window.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;</AdditionalDependencies>
+      <AdditionalDependencies>freetype.lib;sfml-main.lib;sfml-network.lib;sfml-system.lib;</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -137,7 +141,6 @@
     <ClCompile Include="RequestHandler.cpp" />
     <ClCompile Include="RequestHandler.h" />
     <ClCompile Include="Source.cpp" />
-    <ClCompile Include="WSAInitializer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Communicator.h" />
@@ -146,7 +149,6 @@
     <ClInclude Include="JsonDeserializer.h" />
     <ClInclude Include="JsonSerializer.h" />
     <ClInclude Include="Request.h" />
-    <ClInclude Include="WSAInitializer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

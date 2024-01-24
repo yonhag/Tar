@@ -9,7 +9,7 @@ public:
 	RequestHandler(const std::vector<unsigned char>& data);
 
 	Request HandleRequest(std::vector<unsigned char>& data);
-	DirResponse HandleDirRequest(std::vector<unsigned char>& data);
+	DirResponse HandleDirRequest(std::vector<unsigned char>& data) const;
 
 private:
 	// Directory

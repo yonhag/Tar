@@ -42,9 +42,6 @@
     <ClCompile Include="Source.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="WSAInitializer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Protocol.h">
       <Filter>Header Files\Consts</Filter>
     </ClCompile>
@@ -58,9 +55,6 @@
   <ItemGroup>
     <ClInclude Include="Communicator.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="WSAInitializer.h">
-      <Filter>Header Files\External</Filter>
     </ClInclude>
     <ClInclude Include="Consts.h">
       <Filter>Header Files\Consts</Filter>

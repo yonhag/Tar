@@ -3,6 +3,7 @@
 #include <thread>
 #include <exception>
 #include <iostream>
+#include "SFML/System.hpp"
 
 Communicator::Communicator()
 {
@@ -95,7 +96,7 @@ bool Communicator::IsDirectoryMessage(const std::vector<unsigned char>& message)
 }
 
 
-sf::TcpSocket::Status Communicator::SendData(sf::TcpSocket& socket, const std::vector<unsigned char>& data)
+sf::TcpSocket::Status Communicator::SendData(sf::TcpSocket& socket, const std::vector<unsigned char>& data) const
 {
 	return socket.send(data.data(), data.size());
 }
