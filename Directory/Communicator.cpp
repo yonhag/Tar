@@ -30,17 +30,20 @@ void Communicator::RunServer()
 	while (true)
 	{
 		// Accepting clients
-		SOCKET client_socket = accept(this->_serverSocket, NULL, NULL);
-		if (client_socket == INVALID_SOCKET)
-			throw std::exception(__FUNCTION__);
+		auto client_socket = std::unique_ptr<sf::TcpSocket>();
 
-		std::cout << "Accepting client..." << std::endl;
+		// If connection is fine
+		if (this->_serverSocket.accept(*client_socket) == sf::Socket::Status::Done)
+		{
+			std::cout << "Accepting client..." << std::endl;
 
-		// Detaching client handling to a different thread
-		std::thread tr(&Communicator::HandleClient, this, std::ref(client_socket));
-		tr.detach();
+			// Detaching client handling to a different thread
+			std::thread tr(&Communicator::HandleClient, this, std::move(client_socket));
+			tr.detach();
+		}
+		else
+			std::cout << "Problems with socket connection" << std::endl;
 	}
-
 }
 
 Response Communicator::SendRelayConnectionRequest(const Relay& relay, const std::vector<unsigned char>& request)
@@ -110,4 +113,43 @@ void Communicator::HandleClient(std::unique_ptr<sf::TcpSocket> sock)
 	Response response = RequestHandler::HandleRequest(message);
 	
 	SendData(sock, response.data);
+}
+
+sf::TcpSocket::Status Communicator::SendData(sf::TcpSocket& socket, const std::vector<unsigned char>& data) const
+{
+	return socket.send(data.data(), data.size());
+}
+
+std::vector<unsigned char> Communicator::ReceiveWithTimeout(sf::TcpSocket& socket)
+{
+	socket.setBlocking(false);
+	auto start_time = std::chrono::steady_clock::now();
+	std::size_t received;
+	std::vector<unsigned char> buffer(max_message_size);
+
+	while (true)
+	{
+		sf::Socket::Status status = socket.receive(buffer.data(), buffer.size(), received);
+		if (status == sf::Socket::Done) // Received data
+		{
+			socket.setBlocking(true);
+			return std::vector<unsigned char>(buffer.begin(), buffer.begin() + received);
+		}
+		else if (status == sf::Socket::NotReady) // No data yet
+		{
+			if (this->HasTimeoutPassed(start_time))
+			{
+				socket.setBlocking(true);
+				throw std::exception("Timeout passed");
+			}
+			// Sleeping for 0.5s to avoid excessive CPU usage
+			std::this_thread::sleep_for(std::chrono::milliseconds(500));
+		}
+		else // Socket error
+		{
+			std::cout << status;
+			socket.setBlocking(true);
+			throw std::exception("Socket Error");
+		}
+	}
 }

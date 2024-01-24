@@ -22,9 +22,8 @@ private:
 	void HandleClient(std::unique_ptr<sf::TcpSocket> clientSocket);
 
 	// Helper functions
-	
-
-
+	sf::TcpSocket::Status SendData(sf::TcpSocket& socket, const std::vector<unsigned char>& data) const;
+	std::vector<unsigned char> ReceiveWithTimeout(sf::TcpSocket& socket);
 
 	sf::TcpListener _serverSocket;
 	std::vector<std::unique_ptr<sf::TcpSocket>> _user_list;

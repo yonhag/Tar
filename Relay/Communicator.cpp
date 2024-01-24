@@ -26,6 +26,8 @@ void Communicator::RunServer()
 	{
 		// Accepting clients
 		auto client_socket = std::make_unique<sf::TcpSocket>();
+
+		// If connection is fine
 		if (this->_serverSocket.accept(*client_socket) == sf::Socket::Status::Done)
 		{
 			std::cout << "Accepting client..." << std::endl;
