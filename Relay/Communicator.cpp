@@ -1,5 +1,6 @@
 #include "Communicator.h"
 #include "Protocol.h"
+#include "Request.h"
 #include <thread>
 #include <exception>
 #include <iostream>
@@ -17,6 +18,8 @@ Communicator::~Communicator()
 
 void Communicator::RunServer()
 {
+	std::cout << "Listening on port " << this->port << std::endl;
+
 	while (true)
 	{
 		// Accepting clients
