@@ -13,7 +13,7 @@ public:
 	[[noreturn]] void RunServer();
 
 private:
-	void HandleConnection(sf::TcpSocket& socket);
+	void HandleConnection(std::unique_ptr<sf::TcpSocket> socket);
 	void ServeClient(sf::TcpSocket& incomingSocket, const Request& initialRequest);
 		
 	sf::TcpListener _serverSocket;

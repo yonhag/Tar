@@ -4,11 +4,13 @@
 #include <thread>
 #include <exception>
 #include <iostream>
+#include <memory>
 #include "SFML/System.hpp"
 
 Communicator::Communicator()
 {
-	this->_serverSocket.listen(port);
+	if (this->_serverSocket.listen(port) != sf::Socket::Done)
+		throw std::exception("Invalid server socket");
 }
 
 Communicator::~Communicator()
@@ -23,25 +25,27 @@ void Communicator::RunServer()
 	while (true)
 	{
 		// Accepting clients
-		sf::TcpSocket client_socket;
-		if (this->_serverSocket.accept(client_socket) != sf::Socket::Status::Done)
+		auto client_socket = std::make_unique<sf::TcpSocket>();
+		if (this->_serverSocket.accept(*client_socket) == sf::Socket::Status::Done)
+		{
+			std::cout << "Accepting client..." << std::endl;
+
+			// Detaching client handling to a different thread
+			std::thread tr(&Communicator::HandleConnection, this, std::move(client_socket));
+			tr.detach();
+		}
+		else
 			std::cout << "Problems with socket connection" << std::endl;
-
-		std::cout << "Accepting client..." << std::endl;
-
-		// Detaching client handling to a different thread
-		std::thread tr(&Communicator::HandleConnection, this, std::ref(client_socket));
-		tr.detach();
 	}
 
 }
 
-void Communicator::HandleConnection(sf::TcpSocket& socket)
+void Communicator::HandleConnection(std::unique_ptr<sf::TcpSocket> socket)
 {
 	while (true)
 	{
 		// Receiving data
-		std::vector<unsigned char> data = ReceiveWithTimeout(socket);
+		std::vector<unsigned char> data = ReceiveWithTimeout(*socket);
 
 		if (IsDirectoryMessage(data))
 		{
@@ -49,7 +53,7 @@ void Communicator::HandleConnection(sf::TcpSocket& socket)
 
 			DirResponse response = handler.HandleDirRequest(data);
 			
-			this->SendData(socket, response.data);
+			this->SendData(*socket, response.data);
 
 			return;
 		}
@@ -57,7 +61,7 @@ void Communicator::HandleConnection(sf::TcpSocket& socket)
 		{
 			RequestHandler handler(data);
 			Request request = handler.HandleRequest(data);
-			ServeClient(socket, request);
+			ServeClient(*socket, request);
 		}
 	}
 }
@@ -131,6 +135,7 @@ std::vector<unsigned char> Communicator::ReceiveWithTimeout(sf::TcpSocket& socke
 		}
 		else // Socket error
 		{
+			std::cout << status;
 			socket.setBlocking(true);
 			throw std::exception("Socket Error");
 		}
