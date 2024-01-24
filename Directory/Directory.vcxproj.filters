@@ -30,9 +30,6 @@
     <ClCompile Include="Communicator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="WSAInitializer.cpp">
-      <Filter>Header Files\External</Filter>
-    </ClCompile>
     <ClCompile Include="RequestHandler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -61,9 +58,6 @@
     </ClInclude>
     <ClInclude Include="RequestHandler.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="WSAInitializer.h">
-      <Filter>Header Files\External</Filter>
     </ClInclude>
     <ClInclude Include="Protocol.h">
       <Filter>Header Files</Filter>

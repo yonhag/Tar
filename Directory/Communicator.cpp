@@ -3,7 +3,6 @@
 #include "RequestHandler.h"
 #include "FileHandler.h"
 #include "JsonDeserializer.h"
-#include <Ws2tcpip.h>
 #include <thread>
 #include <exception>
 #include <iostream>
@@ -88,7 +87,7 @@ void Communicator::BindAndListen()
 	std::cout << "Listening on port " << network_listening_port << std::endl;
 }
 
-void Communicator::HandleClient(SOCKET sock)
+void Communicator::HandleClient(std::unique_ptr<sf::TcpSocket> sock)
 {
 	// Recieving the message
 	unsigned char buffer[Communicator::max_message_size];
@@ -111,65 +110,4 @@ void Communicator::HandleClient(SOCKET sock)
 	Response response = RequestHandler::HandleRequest(message);
 	
 	SendData(sock, response.data);
-}
-
-std::vector<unsigned char> Communicator::SendDataThroughNewClientSocket(const std::string& ip, const u_short port, const std::vector<unsigned char>& data)
-{
-	SOCKET sock = socket(AF_INET, SOCK_STREAM, NULL);
-	if (sock == INVALID_SOCKET)
-		throw std::exception("Invalid Socket Creation");
-
-	// Setting the socket
-	sockaddr_in serverAddress;
-	serverAddress.sin_family = AF_INET;
-	serverAddress.sin_port = htons(port);
-
-	if (InetPton(AF_INET, StringToPCWSTR(ip), &serverAddress.sin_addr) != 1)
-	{
-		closesocket(sock);
-		throw std::exception("Socket creation failed");
-	}
-
-	// Connecting
-	if (connect(sock, (struct sockaddr*)&serverAddress, sizeof(serverAddress)) == SOCKET_ERROR)
-		throw std::exception("Connection Failed");
-
-	SendData(sock, data);
-
-	// Receiving
-	char buffer[Communicator::max_message_size];
-	int len = recv(sock, buffer, sizeof(buffer), NULL);
-
-	if (len <= 0)
-		throw std::exception("Error while receiving");
-
-	// Transferring
-	Response response;
-	std::vector<unsigned char> receivedResponse(reinterpret_cast<unsigned char>(buffer));
-	
-	return receivedResponse;
-}
-
-void Communicator::SendData(SOCKET sock, const std::vector<unsigned char>& data)
-{
-	if (send(sock, reinterpret_cast<const char*>(data.data()), data.size(), 0) == INVALID_SOCKET)
-	{
-		throw std::exception("Error while sending message to client");
-	}
-}
-
-PCWSTR Communicator::StringToPCWSTR(const std::string& str)
-{
-	// Convert std::string to wide string using the system's default code page
-	int bufferSize = MultiByteToWideChar(CP_ACP, 0, str.c_str(), -1, nullptr, 0);
-	if (bufferSize == 0)
-		throw std::exception("Error in StringToPCWSTR");
-
-	std::wstring wideBuffer(bufferSize, L'\0');
-
-	// Convert std::string to wide string
-	if (MultiByteToWideChar(CP_ACP, 0, str.c_str(), -1, &wideBuffer[0], bufferSize) == 0)
-		throw std::exception("Error in StringToPCWSTR");
-
-	return wideBuffer.c_str();
 }

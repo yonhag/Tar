@@ -1,11 +1,11 @@
-#include <WinSock2.h>
-#include <Windows.h>
-#include <vector>
-#include <map>
-#include <string>
 #include "Relay.h"
 #include "Response.h"
 #include "Request.h"
+#include <string>
+#include <memory>
+#include <vector>
+#include <map>
+#include "SFML/Network.hpp"
 
 class Communicator
 {
@@ -19,17 +19,17 @@ public:
 
 private:
 	void BindAndListen();
-	void HandleClient(SOCKET clientSocket);
+	void HandleClient(std::unique_ptr<sf::TcpSocket> clientSocket);
 
 	// Helper functions
-	static std::vector<unsigned char> SendDataThroughNewClientSocket(const std::string& ip, const u_short port, const std::vector<unsigned char>& data);
-	static void SendData(SOCKET sock, const std::vector<unsigned char>& data);
-	static PCWSTR StringToPCWSTR(const std::string& str);
+	
 
-	SOCKET _serverSocket;
-	std::vector<SOCKET> _user_list;
+
+
+	sf::TcpListener _serverSocket;
+	std::vector<std::unique_ptr<sf::TcpSocket>> _user_list;
 
 	// Consts
-	static const u_short network_listening_port = 8200;
+	static const unsigned short network_listening_port = 8200;
 	static const int max_message_size = 2048; // in bytes
 };
