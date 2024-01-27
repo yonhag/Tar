@@ -21,7 +21,7 @@ public:
 private:
 	// Network connection
 	Directory GetNextDir(std::ifstream& dirFile) const;
-	bool GetRelays(LoadLevel loadlevel);
+	bool GetRelays(const LoadLevel loadlevel);
 
 	// Encryption
 	static std::vector<unsigned char> AddIP(const std::vector<unsigned char>& message, const std::string& ip);
