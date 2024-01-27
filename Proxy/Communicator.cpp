@@ -2,9 +2,12 @@
 #include "Protocol.h"
 #include "Consts.h"
 #include "JsonDeserializer.h"
+#include "JsonSerializer.h"
 #include <thread>
 #include <exception>
 #include <iostream>
+
+const std::chrono::seconds Communicator::timeout = std::chrono::seconds(5);
 
 Communicator::Communicator(const NetworkHandler& nwh) :
 	_nwhandler(nwh)
@@ -38,35 +41,30 @@ void Communicator::RunServer()
 
 }
 
-std::vector<unsigned char> Communicator::GetRelays()
+std::vector<unsigned char> Communicator::GetRelays(const std::string& dirIP)
 {
-	return std::vector<unsigned char>();
+	std::vector<unsigned char> request = JsonSerializer;
+
+	sf::TcpSocket directorySocket;
+	
+	if (directorySocket.connect(dirIP, directory_port) != sf::Socket::Status::Done)
+		throw std::exception("Directory connection failed");
+
+	if (SendData(directorySocket, request) != sf::Socket::Status::Done)
+		throw std::exception("Directory sending failed");
+	
+	// Receiving the relays
+	std::vector<unsigned char> relays;
+	try { std::vector<unsigned char> relays = ReceiveWithTimeout(directorySocket); }
+	catch (std::exception& e) { std::cout << e.what(); }
+
+	return relays;
 }
 
 void Communicator::HandleClient(std::unique_ptr<sf::TcpSocket> sock)
 {
 	// Recieving the message
-	unsigned char buffer[max_message_size];
-	int len = recv(sock, reinterpret_cast<char*>(buffer), max_message_size, NULL);
-	
-	// If connection isn't right
-	if (len <= 0) 
-	{
-		if (len == 0)
-		{
-			// Client closed the socket
-			std::cout << "Client closed the connection" << std::endl;
-		}
-		else
-		{
-			// Error occurred, handle it accordingly
-			std::cout << "Error in receiving data from client" << std::endl;
-		}
-		return;
-	}
-
-	// Dealing with the message
-	std::vector<unsigned char> message(buffer, buffer + len);
+	std::vector<unsigned char> message = ReceiveWithTimeout(*sock);
 	
 	MessageRequest request = JsonDeserializer::DeserializeClientMessage(message);
 
@@ -77,27 +75,11 @@ void Communicator::HandleClient(std::unique_ptr<sf::TcpSocket> sock)
 
 void Communicator::SendMessages()
 {
-	// Creating a socket with the relays
-	SOCKET relaySocket = socket(AF_INET, SOCK_STREAM, 0);
-	if (relaySocket = INVALID_SOCKET)
-		throw std::exception("Relay socket failed");
+	sf::TcpSocket relaySocket;
 
-	// Socket Specifiers
-	sockaddr_in serverAddress;
-	serverAddress.sin_family = AF_INET;
-	serverAddress.sin_port = htons(this->relay_port);
-
-	PCWSTR ip = NetworkHandler::StringToPCWSTR(this->_nwhandler.GetFirstRelayIP());
-	if (InetPton(AF_INET, ip, &(serverAddress.sin_addr)) != 1)
+	if (relaySocket.connect(this->_nwhandler.GetFirstRelayIP(), this->relay_port) != sf::Socket::Status::Done)
 	{
-		closesocket(relaySocket);
-		throw std::exception("Relay socket failed");
-	}
-
-	// Connecting
-	if (connect(relaySocket, reinterpret_cast<sockaddr*>(&serverAddress), sizeof(serverAddress)) == INVALID_SOCKET)
-	{
-		closesocket(relaySocket);
+		relaySocket.disconnect();
 		throw std::exception("Relay socket failed");
 	}
 
@@ -112,7 +94,7 @@ void Communicator::SendMessages()
 		this->_messageQueue.pop();
 		
 		// Sending the message
-		if (send(relaySocket, reinterpret_cast<const char*>(message.data()), message.size(), 0) == INVALID_SOCKET)
+		if (SendData(relaySocket, message) != sf::Socket::Status::Done)
 			throw std::exception("Error while sending message to client");
 	}
 }

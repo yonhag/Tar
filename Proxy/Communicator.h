@@ -5,7 +5,6 @@
 #include <chrono>
 #include <memory>
 #include "SFML/Network.hpp"
-#include "SFML/System.hpp"
 
 class Communicator
 {
@@ -14,7 +13,8 @@ public:
 	~Communicator();
 
 	[[noreturn]] void RunServer();
-	static std::vector<unsigned char> GetRelays();
+	static std::vector<unsigned char> GetRelays(const std::string& dirIP);
+
 private:
 	// Server socket
 	void HandleClient(std::unique_ptr<sf::TcpSocket> clientSocket);
@@ -27,12 +27,15 @@ private:
 	// Helper functions
 	static bool HasTimeoutPassed(const std::chrono::steady_clock::time_point& start_time);
 
+	// Members
 	std::queue <std::vector<unsigned char>> _messageQueue;
 	sf::TcpListener _serverSocket;
 	NetworkHandler _nwhandler;
 
-	const unsigned short relay_port = 8200;
-	const unsigned short directory_port = 8201;
-	const unsigned short server_port = 8202;
+	// Constants
+	static const std::chrono::seconds timeout; // Defined in .cpp file
 
+	static const unsigned short relay_port = 8200;
+	static const unsigned short directory_port = 8201;
+	static const unsigned short server_port = 8202;
 };

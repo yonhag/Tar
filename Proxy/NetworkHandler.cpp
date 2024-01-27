@@ -15,8 +15,7 @@ NetworkHandler::NetworkHandler(const LoadLevel loadlevel)
     {
         this->_dir = GetNextDir(dirFile);
         
-        // If file is over
-        if (dirFile.eof())
+        if (dirFile.eof()) // If file is over
             throw std::exception("Reached EOF");
 
         hasFoundDir = GetRelays(loadlevel);
@@ -76,13 +75,38 @@ Directory NetworkHandler::GetNextDir(std::ifstream& dirFile) const
 
 bool NetworkHandler::GetRelays(const LoadLevel loadlevel)
 {
+    // Creating the socket
+    sf::TcpSocket sock;
+    SOCKET sock = socket(AF_INET, SOCK_STREAM, 0);
+    if (sock == INVALID_SOCKET)
+        throw std::exception("Invalid Socket Creation");
+
+    // Setting the socket
+    sockaddr_in serverAddress;
+    serverAddress.sin_family = AF_INET;
+    serverAddress.sin_port = htons(this->_dir._port);
+
+    if (InetPton(AF_INET, StringToPCWSTR(this->_dir._ip), &serverAddress.sin_addr) != 1)
+    {
+        closesocket(sock);
+        return false;
+    }
+
+    // Connecting
+    if (connect(sock, (struct sockaddr*)&serverAddress, sizeof(serverAddress)) == SOCKET_ERROR)
+        throw std::exception("Connection Failed");
+
+    // Sending
+    std::vector<unsigned char> request = this->GetRelayRequest(loadlevel);
+    if (send(sock, reinterpret_cast<const char*>(request.data()), request.size(), 0) == INVALID_SOCKET)
+        return false;
     
     return ReceiveRelays(sock);
 }
 
 bool NetworkHandler::ReceiveRelays(sf::TcpSocket sock)
 {
-    std::vector<unsigned char> message;
+    const int max_message_size = 4096;
 
     return HandleConnectionMessage(message);
 }
