@@ -41,9 +41,9 @@ void Communicator::RunServer()
 
 }
 
-std::vector<unsigned char> Communicator::GetRelays(const std::string& dirIP)
+std::vector<unsigned char> Communicator::GetRelays(const std::string& dirIP, const LoadLevel& ll)
 {
-	std::vector<unsigned char> request = JsonSerializer;
+	std::vector<unsigned char> request = JsonSerializer::SerializeGetRelaysRequest(ll);
 
 	sf::TcpSocket directorySocket;
 	
@@ -54,9 +54,7 @@ std::vector<unsigned char> Communicator::GetRelays(const std::string& dirIP)
 		throw std::exception("Directory sending failed");
 	
 	// Receiving the relays
-	std::vector<unsigned char> relays;
-	try { std::vector<unsigned char> relays = ReceiveWithTimeout(directorySocket); }
-	catch (std::exception& e) { std::cout << e.what(); }
+	std::vector<unsigned char> relays = ReceiveWithTimeout(directorySocket);
 
 	return relays;
 }
@@ -77,7 +75,7 @@ void Communicator::SendMessages()
 {
 	sf::TcpSocket relaySocket;
 
-	if (relaySocket.connect(this->_nwhandler.GetFirstRelayIP(), this->relay_port) != sf::Socket::Status::Done)
+	if (relaySocket.connect(this->_nwhandler.GetFirstRelayIP(), Communicator::relay_port) != sf::Socket::Status::Done)
 	{
 		relaySocket.disconnect();
 		throw std::exception("Relay socket failed");
@@ -85,7 +83,7 @@ void Communicator::SendMessages()
 
 	while (true)
 	{
-		// Sleep is queue is empty
+		// Sleep if queue is empty
 		if (this->_messageQueue.empty())
 			std::this_thread::sleep_for(std::chrono::seconds(3));
 
@@ -99,10 +97,11 @@ void Communicator::SendMessages()
 	}
 }
 
-sf::TcpSocket::Status Communicator::SendData(sf::TcpSocket& socket, const std::vector<unsigned char>& data) const
+sf::TcpSocket::Status Communicator::SendData(sf::TcpSocket& socket, const std::vector<unsigned char>& data)
 {
 	return socket.send(data.data(), data.size());
 }
+
 std::vector<unsigned char> Communicator::ReceiveWithTimeout(sf::TcpSocket& socket)
 {
 	socket.setBlocking(false);

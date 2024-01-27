@@ -22,8 +22,6 @@ private:
 	// Network connection
 	Directory GetNextDir(std::ifstream& dirFile) const;
 	bool GetRelays(LoadLevel loadlevel);
-	bool ReceiveRelays(sf::TcpSocket sock);
-	bool HandleConnectionMessage(const std::vector<unsigned char>& message);
 
 	// Encryption
 	static std::vector<unsigned char> AddIP(const std::vector<unsigned char>& message, const std::string& ip);

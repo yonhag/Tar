@@ -1,3 +1,4 @@
+#pragma once
 #include "NetworkHandler.h"
 #include <vector>
 #include <queue>
@@ -13,15 +14,14 @@ public:
 	~Communicator();
 
 	[[noreturn]] void RunServer();
-	static std::vector<unsigned char> GetRelays(const std::string& dirIP);
-
+	static std::vector<unsigned char> GetRelays(const std::string& dirIP, const LoadLevel& ll);
 private:
 	// Server socket
 	void HandleClient(std::unique_ptr<sf::TcpSocket> clientSocket);
 
 	// Message Sending
 	void SendMessages();
-	sf::TcpSocket::Status SendData(sf::TcpSocket& socket, const std::vector<unsigned char>& data) const;
+	static sf::TcpSocket::Status SendData(sf::TcpSocket& socket, const std::vector<unsigned char>& data);
 	static std::vector<unsigned char> ReceiveWithTimeout(sf::TcpSocket& socket);
 
 	// Helper functions

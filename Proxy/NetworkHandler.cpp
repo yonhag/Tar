@@ -1,7 +1,10 @@
-#include "JsonSerializer.h"
+#pragma once
 #include "NetworkHandler.h"
+#include "Communicator.h"
+#include "JsonSerializer.h"
 #include "JsonDeserializer.h"
 #include "Consts.h"
+#include <iostream>
 
 NetworkHandler::NetworkHandler(const LoadLevel loadlevel)
 {
@@ -75,47 +78,19 @@ Directory NetworkHandler::GetNextDir(std::ifstream& dirFile) const
 
 bool NetworkHandler::GetRelays(const LoadLevel loadlevel)
 {
-    // Creating the socket
-    sf::TcpSocket sock;
-    SOCKET sock = socket(AF_INET, SOCK_STREAM, 0);
-    if (sock == INVALID_SOCKET)
-        throw std::exception("Invalid Socket Creation");
-
-    // Setting the socket
-    sockaddr_in serverAddress;
-    serverAddress.sin_family = AF_INET;
-    serverAddress.sin_port = htons(this->_dir._port);
-
-    if (InetPton(AF_INET, StringToPCWSTR(this->_dir._ip), &serverAddress.sin_addr) != 1)
+    try 
     {
-        closesocket(sock);
-        return false;
+        std::vector<unsigned char> relayResponse = Communicator::GetRelays(this->_dir._ip, loadlevel);
+
+        this->_relays = JsonDeserializer::DeserializeGetRelaysResponse(relayResponse);
+        
+        return this->_relays.size() == 3;
     }
-
-    // Connecting
-    if (connect(sock, (struct sockaddr*)&serverAddress, sizeof(serverAddress)) == SOCKET_ERROR)
-        throw std::exception("Connection Failed");
-
-    // Sending
-    std::vector<unsigned char> request = this->GetRelayRequest(loadlevel);
-    if (send(sock, reinterpret_cast<const char*>(request.data()), request.size(), 0) == INVALID_SOCKET)
-        return false;
-    
-    return ReceiveRelays(sock);
-}
-
-bool NetworkHandler::ReceiveRelays(sf::TcpSocket sock)
-{
-    const int max_message_size = 4096;
-
-    return HandleConnectionMessage(message);
-}
-
-bool NetworkHandler::HandleConnectionMessage(const std::vector<unsigned char>& message)
-{
-    this->_relays = JsonDeserializer::DeserializeGetRelaysResponse(message);
-
-    return this->_relays.size() == 3;
+    catch (std::exception& e) 
+    { 
+        std::cout << e.what() << std::endl; 
+        return false; 
+    }
 }
 
 std::vector<unsigned char> NetworkHandler::EncryptMessage(const MessageRequest& message)
