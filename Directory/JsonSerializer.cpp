@@ -82,6 +82,6 @@ std::vector<unsigned char> JsonSerializer::SerializeRelayConnectionRequest()
 char JsonSerializer::DigitToChar(const int integer)
 {
 	if (integer > 9 && integer < 0)
-		throw std::exception("Must be a digit");
+		throw std::runtime_error("Must be a digit");
 	return static_cast<char>(integer + '0');
 }
