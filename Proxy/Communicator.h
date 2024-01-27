@@ -1,9 +1,11 @@
-#include <WinSock2.h>
-#include <Windows.h>
+#include "NetworkHandler.h"
 #include <vector>
 #include <queue>
 #include <string>
-#include "NetworkHandler.h"
+#include <chrono>
+#include <memory>
+#include "SFML/Network.hpp"
+#include "SFML/System.hpp"
 
 class Communicator
 {
@@ -15,16 +17,20 @@ public:
 
 private:
 	// Server socket
-	void bindAndListen();
-	void HandleClient(SOCKET clientSocket);
+	void HandleClient(std::unique_ptr<sf::TcpSocket> clientSocket);
 
 	// Message Sending
 	void SendMessages();
+	sf::TcpSocket::Status SendData(sf::TcpSocket& socket, const std::vector<unsigned char>& data) const;
+	static std::vector<unsigned char> ReceiveWithTimeout(sf::TcpSocket& socket);
+
+	// Helper functions
+	static bool HasTimeoutPassed(const std::chrono::steady_clock::time_point& start_time);
 
 	std::queue <std::vector<unsigned char>> _messageQueue;
-	SOCKET _serverSocket;
+	sf::TcpListener _serverSocket;
 	NetworkHandler _nwhandler;
 
 	const u_short server_port = 8200;
-	const u_short relay_port = 16400;
+	const u_short relay_port = 8200;
 };

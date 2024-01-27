@@ -7,6 +7,8 @@
 #include <memory>
 #include "SFML/System.hpp"
 
+const std::chrono::seconds Communicator::timeout = std::chrono::seconds(5);
+
 Communicator::Communicator()
 {
 	if (this->_serverSocket.listen(port) != sf::Socket::Done)
@@ -104,20 +106,20 @@ bool Communicator::IsDirectoryMessage(const std::vector<unsigned char>& message)
 	return false;
 }
 
-
 sf::TcpSocket::Status Communicator::SendData(sf::TcpSocket& socket, const std::vector<unsigned char>& data) const
 {
 	return socket.send(data.data(), data.size());
 }
 
-std::vector<unsigned char> Communicator::ReceiveWithTimeout(sf::TcpSocket& socket) 
+
+std::vector<unsigned char> Communicator::ReceiveWithTimeout(sf::TcpSocket& socket)
 {
 	socket.setBlocking(false);
 	auto start_time = std::chrono::steady_clock::now();
 	std::size_t received;
 	std::vector<unsigned char> buffer(max_message_size);
 
-	while (true) 
+	while (true)
 	{
 		sf::Socket::Status status = socket.receive(buffer.data(), buffer.size(), received);
 		if (status == sf::Socket::Done) // Received data
@@ -127,10 +129,10 @@ std::vector<unsigned char> Communicator::ReceiveWithTimeout(sf::TcpSocket& socke
 		}
 		else if (status == sf::Socket::NotReady) // No data yet
 		{
-			if (this->HasTimeoutPassed(start_time))
+			if (Communicator::HasTimeoutPassed(start_time))
 			{
 				socket.setBlocking(true);
-				std::cout << "Timeout passed";
+				throw std::exception("Timeout passed");
 			}
 			// Sleeping for 0.5s to avoid excessive CPU usage
 			std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -138,13 +140,13 @@ std::vector<unsigned char> Communicator::ReceiveWithTimeout(sf::TcpSocket& socke
 		else // Socket error
 		{
 			socket.setBlocking(true);
-			std::cout << "Socket error";
-			return;
+			throw std::exception("Socket error");
 		}
 	}
 }
 
+
 bool Communicator::HasTimeoutPassed(const std::chrono::steady_clock::time_point& start_time)
 {
-	return std::chrono::steady_clock::now() - start_time > this->timeout;
+	return std::chrono::steady_clock::now() - start_time > Communicator::timeout;
 }

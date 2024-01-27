@@ -11,8 +11,8 @@ const std::chrono::seconds Communicator::timeout = std::chrono::seconds(5);
 
 Communicator::Communicator()
 {
-	if (this->_serverSocket.listen(Communicator::network_listening_port) != sf::Socket::Done)
-		throw std::exception("Invalid server socket");
+	if (this->_serverSocket.listen(Communicator::directory_listening_port) != sf::Socket::Done)
+		throw std::runtime_error("Invalid server socket");
 }
 
 Communicator::~Communicator()
@@ -22,7 +22,7 @@ Communicator::~Communicator()
 
 void Communicator::RunServer()
 {
-	std::cout << "Listening on port " << Communicator::network_listening_port << std::endl;
+	std::cout << "Listening on port " << Communicator::directory_listening_port << std::endl;
 
 	while (true)
 	{
@@ -46,7 +46,7 @@ void Communicator::RunServer()
 Response Communicator::SendRelayConnectionRequest(const Relay& relay, const std::vector<unsigned char>& request)
 {
 	Response response;
-	response.data = Communicator::SendDataThroughNewClientSocket(relay.ip, Communicator::network_listening_port, request);
+	response.data = Communicator::SendDataThroughNewClientSocket(relay.ip, Communicator::relay_listening_port, request);
 	return response;
 }
 
@@ -61,7 +61,7 @@ unsigned int Communicator::UpdateOtherDirectories(const Request& relayRequest)
 		if (ip == "")
 			break;
 
-		std::vector<unsigned char> response = SendDataThroughNewClientSocket(ip, Communicator::network_listening_port, relayRequest.data);
+		std::vector<unsigned char> response = SendDataThroughNewClientSocket(ip, Communicator::directory_listening_port, relayRequest.data);
 		
 		if (JsonDeserializer::DeserializeUpdateDirectoriesResponse(response))
 			directoriesUpdated++;
@@ -84,7 +84,7 @@ std::vector<unsigned char> Communicator::SendDataThroughNewClientSocket(const st
 {
 	sf::TcpSocket sock;
 	if (sock.connect(ip, port) != sf::Socket::Status::Done)
-		throw std::exception("Connection failed");
+		throw std::runtime_error("Connection failed");
 
 	Communicator::SendData(sock, data);
 	return ReceiveWithTimeout(sock);
@@ -115,7 +115,7 @@ std::vector<unsigned char> Communicator::ReceiveWithTimeout(sf::TcpSocket& socke
 			if (Communicator::HasTimeoutPassed(start_time))
 			{
 				socket.setBlocking(true);
-				throw std::exception("Timeout passed");
+				throw std::runtime_error("Timeout passed");
 			}
 			// Sleeping for 0.5s to avoid excessive CPU usage
 			std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -123,7 +123,7 @@ std::vector<unsigned char> Communicator::ReceiveWithTimeout(sf::TcpSocket& socke
 		else // Socket error
 		{
 			socket.setBlocking(true);
-			throw std::exception("Socket error");
+			throw std::runtime_error("Socket error");
 		}
 	}
 }

@@ -1,14 +1,11 @@
 #include "Communicator.h"
 #include "NetworkHandler.h"
-#include "WSAInitializer.h"
 #include "LoadLevel.h"
 #include <exception>
 #include <iostream>
 
 int main()
 {
-	WSAInitializer wsa_init;
-
 	LoadLevel loadlevel;
 	int lvl;
 	std::cout << "Enter load level:\n0: Low\n1: Medium\n2: High\nType: ";
