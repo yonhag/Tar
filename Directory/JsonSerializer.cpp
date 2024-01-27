@@ -73,7 +73,7 @@ std::vector<unsigned char> JsonSerializer::SerializeRelayConnectionRequest()
 {
 	std::vector<unsigned char> vec;
 
-	const char* signature = "DIR" + (int)DirectoryCodes::RelayConnection;
+	const char* signature = "DIR" + (char)DirectoryCodes::RelayConnection;
 	vec.insert(vec.begin(), signature, signature + sizeof(signature) - 1);
 
 	return vec;
