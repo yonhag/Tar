@@ -14,7 +14,7 @@ public:
 	~Communicator();
 
 	[[noreturn]] void RunServer();
-
+	static std::vector<unsigned char> GetRelays();
 private:
 	// Server socket
 	void HandleClient(std::unique_ptr<sf::TcpSocket> clientSocket);
@@ -31,6 +31,8 @@ private:
 	sf::TcpListener _serverSocket;
 	NetworkHandler _nwhandler;
 
-	const u_short server_port = 8200;
-	const u_short relay_port = 8200;
+	const unsigned short relay_port = 8200;
+	const unsigned short directory_port = 8201;
+	const unsigned short server_port = 8202;
+
 };

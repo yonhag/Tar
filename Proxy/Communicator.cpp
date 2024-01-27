@@ -38,6 +38,11 @@ void Communicator::RunServer()
 
 }
 
+std::vector<unsigned char> Communicator::GetRelays()
+{
+	return std::vector<unsigned char>();
+}
+
 void Communicator::HandleClient(std::unique_ptr<sf::TcpSocket> sock)
 {
 	// Recieving the message

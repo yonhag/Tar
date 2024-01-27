@@ -1,6 +1,3 @@
-#include <WinSock2.h>
-#include <Windows.h>
-#include <Ws2tcpip.h>
 #include "JsonSerializer.h"
 #include "NetworkHandler.h"
 #include "JsonDeserializer.h"
@@ -79,72 +76,13 @@ Directory NetworkHandler::GetNextDir(std::ifstream& dirFile) const
 
 bool NetworkHandler::GetRelays(const LoadLevel loadlevel)
 {
-    // Creating the socket
-    SOCKET sock = socket(AF_INET, SOCK_STREAM, 0);
-    if (sock == INVALID_SOCKET)
-        throw std::exception("Invalid Socket Creation");
-
-    // Setting the socket
-    sockaddr_in serverAddress;
-    serverAddress.sin_family = AF_INET;
-    serverAddress.sin_port = htons(this->_dir._port);
-
-    if (InetPton(AF_INET, StringToPCWSTR(this->_dir._ip), &serverAddress.sin_addr) != 1)
-    {
-        closesocket(sock);
-        return false;
-    }
-
-    // Connecting
-    if (connect(sock, (struct sockaddr*)&serverAddress, sizeof(serverAddress)) == SOCKET_ERROR)
-        throw std::exception("Connection Failed");
-
-    // Sending
-    std::vector<unsigned char> request = this->GetRelayRequest(loadlevel);
-    if (send(sock, reinterpret_cast<const char*>(request.data()), request.size(), 0) == INVALID_SOCKET)
-        return false;
     
     return ReceiveRelays(sock);
 }
 
-PCWSTR NetworkHandler::StringToPCWSTR(const std::string& str)
+bool NetworkHandler::ReceiveRelays(sf::TcpSocket sock)
 {
-    // Convert std::string to wide string using the system's default code page
-    int bufferSize = MultiByteToWideChar(CP_ACP, 0, str.c_str(), -1, nullptr, 0);
-    if (bufferSize == 0)
-        throw std::exception("Error in StringToPCWSTR");
-
-    std::wstring wideBuffer(bufferSize, L'\0');
-
-    // Convert std::string to wide string
-    if (MultiByteToWideChar(CP_ACP, 0, str.c_str(), -1, &wideBuffer[0], bufferSize) == 0)
-        throw std::exception("Error in StringToPCWSTR");
-
-    return wideBuffer.c_str();
-}
-
-std::vector<unsigned char> NetworkHandler::GetRelayRequest(const LoadLevel loadlevel) const
-{
-    return JsonSerializer::SerializeGetRelaysRequest(loadlevel);
-}
-
-bool NetworkHandler::ReceiveRelays(SOCKET sock)
-{
-    const int max_message_size = 4096;
-    
-    unsigned char buffer[max_message_size];
-    int len = recv(sock, reinterpret_cast<char*>(buffer), max_message_size, NULL);
-    
-    try
-    {
-        ::closesocket(sock);
-    }
-    catch (...) {};
-
-    if (len <= 0)
-        return false;
-
-    std::vector<unsigned char> message(buffer, buffer + len);
+    std::vector<unsigned char> message;
 
     return HandleConnectionMessage(message);
 }
