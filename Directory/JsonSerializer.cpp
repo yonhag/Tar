@@ -51,7 +51,8 @@ Request JsonSerializer::SerializeUpdateDirectoryRequest(const Relay& newRelay)
 	std::vector<unsigned char> buffer;
 
 	// Adding signature
-	const char* signature = "DIR" + (int)DirectoryCodes::AddRelay;
+	std::string sigStr = "DIR" + std::to_string(static_cast<int>(DirectoryCodes::AddRelay));
+	const char* signature = sigStr.c_str();
 	buffer.insert(buffer.begin(), signature, signature + sizeof(signature) - 1);
 	
 	// Creating JSON object
@@ -72,8 +73,9 @@ Request JsonSerializer::SerializeUpdateDirectoryRequest(const Relay& newRelay)
 std::vector<unsigned char> JsonSerializer::SerializeRelayConnectionRequest()
 {
 	std::vector<unsigned char> vec;
-
-	const char* signature = "DIR" + (char)DirectoryCodes::RelayConnection;
+	
+	std::string sigStr = "DIR" + std::to_string(static_cast<int>(DirectoryCodes::RelayConnection));
+	const char* signature = sigStr.c_str();
 	vec.insert(vec.begin(), signature, signature + sizeof(signature) - 1);
 
 	return vec;
