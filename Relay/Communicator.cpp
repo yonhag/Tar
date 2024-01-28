@@ -11,7 +11,7 @@ const std::chrono::seconds Communicator::timeout = std::chrono::seconds(5);
 
 Communicator::Communicator()
 {
-	if (this->_serverSocket.listen(port) != sf::Socket::Done)
+	if (this->_serverSocket.listen(port) != sf::Socket::Status::Done)
 		throw std::runtime_error("Invalid server socket");
 }
 
@@ -73,7 +73,7 @@ void Communicator::HandleConnection(std::unique_ptr<sf::TcpSocket> socket)
 void Communicator::ServeClient(sf::TcpSocket& incomingSocket, const Request& initialRequest)
 {
 	sf::TcpSocket targetSocket;
-	if (targetSocket.connect(initialRequest.dest_ip.c_str(), this->port) != sf::Socket::Done)
+	if (targetSocket.connect(initialRequest.dest_ip.c_str(), this->port) != sf::Socket::Status::Done)
 		return;
 
 	SendData(targetSocket, initialRequest.data); // Throws an exception on its own
@@ -122,12 +122,12 @@ std::vector<unsigned char> Communicator::ReceiveWithTimeout(sf::TcpSocket& socke
 	while (true)
 	{
 		sf::Socket::Status status = socket.receive(buffer.data(), buffer.size(), received);
-		if (status == sf::Socket::Done) // Received data
+		if (status == sf::Socket::Status::Done) // Received data
 		{
 			socket.setBlocking(true);
 			return std::vector<unsigned char>(buffer.begin(), buffer.begin() + received);
 		}
-		else if (status == sf::Socket::NotReady) // No data yet
+		else if (status == sf::Socket::Status::NotReady) // No data yet
 		{
 			if (Communicator::HasTimeoutPassed(start_time))
 			{
