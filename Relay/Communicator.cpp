@@ -12,7 +12,7 @@ const std::chrono::seconds Communicator::timeout = std::chrono::seconds(5);
 Communicator::Communicator()
 {
 	if (this->_serverSocket.listen(port) != sf::Socket::Done)
-		throw std::exception("Invalid server socket");
+		throw std::runtime_error("Invalid server socket");
 }
 
 Communicator::~Communicator()
@@ -132,7 +132,7 @@ std::vector<unsigned char> Communicator::ReceiveWithTimeout(sf::TcpSocket& socke
 			if (Communicator::HasTimeoutPassed(start_time))
 			{
 				socket.setBlocking(true);
-				throw std::exception("Timeout passed");
+				throw std::runtime_error("Timeout passed");
 			}
 			// Sleeping for 0.5s to avoid excessive CPU usage
 			std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -140,7 +140,7 @@ std::vector<unsigned char> Communicator::ReceiveWithTimeout(sf::TcpSocket& socke
 		else // Socket error
 		{
 			socket.setBlocking(true);
-			throw std::exception("Socket error");
+			throw std::runtime_error("Socket error");
 		}
 	}
 }
