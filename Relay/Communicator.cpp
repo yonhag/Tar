@@ -73,7 +73,7 @@ void Communicator::HandleConnection(std::unique_ptr<sf::TcpSocket> socket)
 void Communicator::ServeClient(sf::TcpSocket& incomingSocket, const Request& initialRequest)
 {
 	sf::TcpSocket targetSocket;
-	if (targetSocket.connect(initialRequest.dest_ip.c_str(), this->port) != sf::Socket::Status::Done)
+	if (targetSocket.connect(sf::IpAddress(initialRequest.dest_ip), this->port) != sf::Socket::Status::Done)
 		return;
 
 	SendData(targetSocket, initialRequest.data); // Throws an exception on its own
