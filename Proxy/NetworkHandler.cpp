@@ -18,9 +18,16 @@ NetworkHandler::NetworkHandler(const LoadLevel loadlevel)
     {
         this->_dir = GetNextDir(dirFile);
 
-        hasFoundDir = GetRelays(this->_dir, loadlevel);
+        std::cout << "Trying " << this->_dir._ip << ":" << this->_dir._port << std::endl;
+
+        hasFoundDir = GetRelays(loadlevel);
     }
     dirFile.close();
+
+    if (hasFoundDir)
+        this->_isConnected = true;
+    else
+        this->_isConnected = false;
 }
 
 NetworkHandler::NetworkHandler(const NetworkHandler& nwh, const LoadLevel loadlevel) :
@@ -37,9 +44,14 @@ NetworkHandler::NetworkHandler(const NetworkHandler& nwh, const LoadLevel loadle
         while (!hasFoundDir && !dirFile.eof())
         {
             this->_dir = GetNextDir(dirFile);
-            hasFoundDir = GetRelays(this->_dir, loadlevel);
+            hasFoundDir = GetRelays(loadlevel);
         }
         dirFile.close();
+
+        if (hasFoundDir)
+            this->_isConnected = true;
+        else
+            this->_isConnected = false;
     }
 }
 

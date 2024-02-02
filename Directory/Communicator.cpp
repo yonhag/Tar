@@ -14,6 +14,7 @@ Communicator::Communicator()
 {
 	if (this->_serverSocket.listen(Communicator::directory_listening_port) != sf::Socket::Status::Done)
 		throw std::runtime_error("Invalid server socket");
+	std::cout << "Listening on port " << Communicator::directory_listening_port << std::endl;
 }
 
 Communicator::~Communicator()
@@ -23,8 +24,6 @@ Communicator::~Communicator()
 
 void Communicator::RunServer()
 {
-	std::cout << "Listening on port " << Communicator::directory_listening_port << std::endl;
-
 	while (true)
 	{
 		// Accepting clients
@@ -75,6 +74,10 @@ void Communicator::HandleClient(std::unique_ptr<sf::TcpSocket> sock)
 	// Recieving the message
 	try {
 		auto message = this->ReceiveWithTimeout(*sock);
+		
+		for (auto& i : message)
+			std::cout << i;
+
 		Response response = RequestHandler::HandleRequest(message);
 		Communicator::SendData(*sock, response.data);
 	}

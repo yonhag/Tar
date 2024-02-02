@@ -19,7 +19,10 @@ int main()
 		NetworkHandler nwh(loadlevel);
 
 		if (!nwh.IsConnected())
+		{
+			std::cout << "Directories unavailable" << std::endl;
 			return 1;
+		}
 
 		auto comm = Communicator(nwh);
 

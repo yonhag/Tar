@@ -129,6 +129,7 @@ std::vector<unsigned char> Communicator::ReceiveWithTimeout(sf::TcpSocket& socke
 		}
 		else // Socket error
 		{
+			std::cout << status;
 			socket.setBlocking(true);
 			throw std::exception("Socket error");
 		}
