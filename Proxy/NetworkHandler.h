@@ -4,6 +4,7 @@
 #include "MessageRequest.h"
 #include "LoadLevel.h"
 #include <fstream>
+#include <SFML/Network.hpp>
 
 class NetworkHandler
 {
@@ -16,15 +17,11 @@ public:
 	std::string GetFirstRelayIP() const;
 
 	// Helper functions
-	static PCWSTR StringToPCWSTR(const std::string& str);
 
 private:
 	// Network connection
 	Directory GetNextDir(std::ifstream& dirFile) const;
 	bool GetRelays(const LoadLevel loadlevel);
-	std::vector<unsigned char> GetRelayRequest(const LoadLevel loadlevel) const; 
-	bool ReceiveRelays(SOCKET sock);
-	bool HandleConnectionMessage(const std::vector<unsigned char>& message);
 
 	// Encryption
 	static std::vector<unsigned char> AddIP(const std::vector<unsigned char>& message, const std::string& ip);

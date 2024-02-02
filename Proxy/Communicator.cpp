@@ -2,92 +2,67 @@
 #include "Protocol.h"
 #include "Consts.h"
 #include "JsonDeserializer.h"
-#include <WS2tcpip.h>
+#include "JsonSerializer.h"
 #include <thread>
 #include <exception>
 #include <iostream>
-#include <chrono>
+
+const std::chrono::seconds Communicator::timeout = std::chrono::seconds(5);
 
 Communicator::Communicator(const NetworkHandler& nwh) :
 	_nwhandler(nwh)
 {
-	this->_serverSocket = socket(AF_INET, SOCK_STREAM, 0);
-	if (this->_serverSocket == INVALID_SOCKET)
-		throw std::exception("Invalid Socket Creation");
+	this->_serverSocket.listen(server_port);
 }
 
 Communicator::~Communicator()
 {
-	try
-	{
-		::closesocket(_serverSocket);
-	}
-	catch (...) {}
+	this->_serverSocket.close();
 }
 
 void Communicator::RunServer()
 {
-	bindAndListen();
+	std::cout << "Listening on port " << this->server_port << std::endl;
+
 	std::thread sendingThread(&Communicator::SendMessages, this);
 	sendingThread.detach();
 
 	while (true)
 	{
 		// Accepting clients
-		SOCKET client_socket = accept(this->_serverSocket, NULL, NULL);
-		if (client_socket == INVALID_SOCKET)
-			throw std::exception(__FUNCTION__);
+		auto clientSocket = std::make_unique<sf::TcpSocket>();
+		if (this->_serverSocket.accept(*clientSocket) == sf::Socket::Status::Done);
 
 		std::cout << "Accepting client..." << std::endl;
 
 		// Detaching client handling to a different thread
-		this->HandleClient(client_socket);
+		this->HandleClient(std::move(clientSocket));
 	}
 
 }
 
-void Communicator::bindAndListen()
+std::vector<unsigned char> Communicator::GetRelays(const std::string& dirIP, const LoadLevel& ll)
 {
-	struct sockaddr_in sa = { 0 };
+	std::vector<unsigned char> request = JsonSerializer::SerializeGetRelaysRequest(ll);
 
-	sa.sin_port = htons(server_port);
-	sa.sin_family = AF_INET;
-	sa.sin_addr.s_addr = INADDR_ANY;
+	sf::TcpSocket directorySocket;
+	
+	if (directorySocket.connect(dirIP, directory_port) != sf::Socket::Status::Done)
+		throw std::exception("Directory connection failed");
 
-	// Connects between the socket and the configuration (port and etc..)
-	if (::bind(_serverSocket, (struct sockaddr*)&sa, sizeof(sa)) == SOCKET_ERROR)
-		throw std::exception(__FUNCTION__ " - bind");
+	if (SendData(directorySocket, request) != sf::Socket::Status::Done)
+		throw std::exception("Directory sending failed");
+	
+	// Receiving the relays
+	std::vector<unsigned char> relays = ReceiveWithTimeout(directorySocket);
 
-	// Start listening for incoming requests of clients
-	if (::listen(_serverSocket, SOMAXCONN) == SOCKET_ERROR)
-		throw std::exception(__FUNCTION__ " - listen");
-	std::cout << "Listening on port " << server_port << std::endl;
+	return relays;
 }
 
-void Communicator::HandleClient(SOCKET sock)
+void Communicator::HandleClient(std::unique_ptr<sf::TcpSocket> sock)
 {
 	// Recieving the message
-	unsigned char buffer[max_message_size];
-	int len = recv(sock, reinterpret_cast<char*>(buffer), max_message_size, NULL);
-	
-	// If connection isn't right
-	if (len <= 0) 
-	{
-		if (len == 0)
-		{
-			// Client closed the socket
-			std::cout << "Client closed the connection" << std::endl;
-		}
-		else
-		{
-			// Error occurred, handle it accordingly
-			std::cout << "Error in receiving data from client" << std::endl;
-		}
-		return;
-	}
-
-	// Dealing with the message
-	std::vector<unsigned char> message(buffer, buffer + len);
+	std::vector<unsigned char> message = ReceiveWithTimeout(*sock);
 	
 	MessageRequest request = JsonDeserializer::DeserializeClientMessage(message);
 
@@ -98,33 +73,17 @@ void Communicator::HandleClient(SOCKET sock)
 
 void Communicator::SendMessages()
 {
-	// Creating a socket with the relays
-	SOCKET relaySocket = socket(AF_INET, SOCK_STREAM, 0);
-	if (relaySocket = INVALID_SOCKET)
-		throw std::exception("Relay socket failed");
+	sf::TcpSocket relaySocket;
 
-	// Socket Specifiers
-	sockaddr_in serverAddress;
-	serverAddress.sin_family = AF_INET;
-	serverAddress.sin_port = htons(this->relay_port);
-
-	PCWSTR ip = NetworkHandler::StringToPCWSTR(this->_nwhandler.GetFirstRelayIP());
-	if (InetPton(AF_INET, ip, &(serverAddress.sin_addr)) != 1)
+	if (relaySocket.connect(this->_nwhandler.GetFirstRelayIP(), Communicator::relay_port) != sf::Socket::Status::Done)
 	{
-		closesocket(relaySocket);
-		throw std::exception("Relay socket failed");
-	}
-
-	// Connecting
-	if (connect(relaySocket, reinterpret_cast<sockaddr*>(&serverAddress), sizeof(serverAddress)) == INVALID_SOCKET)
-	{
-		closesocket(relaySocket);
+		relaySocket.disconnect();
 		throw std::exception("Relay socket failed");
 	}
 
 	while (true)
 	{
-		// Sleep is queue is empty
+		// Sleep if queue is empty
 		if (this->_messageQueue.empty())
 			std::this_thread::sleep_for(std::chrono::seconds(3));
 
@@ -133,7 +92,50 @@ void Communicator::SendMessages()
 		this->_messageQueue.pop();
 		
 		// Sending the message
-		if (send(relaySocket, reinterpret_cast<const char*>(message.data()), message.size(), 0) == INVALID_SOCKET)
+		if (SendData(relaySocket, message) != sf::Socket::Status::Done)
 			throw std::exception("Error while sending message to client");
 	}
+}
+
+sf::TcpSocket::Status Communicator::SendData(sf::TcpSocket& socket, const std::vector<unsigned char>& data)
+{
+	return socket.send(data.data(), data.size());
+}
+
+std::vector<unsigned char> Communicator::ReceiveWithTimeout(sf::TcpSocket& socket)
+{
+	socket.setBlocking(false);
+	auto start_time = std::chrono::steady_clock::now();
+	std::size_t received;
+	std::vector<unsigned char> buffer(max_message_size);
+
+	while (true)
+	{
+		sf::Socket::Status status = socket.receive(buffer.data(), buffer.size(), received);
+		if (status == sf::Socket::Done) // Received data
+		{
+			socket.setBlocking(true);
+			return std::vector<unsigned char>(buffer.begin(), buffer.begin() + received);
+		}
+		else if (status == sf::Socket::NotReady) // No data yet
+		{
+			if (Communicator::HasTimeoutPassed(start_time))
+			{
+				socket.setBlocking(true);
+				throw std::exception("Timeout passed");
+			}
+			// Sleeping for 0.5s to avoid excessive CPU usage
+			std::this_thread::sleep_for(std::chrono::milliseconds(500));
+		}
+		else // Socket error
+		{
+			socket.setBlocking(true);
+			throw std::exception("Socket error");
+		}
+	}
+}
+
+bool Communicator::HasTimeoutPassed(const std::chrono::steady_clock::time_point& start_time)
+{
+	return std::chrono::steady_clock::now() - start_time > Communicator::timeout;
 }

@@ -30,9 +30,6 @@
     <ClCompile Include="Communicator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="WSAInitializer.cpp">
-      <Filter>Header Files\External</Filter>
-    </ClCompile>
     <ClCompile Include="RequestHandler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -51,6 +48,9 @@
     <ClCompile Include="LoadLevel.h">
       <Filter>Header Files\Structs</Filter>
     </ClCompile>
+    <ClCompile Include="FileHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Communicator.h">
@@ -58,9 +58,6 @@
     </ClInclude>
     <ClInclude Include="RequestHandler.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="WSAInitializer.h">
-      <Filter>Header Files\External</Filter>
     </ClInclude>
     <ClInclude Include="Protocol.h">
       <Filter>Header Files</Filter>
@@ -85,6 +82,12 @@
     </ClInclude>
     <ClInclude Include="DedicatedRelay.h">
       <Filter>Header Files\Structs</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectoryCodes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FileHandler.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

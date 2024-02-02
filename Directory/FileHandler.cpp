@@ -5,7 +5,7 @@ FileHandler::FileHandler()
 	this->_directoryListFile.open(this->_directoryFileName, std::ios::in);
 
 	if (!this->_directoryListFile.is_open())
-		throw std::exception("File cannot be open");
+		throw std::runtime_error("File cannot be open");
 }
 
 FileHandler::~FileHandler()

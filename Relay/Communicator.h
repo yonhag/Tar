@@ -1,10 +1,8 @@
-#include <WinSock2.h>
-#include <Windows.h>
-#include <WS2tcpip.h>
 #include <vector>
-#include <map>
 #include <string>
 #include "RequestHandler.h"
+#include "SFML/Network.hpp"
+#include <chrono>
 
 class Communicator
 {
@@ -15,21 +13,19 @@ public:
 	[[noreturn]] void RunServer();
 
 private:
-	void HandleConnection(SOCKET clientSocket);
-	void ServeClient(SOCKET incomingSocket, const Request& initialRequest);
-	std::vector<unsigned char> ReceiveSocketMessageAsVector(SOCKET targetSocket);
-
-	
-	
+	void HandleConnection(std::unique_ptr<sf::TcpSocket> socket);
+	void ServeClient(sf::TcpSocket& incomingSocket, const Request& initialRequest);
 		
-	SOCKET _serverSocket;
-	std::map<SOCKET, RequestHandler> _user_list;
+	sf::TcpListener _serverSocket;
 	
-	const DWORD socket_timeout = 10000; // 10s
-	const u_short port = 8200;
+	const unsigned short port = 8200;
+	const unsigned short client_port = 8202;
+	static const std::chrono::seconds timeout; // Defined in .cpp file
 
 	// Helper functions
-	void BindAndListen();
-	void SendData(SOCKET sock, const std::vector<unsigned char>& data);
-	bool IsDirectoryMessage(const std::vector<unsigned char>& message);
+	sf::TcpSocket::Status SendData(sf::TcpSocket& socket, const std::vector<unsigned char>& data) const;
+	static std::vector<unsigned char> ReceiveWithTimeout(sf::TcpSocket& socket);
+	static bool IsDirectoryMessage(const std::vector<unsigned char>& message);
+	static bool HasTimeoutPassed(const std::chrono::steady_clock::time_point& start_time);
+	static sf::IpAddress StringToIP(const std::string& ipString);
 };

@@ -1,150 +1,107 @@
 #include "Communicator.h"
 #include "Protocol.h"
+#include "Request.h"
 #include <thread>
 #include <exception>
 #include <iostream>
+#include <memory>
+#include <sstream>
+#include "SFML/System.hpp"
+
+const std::chrono::seconds Communicator::timeout = std::chrono::seconds(5);
 
 Communicator::Communicator()
 {
-	this->_serverSocket = socket(AF_INET, SOCK_STREAM, 0);
-	if (this->_serverSocket == INVALID_SOCKET)
-		throw std::exception("Invalid Socket Creation");
+	if (this->_serverSocket.listen(port) != sf::Socket::Status::Done)
+		throw std::runtime_error("Invalid server socket");
 }
 
 Communicator::~Communicator()
 {
-	try
-	{
-		::closesocket(_serverSocket);
-	}
-	catch (...) {}
+	this->_serverSocket.close();
 }
 
 void Communicator::RunServer()
 {
-	BindAndListen();
+	std::cout << "Listening on port " << this->port << std::endl;
 
 	while (true)
 	{
 		// Accepting clients
-		SOCKET client_socket = accept(this->_serverSocket, NULL, NULL);
-		if (client_socket == INVALID_SOCKET)
-			throw std::exception(__FUNCTION__);
+		auto client_socket = std::make_unique<sf::TcpSocket>();
 
-		std::cout << "Accepting client..." << std::endl;
+		// If connection is fine
+		if (this->_serverSocket.accept(*client_socket) == sf::Socket::Status::Done)
+		{
+			std::cout << "Accepting client..." << std::endl;
 
-		// Detaching client handling to a different thread
-		std::thread tr(&Communicator::HandleConnection, this, std::ref(client_socket));
-		tr.detach();
+			// Detaching client handling to a different thread
+			std::thread tr(&Communicator::HandleConnection, this, std::move(client_socket));
+			tr.detach();
+		}
+		else
+			std::cout << "Problems with socket connection" << std::endl;
 	}
 
 }
 
-void Communicator::BindAndListen()
+void Communicator::HandleConnection(std::unique_ptr<sf::TcpSocket> socket)
 {
-	struct sockaddr_in sa = { 0 };
-
-	sa.sin_port = htons(port);
-	sa.sin_family = AF_INET;
-	sa.sin_addr.s_addr = INADDR_ANY;
-
-	// Connects between the socket and the configuration (port and etc..)
-	if (::bind(_serverSocket, (struct sockaddr*)&sa, sizeof(sa)) == SOCKET_ERROR)
-		throw std::exception(__FUNCTION__ " - bind");
-
-	// Start listening for incoming requests of clients
-	if (::listen(_serverSocket, SOMAXCONN) == SOCKET_ERROR)
-		throw std::exception(__FUNCTION__ " - listen");
-	std::cout << "Listening on port " << port << std::endl;
-}
-
-void Communicator::HandleConnection(SOCKET sock)
-{
-	// Setting the timeout
-	setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, reinterpret_cast<const char*>(&this->socket_timeout), sizeof(this->socket_timeout));
-
 	while (true)
 	{
-		std::vector<unsigned char> message = ReceiveSocketMessageAsVector(sock);
+		// Receiving data
+		std::vector<unsigned char> data = ReceiveWithTimeout(*socket);
 
-		if (IsDirectoryMessage(message))
+		if (IsDirectoryMessage(data))
 		{
-			RequestHandler handler(message);
+			RequestHandler handler(data);
 
-			DirResponse response = handler.HandleDirRequest(message);
+			DirResponse response = handler.HandleDirRequest(data);
 			
-			try { SendData(sock, response.data); }
-			catch (std::exception&) {} // No need to do anything
-			
-			::closesocket(sock);
+			this->SendData(*socket, response.data);
+
 			return;
 		}
 		else
 		{
-			RequestHandler handler(message);
-			Request request = handler.HandleRequest(message);
-			ServeClient(sock, request);
+			RequestHandler handler(data);
+			Request request = handler.HandleRequest(data);
+			ServeClient(*socket, request);
 		}
 	}
 }
 
-void Communicator::ServeClient(SOCKET incomingSocket, const Request& initialRequest)
+void Communicator::ServeClient(sf::TcpSocket& incomingSocket, const Request& initialRequest)
 {
-	SOCKET targetSocket = socket(AF_INET, SOCK_STREAM, NULL);
-	if (targetSocket == INVALID_SOCKET)
-		throw std::exception("targetSocket creation failed");
-
-	sockaddr_in sa;
-	sa.sin_family = AF_INET;
-	sa.sin_port = htons(8200);
-	inet_pton(AF_INET, initialRequest.dest_ip.c_str(), &(sa.sin_addr));
-
-	// Setting socket time to get the response
-	setsockopt(targetSocket, SOL_SOCKET, SO_RCVTIMEO, reinterpret_cast<const char*>(&this->socket_timeout), sizeof(this->socket_timeout));
-
-	if (connect(targetSocket, reinterpret_cast<sockaddr*>(&sa), sizeof(sa)) == SOCKET_ERROR) 
-		throw std::exception("targetSocket connection failed");
+	sf::TcpSocket targetSocket;
+	try
+	{
+		if (targetSocket.connect(StringToIP(initialRequest.dest_ip), this->client_port) != sf::Socket::Status::Done)
+			return;
+	}
+	catch (std::exception& e) { std::cout << e.what() << std::endl; return; }
 
 	SendData(targetSocket, initialRequest.data); // Throws an exception on its own
 
-	while (true)
+	// While loop closes on its own when RecieveWithTimeout closes without a connection made - exception thrown.
+	try
 	{
-		try
+		while (true)
 		{
-			std::vector<unsigned char> message = ReceiveSocketMessageAsVector(targetSocket);
+			std::vector<unsigned char> message = ReceiveWithTimeout(targetSocket);
 
 			// TODO: ENCRYPT THE MESSAGE
 
 			SendData(incomingSocket, message);
 
-
-			message = ReceiveSocketMessageAsVector(incomingSocket);
+			message = ReceiveWithTimeout(incomingSocket);
 
 			// TODO: DECRYPT THE MESSAGE
 
 			SendData(targetSocket, message);
 		}
-		catch (std::exception&) { ::closesocket(targetSocket); ::closesocket(incomingSocket); }
 	}
-}
-
-std::vector<unsigned char> Communicator::ReceiveSocketMessageAsVector(SOCKET sock)
-{
-	char buffer[max_message_size];
-	int len = recv(sock, buffer, max_message_size, NULL);
-
-	// Check connection
-	if (len <= 0)
-	{
-		if (len == SOCKET_ERROR && WSAGetLastError() == WSAETIMEDOUT)
-			throw std::exception("Timeout");
-		else
-			throw std::exception("Connection closed");
-	}
-
-	std::vector<unsigned char> response(buffer, buffer + len);
-
-	return response;
+	catch (...) {} // No need to cleanup - SFML destructor will.
 }
 
 bool Communicator::IsDirectoryMessage(const std::vector<unsigned char>& message)
@@ -154,11 +111,67 @@ bool Communicator::IsDirectoryMessage(const std::vector<unsigned char>& message)
 	return false;
 }
 
-
-void Communicator::SendData(SOCKET sock, const std::vector<unsigned char>& data)
+sf::TcpSocket::Status Communicator::SendData(sf::TcpSocket& socket, const std::vector<unsigned char>& data) const
 {
-	if (send(sock, reinterpret_cast<const char*>(data.data()), data.size(), 0) == INVALID_SOCKET)
+	return socket.send(data.data(), data.size());
+}
+
+
+std::vector<unsigned char> Communicator::ReceiveWithTimeout(sf::TcpSocket& socket)
+{
+	socket.setBlocking(false);
+	auto start_time = std::chrono::steady_clock::now();
+	std::size_t received;
+	std::vector<unsigned char> buffer(max_message_size);
+
+	while (true)
 	{
-		throw std::exception("Error while sending message to client");
+		sf::Socket::Status status = socket.receive(buffer.data(), buffer.size(), received);
+		if (status == sf::Socket::Status::Done) // Received data
+		{
+			socket.setBlocking(true);
+			return std::vector<unsigned char>(buffer.begin(), buffer.begin() + received);
+		}
+		else if (status == sf::Socket::Status::NotReady) // No data yet
+		{
+			if (Communicator::HasTimeoutPassed(start_time))
+			{
+				socket.setBlocking(true);
+				throw std::runtime_error("Timeout passed");
+			}
+			// Sleeping for 0.5s to avoid excessive CPU usage
+			std::this_thread::sleep_for(std::chrono::milliseconds(500));
+		}
+		else // Socket error
+		{
+			socket.setBlocking(true);
+			throw std::runtime_error("Socket error");
+		}
 	}
+}
+
+
+bool Communicator::HasTimeoutPassed(const std::chrono::steady_clock::time_point& start_time)
+{
+	return std::chrono::steady_clock::now() - start_time > Communicator::timeout;
+}
+
+sf::IpAddress Communicator::StringToIP(const std::string& ipString)
+{
+	std::uint8_t parts[4] = { 0, 0, 0, 0 };
+	std::stringstream ss(ipString);
+	std::string part;
+
+	for (int i = 0; i < 4 && std::getline(ss, part, '.'); ++i) {
+		int number = std::stoi(part);
+		if (number >= 0 && number <= 255) {
+			parts[i] = static_cast<std::uint8_t>(number);
+		}
+		else {
+			// Handle invalid number
+			throw std::runtime_error("Invalid IP address: " + ipString);
+		}
+	}
+
+	return sf::IpAddress(parts[0], parts[1], parts[2], parts[3]);
 }
