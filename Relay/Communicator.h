@@ -19,6 +19,7 @@ private:
 	sf::TcpListener _serverSocket;
 	
 	const unsigned short port = 8200;
+	const unsigned short client_port = 8202;
 	static const std::chrono::seconds timeout; // Defined in .cpp file
 
 	// Helper functions
@@ -26,4 +27,5 @@ private:
 	static std::vector<unsigned char> ReceiveWithTimeout(sf::TcpSocket& socket);
 	static bool IsDirectoryMessage(const std::vector<unsigned char>& message);
 	static bool HasTimeoutPassed(const std::chrono::steady_clock::time_point& start_time);
+	static sf::IpAddress StringToIP(const std::string& ipString);
 };

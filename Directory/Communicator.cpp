@@ -3,6 +3,7 @@
 #include "RequestHandler.h"
 #include "FileHandler.h"
 #include "JsonDeserializer.h"
+#include <sstream>
 #include <thread>
 #include <exception>
 #include <iostream>
@@ -11,7 +12,7 @@ const std::chrono::seconds Communicator::timeout = std::chrono::seconds(5);
 
 Communicator::Communicator()
 {
-	if (this->_serverSocket.listen(Communicator::directory_listening_port) != sf::Socket::Done)
+	if (this->_serverSocket.listen(Communicator::directory_listening_port) != sf::Socket::Status::Done)
 		throw std::runtime_error("Invalid server socket");
 }
 
@@ -83,7 +84,7 @@ void Communicator::HandleClient(std::unique_ptr<sf::TcpSocket> sock)
 std::vector<unsigned char> Communicator::SendDataThroughNewClientSocket(const std::string& ip, const unsigned short port, const std::vector<unsigned char>& data)
 {
 	sf::TcpSocket sock;
-	if (sock.connect(ip, port) != sf::Socket::Status::Done)
+	if (sock.connect(StringToIP(ip), port) != sf::Socket::Status::Done)
 		throw std::runtime_error("Connection failed");
 
 	Communicator::SendData(sock, data);
@@ -105,12 +106,12 @@ std::vector<unsigned char> Communicator::ReceiveWithTimeout(sf::TcpSocket& socke
 	while (true)
 	{
 		sf::Socket::Status status = socket.receive(buffer.data(), buffer.size(), received);
-		if (status == sf::Socket::Done) // Received data
+		if (status == sf::Socket::Status::Done) // Received data
 		{
 			socket.setBlocking(true);
 			return std::vector<unsigned char>(buffer.begin(), buffer.begin() + received);
 		}
-		else if (status == sf::Socket::NotReady) // No data yet
+		else if (status == sf::Socket::Status::NotReady) // No data yet
 		{
 			if (Communicator::HasTimeoutPassed(start_time))
 			{
@@ -128,8 +129,27 @@ std::vector<unsigned char> Communicator::ReceiveWithTimeout(sf::TcpSocket& socke
 	}
 }
 
-
 bool Communicator::HasTimeoutPassed(const std::chrono::steady_clock::time_point& start_time)
 {
 	return std::chrono::steady_clock::now() - start_time > Communicator::timeout;
+}
+
+sf::IpAddress Communicator::StringToIP(const std::string& ipString)
+{
+	std::uint8_t parts[4] = { 0, 0, 0, 0 };
+	std::stringstream ss(ipString);
+	std::string part;
+
+	for (int i = 0; i < 4 && std::getline(ss, part, '.'); ++i) {
+		int number = std::stoi(part);
+		if (number >= 0 && number <= 255) {
+			parts[i] = static_cast<std::uint8_t>(number);
+		}
+		else {
+			// Handle invalid number
+			throw std::runtime_error("Invalid IP address: " + ipString);
+		}
+	}
+
+	return sf::IpAddress(parts[0], parts[1], parts[2], parts[3]);
 }

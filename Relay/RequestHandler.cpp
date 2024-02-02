@@ -39,6 +39,7 @@ DirRequests RequestHandler::DetermineDirRequest(std::vector<unsigned char>& data
 	case '1':
 		return DirRequests::Keys;
 	}
+	return DirRequests();
 }
 
 DirResponse RequestHandler::HandleKeyRequest() const

@@ -25,6 +25,7 @@ private:
 	static sf::TcpSocket::Status SendData(sf::TcpSocket& socket, const std::vector<unsigned char>& data);
 	static std::vector<unsigned char> ReceiveWithTimeout(sf::TcpSocket& socket);
 	static bool HasTimeoutPassed(const std::chrono::steady_clock::time_point& start_time);
+	static sf::IpAddress StringToIP(const std::string& ipString);
 
 	// Members
 	sf::TcpListener _serverSocket;

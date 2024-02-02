@@ -5,6 +5,7 @@
 #include <exception>
 #include <iostream>
 #include <memory>
+#include <sstream>
 #include "SFML/System.hpp"
 
 const std::chrono::seconds Communicator::timeout = std::chrono::seconds(5);
@@ -73,8 +74,12 @@ void Communicator::HandleConnection(std::unique_ptr<sf::TcpSocket> socket)
 void Communicator::ServeClient(sf::TcpSocket& incomingSocket, const Request& initialRequest)
 {
 	sf::TcpSocket targetSocket;
-	if (targetSocket.connect(sf::IpAddress(initialRequest.dest_ip), this->port) != sf::Socket::Status::Done)
-		return;
+	try
+	{
+		if (targetSocket.connect(StringToIP(initialRequest.dest_ip), this->client_port) != sf::Socket::Status::Done)
+			return;
+	}
+	catch (std::exception& e) { std::cout << e.what() << std::endl; return; }
 
 	SendData(targetSocket, initialRequest.data); // Throws an exception on its own
 
@@ -149,4 +154,24 @@ std::vector<unsigned char> Communicator::ReceiveWithTimeout(sf::TcpSocket& socke
 bool Communicator::HasTimeoutPassed(const std::chrono::steady_clock::time_point& start_time)
 {
 	return std::chrono::steady_clock::now() - start_time > Communicator::timeout;
+}
+
+sf::IpAddress Communicator::StringToIP(const std::string& ipString)
+{
+	std::uint8_t parts[4] = { 0, 0, 0, 0 };
+	std::stringstream ss(ipString);
+	std::string part;
+
+	for (int i = 0; i < 4 && std::getline(ss, part, '.'); ++i) {
+		int number = std::stoi(part);
+		if (number >= 0 && number <= 255) {
+			parts[i] = static_cast<std::uint8_t>(number);
+		}
+		else {
+			// Handle invalid number
+			throw std::runtime_error("Invalid IP address: " + ipString);
+		}
+	}
+
+	return sf::IpAddress(parts[0], parts[1], parts[2], parts[3]);
 }
