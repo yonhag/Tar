@@ -14,12 +14,9 @@ NetworkHandler::NetworkHandler(const LoadLevel loadlevel)
         throw std::exception("File not opening");
 
     bool hasFoundDir = false;
-    while (!hasFoundDir)
+    while (!hasFoundDir && !dirFile.eof())
     {
         this->_dir = GetNextDir(dirFile);
-        
-        if (dirFile.eof()) // If file is over
-            throw std::exception("Reached EOF");
 
         hasFoundDir = GetRelays(loadlevel);
     }
@@ -27,7 +24,7 @@ NetworkHandler::NetworkHandler(const LoadLevel loadlevel)
 }
 
 NetworkHandler::NetworkHandler(const NetworkHandler& nwh, const LoadLevel loadlevel) :
-    _isConnected(nwh._isConnected), _relays(nwh._relays), _dir(nwh._dir)
+    _relays(nwh._relays), _dir(nwh._dir)
 {
     if (this->_relays.empty())
     {
@@ -37,18 +34,13 @@ NetworkHandler::NetworkHandler(const NetworkHandler& nwh, const LoadLevel loadle
             throw std::exception("File not opening");
 
         bool hasFoundDir = false;
-        while (!hasFoundDir)
+        while (!hasFoundDir && !dirFile.eof())
         {
             this->_dir = GetNextDir(dirFile);
             hasFoundDir = GetRelays(loadlevel);
         }
         dirFile.close();
     }
-}
-
-bool NetworkHandler::IsConnected() const
-{
-    return this->_isConnected;
 }
 
 Directory NetworkHandler::GetNextDir(std::ifstream& dirFile) const

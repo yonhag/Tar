@@ -12,7 +12,6 @@ public:
 	explicit NetworkHandler(const LoadLevel loadlevel);
 	NetworkHandler(const NetworkHandler& nwh, const LoadLevel loadlevel);
 
-	bool IsConnected() const;
 	std::vector<unsigned char> EncryptMessage(const MessageRequest& message);
 	std::string GetFirstRelayIP() const;
 
@@ -31,7 +30,6 @@ private:
 	// Decryption
 	
 
-	bool _isConnected;
 	std::vector<Relay> _relays;
 	Directory _dir;
 
