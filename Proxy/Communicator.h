@@ -14,7 +14,7 @@ public:
 	~Communicator();
 
 	[[noreturn]] void RunServer();
-	static std::vector<unsigned char> GetRelays(const std::string& dirIP, const LoadLevel& ll);
+	static std::vector<unsigned char> GetRelays(const Directory& dir, const LoadLevel& ll);
 private:
 	// Server socket
 	void HandleClient(std::unique_ptr<sf::TcpSocket> clientSocket);
@@ -36,6 +36,5 @@ private:
 	static const std::chrono::seconds timeout; // Defined in .cpp file
 
 	static const unsigned short relay_port = 8200;
-	static const unsigned short directory_port = 8201;
 	static const unsigned short server_port = 8202;
 };

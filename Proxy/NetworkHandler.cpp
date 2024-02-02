@@ -18,13 +18,13 @@ NetworkHandler::NetworkHandler(const LoadLevel loadlevel)
     {
         this->_dir = GetNextDir(dirFile);
 
-        hasFoundDir = GetRelays(loadlevel);
+        hasFoundDir = GetRelays(this->_dir, loadlevel);
     }
     dirFile.close();
 }
 
 NetworkHandler::NetworkHandler(const NetworkHandler& nwh, const LoadLevel loadlevel) :
-    _relays(nwh._relays), _dir(nwh._dir)
+    _isConnected(nwh._isConnected), _relays(nwh._relays), _dir(nwh._dir)
 {
     if (this->_relays.empty())
     {
@@ -37,10 +37,15 @@ NetworkHandler::NetworkHandler(const NetworkHandler& nwh, const LoadLevel loadle
         while (!hasFoundDir && !dirFile.eof())
         {
             this->_dir = GetNextDir(dirFile);
-            hasFoundDir = GetRelays(loadlevel);
+            hasFoundDir = GetRelays(this->_dir, loadlevel);
         }
         dirFile.close();
     }
+}
+
+bool NetworkHandler::IsConnected() const
+{
+    return this->_isConnected;
 }
 
 Directory NetworkHandler::GetNextDir(std::ifstream& dirFile) const
@@ -72,7 +77,7 @@ bool NetworkHandler::GetRelays(const LoadLevel loadlevel)
 {
     try 
     {
-        std::vector<unsigned char> relayResponse = Communicator::GetRelays(this->_dir._ip, loadlevel);
+        std::vector<unsigned char> relayResponse = Communicator::GetRelays(this->_dir, loadlevel);
 
         this->_relays = JsonDeserializer::DeserializeGetRelaysResponse(relayResponse);
         

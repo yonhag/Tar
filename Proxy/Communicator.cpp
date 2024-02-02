@@ -41,13 +41,13 @@ void Communicator::RunServer()
 
 }
 
-std::vector<unsigned char> Communicator::GetRelays(const std::string& dirIP, const LoadLevel& ll)
+std::vector<unsigned char> Communicator::GetRelays(const Directory& dir, const LoadLevel& ll)
 {
 	std::vector<unsigned char> request = JsonSerializer::SerializeGetRelaysRequest(ll);
 
 	sf::TcpSocket directorySocket;
 	
-	if (directorySocket.connect(dirIP, directory_port) != sf::Socket::Status::Done)
+	if (directorySocket.connect(dir._ip, dir._port) != sf::Socket::Status::Done)
 		throw std::exception("Directory connection failed");
 
 	if (SendData(directorySocket, request) != sf::Socket::Status::Done)
