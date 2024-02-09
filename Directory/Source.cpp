@@ -1,7 +1,13 @@
 #include "Communicator.h"
+#include <exception>
+#include <iostream>
 
 int main()
 {
-	Communicator().RunServer();
+	try
+	{
+		Communicator().RunServer();
+	}
+	catch (std::exception& e) { std::cout << e.what(); }
 	return 0;
 }
