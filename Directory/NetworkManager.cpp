@@ -5,6 +5,7 @@
 #include "JsonDeserializer.h"
 #include <random>
 #include <algorithm>
+#include <iostream>
 
 // Initializing the relay vector
 // Value can be changed for testing
@@ -14,10 +15,18 @@ enum AssignedUserWeight { Low = 1, Medium = 2, High = 4 };
 
 std::vector<DedicatedRelay> NetworkManager::GetRelays(const LoadLevel loadlevel)
 {
+    for (auto& i : _relays)
+    {
+        std::cout << i.ip << std::endl;
+    }
+
+
     // Making sure there are enough relays avilable
     if (_relays.size() < 3)
+    {
+        std::cout << "ballsx2" << std::endl;
         return std::vector<DedicatedRelay>();
-
+    }
     std::vector<DedicatedRelay> dedicated_relays;
 
     if (loadlevel == LoadLevel::High)
@@ -30,14 +39,25 @@ std::vector<DedicatedRelay> NetworkManager::GetRelays(const LoadLevel loadlevel)
     }
     else if (loadlevel == LoadLevel::Low)
     {
-        for (size_t i = _relays.size() - 1; i < _relays.size() - 4; i++)
+        std::cout << "low" << std::endl << _relays.size() << std::endl;
+        for (int i = _relays.size() - 1; i > (_relays.size() - 3); i--)
         {
-            dedicated_relays.push_back(DedicateRelay(_relays[i]));
-            _relays[i].assigned_users += AssignedUserWeight::Low;
+            try {
+                std::cout << _relays[i].ip << ' ' << _relays.size() << std::endl;
+                dedicated_relays.push_back(DedicateRelay(_relays[i]));
+                _relays[i].assigned_users += AssignedUserWeight::Low;
+            }
+            catch (std::exception& e) { std::cout << e.what(); }
         }
     }
     else
         dedicated_relays = DedicateRelaysForNormalLoadUser();
+
+    std::cout << "Relays:" << std::endl;
+    for (auto& i : dedicated_relays)
+    {
+        std::cout << i.ip;
+    }
 
     return dedicated_relays;
 }
@@ -61,6 +81,7 @@ bool NetworkManager::AddRelay(const Relay& relay)
 
     // Sorted by bandwidth ascending - Lower bandwidth -> Higher banwidth
     std::sort(_relays.begin(), _relays.end(), [](const Relay& a, const Relay& b) { return a.bandwidth < b.bandwidth; });
+    // TODO: Make sure that the rest of the code matches lower->higher, not sure it does.
 
     return true;
 }
@@ -78,7 +99,7 @@ DedicatedRelay NetworkManager::DedicateRelay(const Relay& relay)
     Response response = Communicator::SendRelayConnectionRequest(relay, JsonSerializer::SerializeRelayConnectionRequest());
     
     // Receiving the answer
-    DedicatedRelay drel = JsonDeserializer::DeserializeRelayConnectionResponse(response);
+    DedicatedRelay drel = JsonDeserializer::DeserializeRelayDedicationResponse(response);
     drel.ip = relay.ip;
 
     return drel;

@@ -1,11 +1,11 @@
 #include "RequestHandler.h"
-#include "JsonDeserializer.h"
-#include "JsonSerializer.h"
+#include "Deserializer.h"
+#include "Serializer.h"
 #include <array>
 
 RequestHandler::RequestHandler(const std::vector<unsigned char>& data)
 {
-	JsonDeserializer::DeserializeDirectoryConnectionRequest(data, this->_RSAKey, this->_AESKey);
+	Deserializer::DeserializeDirectoryConnectionRequest(data, this->_RSAKey, this->_AESKey);
 }
 
 Request RequestHandler::HandleRequest(std::vector<unsigned char>& data)
@@ -46,7 +46,7 @@ DirResponse RequestHandler::HandleKeyRequest() const
 {
 	DirResponse res;
 
-	res.data = JsonSerializer::SerializeDirectoryConnectionResponse(this->_AESKey, this->_RSAKey);
+	res.data = Serializer::SerializeDirectoryConnectionResponse(this->_AESKey, this->_RSAKey);
 
 	return res;
 }

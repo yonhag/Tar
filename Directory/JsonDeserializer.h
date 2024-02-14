@@ -8,7 +8,12 @@ class JsonDeserializer
 {
 public:
 	static LoadLevel DeserializeGetRelaysRequest(const std::vector<unsigned char>& request);
-	static DedicatedRelay DeserializeRelayConnectionResponse(const Response& response);
+
+	static Relay DeserializeRelayConnectionRequest(const std::vector<unsigned char>& request);
+	
+	static DedicatedRelay DeserializeRelayDedicationResponse(const Response& response);
+	
 	static bool DeserializeUpdateDirectoriesResponse(const std::vector<unsigned char>& response);
+	
 	static Relay DeserializeUpdateDirectoryRequest(const std::vector<unsigned char>& request);
 };

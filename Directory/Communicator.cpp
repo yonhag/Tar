@@ -75,8 +75,10 @@ void Communicator::HandleClient(std::unique_ptr<sf::TcpSocket> sock)
 	try {
 		auto message = this->ReceiveWithTimeout(*sock);
 		
+		std::cout << "Message: ";
 		for (auto& i : message)
 			std::cout << i;
+		std::cout << std::endl;
 
 		Response response = RequestHandler::HandleRequest(message);
 		Communicator::SendData(*sock, response.data);

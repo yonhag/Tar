@@ -8,9 +8,7 @@ using json = nlohmann::json;
 void to_json(json& j, const DedicatedRelay& relay)
 {
 	j = json{
-		{ "IP", relay.ip },
-		{ "AESKey", relay.AESKey },
-		{ "RSAKey", relay.RSAKey }
+		{ "IP", relay.ip }
 	};
 }
 

@@ -47,14 +47,16 @@ std::vector<unsigned char> Communicator::GetRelays(const Directory& dir, const L
 
 	sf::TcpSocket directorySocket;
 	
-	if (directorySocket.connect(dir._ip, dir._port) != sf::Socket::Status::Done)
-		throw std::exception("Directory connection failed");
-
-	if (SendData(directorySocket, request) != sf::Socket::Status::Done)
-		throw std::exception("Directory sending failed");
+	directorySocket.connect(dir._ip, dir._port);
+	SendData(directorySocket, request);
 	
 	// Receiving the relays
-	std::vector<unsigned char> relays = ReceiveWithTimeout(directorySocket);
+	std::vector<unsigned char> relays(128);
+	std::size_t recv;
+	directorySocket.receive(relays.data(), relays.size(), recv); //ReceiveWithTimeout(directorySocket);
+
+	for (auto& i : relays)
+		std::cout << i;
 
 	return relays;
 }

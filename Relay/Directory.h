@@ -3,6 +3,6 @@
 
 struct Directory
 {
-	std::string _ip;
-	unsigned short _port;
+	std::string ip;
+	unsigned short port;
 };

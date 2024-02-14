@@ -6,13 +6,22 @@
 #include <iostream>
 #include <memory>
 #include <sstream>
+#include "Deserializer.h"
+#include "Serializer.h"
 #include "SFML/System.hpp"
 
 const std::chrono::seconds Communicator::timeout = std::chrono::seconds(5);
 
 Communicator::Communicator()
 {
-	if (this->_serverSocket.listen(port) != sf::Socket::Status::Done)
+	// TODO: Change this to use the dirlist.txt file
+	Directory dir;
+	dir.ip = "127.0.0.1";
+	dir.port = 8201;
+	if (!ConnectToDirectory(dir))
+		throw std::runtime_error("Unable to connect to directory");
+
+	if (this->_serverSocket.listen(listening_port) != sf::Socket::Status::Done)
 		throw std::runtime_error("Invalid server socket");
 }
 
@@ -23,7 +32,7 @@ Communicator::~Communicator()
 
 void Communicator::RunServer()
 {
-	std::cout << "Listening on port " << this->port << std::endl;
+	std::cout << "Listening on port " << this->listening_port << std::endl;
 
 	while (true)
 	{
@@ -102,6 +111,27 @@ void Communicator::ServeClient(sf::TcpSocket& incomingSocket, const Request& ini
 		}
 	}
 	catch (...) {} // No need to cleanup - SFML destructor will.
+}
+
+bool Communicator::ConnectToDirectory(const Directory& dir)
+{
+	sf::TcpSocket sock;
+
+	std::cout << "Connecting to " << StringToIP(dir.ip) << ":" << dir.port << std::endl;
+
+	if (sock.connect(StringToIP(dir.ip), dir.port) != sf::Socket::Status::Done)
+		return false;
+
+	std::cout << "Connected" << std::endl;
+
+	if (SendData(sock, Serializer::SerializeDirectoryConnectionRequest("127.0.0.1", 500, this->listening_port)) != sf::Socket::Status::Done) // TODO: Change this to my actual ip and bandwidth)
+		std::cout << "Error in sending data";
+
+	std::cout << "data sent" << std::endl;
+
+	if (Deserializer::DeserializeDirectoryConnectionResponse(ReceiveWithTimeout(sock)))
+		return true;
+	return false;
 }
 
 bool Communicator::IsDirectoryMessage(const std::vector<unsigned char>& message)

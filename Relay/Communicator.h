@@ -1,8 +1,8 @@
-#include <vector>
-#include <string>
+#include "Directory.h"
 #include "RequestHandler.h"
-#include "SFML/Network.hpp"
+#include <vector>
 #include <chrono>
+#include "SFML/Network.hpp"
 
 class Communicator
 {
@@ -15,10 +15,11 @@ public:
 private:
 	void HandleConnection(std::unique_ptr<sf::TcpSocket> socket);
 	void ServeClient(sf::TcpSocket& incomingSocket, const Request& initialRequest);
-		
+	bool ConnectToDirectory(const Directory& dir);
+
 	sf::TcpListener _serverSocket;
 	
-	const unsigned short port = 8200;
+	const unsigned short listening_port = 8200;
 	const unsigned short client_port = 8202;
 	static const std::chrono::seconds timeout; // Defined in .cpp file
 

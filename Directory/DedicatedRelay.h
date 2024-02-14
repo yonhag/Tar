@@ -5,8 +5,6 @@
 struct DedicatedRelay
 {
 	std::string ip;
-	int AESKey;
-	int RSAKey;
 public:
 	bool operator==(const Relay& other) const
 	{

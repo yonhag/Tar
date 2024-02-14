@@ -135,8 +135,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Communicator.cpp" />
-    <ClCompile Include="JsonDeserializer.cpp" />
-    <ClCompile Include="JsonSerializer.cpp" />
+    <ClCompile Include="Serializer.cpp" />
+    <ClCompile Include="Deserializer.cpp" />
     <ClCompile Include="Protocol.h" />
     <ClCompile Include="RequestHandler.cpp" />
     <ClCompile Include="RequestHandler.h" />
@@ -145,9 +145,10 @@
   <ItemGroup>
     <ClInclude Include="Communicator.h" />
     <ClInclude Include="Consts.h" />
+    <ClInclude Include="Directory.h" />
     <ClInclude Include="json.hpp" />
-    <ClInclude Include="JsonDeserializer.h" />
-    <ClInclude Include="JsonSerializer.h" />
+    <ClInclude Include="Deserializer.h" />
+    <ClInclude Include="Serializer.h" />
     <ClInclude Include="Request.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -45,10 +45,10 @@
     <ClCompile Include="Protocol.h">
       <Filter>Header Files\Consts</Filter>
     </ClCompile>
-    <ClCompile Include="JsonDeserializer.cpp">
+    <ClCompile Include="Serializer.cpp">
       <Filter>Source Files\Serialization</Filter>
     </ClCompile>
-    <ClCompile Include="JsonSerializer.cpp">
+    <ClCompile Include="Deserializer.cpp">
       <Filter>Source Files\Serialization</Filter>
     </ClCompile>
   </ItemGroup>
@@ -65,11 +65,14 @@
     <ClInclude Include="Request.h">
       <Filter>Header Files\Structs</Filter>
     </ClInclude>
-    <ClInclude Include="JsonSerializer.h">
+    <ClInclude Include="Serializer.h">
       <Filter>Header Files\Serialization</Filter>
     </ClInclude>
-    <ClInclude Include="JsonDeserializer.h">
+    <ClInclude Include="Deserializer.h">
       <Filter>Header Files\Serialization</Filter>
+    </ClInclude>
+    <ClInclude Include="Directory.h">
+      <Filter>Header Files\Structs</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
