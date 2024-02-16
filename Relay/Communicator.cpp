@@ -119,9 +119,8 @@ bool Communicator::ConnectToDirectory(const Directory& dir)
 
 	std::cout << "Connecting to " << StringToIP(dir.ip) << ":" << dir.port << std::endl;
 
-	if (sock.connect(StringToIP(dir.ip), dir.port) != sf::Socket::Status::Done)
-		return false;
-
+	std::cout << (int)sock.connect(StringToIP(dir.ip), dir.port) << std::endl;
+	
 	std::cout << "Connected" << std::endl;
 
 	if (SendData(sock, Serializer::SerializeDirectoryConnectionRequest("127.0.0.1", 500, this->listening_port)) != sf::Socket::Status::Done) // TODO: Change this to my actual ip and bandwidth)

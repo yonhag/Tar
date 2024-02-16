@@ -51,6 +51,7 @@ std::vector<unsigned char> Communicator::GetRelays(const Directory& dir, const L
 	SendData(directorySocket, request);
 	
 	// Receiving the relays
+	// #TODO: change this
 	std::vector<unsigned char> relays(128);
 	std::size_t recv;
 	directorySocket.receive(relays.data(), relays.size(), recv); //ReceiveWithTimeout(directorySocket);
