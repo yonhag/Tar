@@ -459,3 +459,4 @@ FodyWeavers.xsd
 
 # End of https://www.toptal.com/developers/gitignore/api/c++,windows,visualstudio
 /RSA/boost_1_66_0
+Compile.py
