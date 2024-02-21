@@ -24,7 +24,7 @@ std::vector<DedicatedRelay> NetworkManager::GetRelays(const LoadLevel loadlevel)
     // Making sure there are enough relays avilable
     if (_relays.size() < 3)
     {
-        std::cout << "ballsx2" << std::endl;
+        std::cout << "Not enough relays" << std::endl;
         return std::vector<DedicatedRelay>();
     }
     std::vector<DedicatedRelay> dedicated_relays;

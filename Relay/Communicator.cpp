@@ -118,8 +118,10 @@ bool Communicator::ConnectToDirectory(const Directory& dir)
 	sf::TcpSocket sock;
 
 	std::cout << "Connecting to " << StringToIP(dir.ip) << ":" << dir.port << std::endl;
-
-	std::cout << (int)sock.connect(StringToIP(dir.ip), dir.port) << std::endl;
+	
+	// TODO: Changes this from localhost
+	if (sock.connect(sf::IpAddress::LocalHost, dir.port) != sf::Socket::Status::Done)
+		return false;
 	
 	std::cout << "Connected" << std::endl;
 
