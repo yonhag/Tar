@@ -2,6 +2,7 @@
 #include "JsonSerializer.h"
 #include "JsonDeserializer.h"
 #include "NetworkManager.h"
+#include <iostream> // TODO: Remove this
 
 enum RequestCodes { GetRelays = '1', NewRelay = '2' };
 
@@ -11,15 +12,20 @@ Response RequestHandler::HandleRequest(const std::vector<unsigned char>& request
     
     if (IsDirMessage(request))
         response = HandleDirRequest(request);
+
+    std::cout << (request[request_type_index] == RequestCodes::NewRelay) << std::endl;
+
     if (request[request_type_index] == RequestCodes::GetRelays)
     {
         LoadLevel llevel = JsonDeserializer::DeserializeGetRelaysRequest(RemoveFirstCharsFromVector(request, 1));
         std::vector<DedicatedRelay> relays = NetworkManager::GetRelays(llevel);
         response = JsonSerializer::SerializeGetRelaysResponse(relays);
     }
-    if (request[request_type_index] == RequestCodes::NewRelay)
+
+    else if (request[request_type_index] == RequestCodes::NewRelay)
     {
-        Relay newRelay = JsonDeserializer::DeserializeRelayConnectionRequest(request);
+        Relay newRelay = JsonDeserializer::DeserializeRelayConnectionRequest(RemoveFirstCharsFromVector(request, 1));
+        std::cout << "passed" << std::endl;
         NetworkManager::AddRelay(newRelay);
         
         response.data = std::vector<unsigned char>();

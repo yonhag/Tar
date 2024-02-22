@@ -81,9 +81,15 @@ void Communicator::HandleClient(std::unique_ptr<sf::TcpSocket> sock)
 		std::cout << std::endl;
 
 		Response response = RequestHandler::HandleRequest(message);
+		
+		std::cout << "Sending: " << std::endl;
+		for (auto& i : response.data)
+			std::cout << i;
+		std::cout << std::endl;
+
 		Communicator::SendData(*sock, response.data);
 	}
-	catch (...) { return; }
+	catch (std::exception& e) { std::cout << e.what(); }
 }
 
 std::vector<unsigned char> Communicator::SendDataThroughNewClientSocket(const std::string& ip, const unsigned short port, const std::vector<unsigned char>& data)

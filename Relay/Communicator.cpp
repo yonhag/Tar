@@ -19,8 +19,10 @@ Communicator::Communicator()
 	while (true)
 	{
 		Directory dir = fh.GetNextDirectory();
-		if (!ConnectToDirectory(dir))
-			throw std::runtime_error("Unable to connect to directory");
+		if (dir.ip == "")
+			throw std::exception("Unable to connect to directory");
+		if (ConnectToDirectory(dir))
+			break;	
 	}
 
 	if (this->_serverSocket.listen(listening_port) != sf::Socket::Status::Done)
@@ -178,6 +180,7 @@ std::vector<unsigned char> Communicator::ReceiveWithTimeout(sf::TcpSocket& socke
 		else // Socket error
 		{
 			socket.setBlocking(true);
+			std::cout << "Error code: " << (int)status << std::endl;
 			throw std::runtime_error("Socket error");
 		}
 	}
