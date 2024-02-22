@@ -20,7 +20,7 @@ Communicator::Communicator()
 	{
 		Directory dir = fh.GetNextDirectory();
 		if (dir.ip == "")
-			throw std::exception("Unable to connect to directory");
+			throw std::runtime_error("Unable to connect to directory");
 		if (ConnectToDirectory(dir))
 			break;	
 	}
