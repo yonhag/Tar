@@ -16,7 +16,7 @@ Communicator::Communicator()
 {
 	// TODO: Change this to use the dirlist.txt file
 	Directory dir;
-	dir.ip = "127.0.0.1";
+	dir.ip = "192.168.0.27";
 	dir.port = 8201;
 	if (!ConnectToDirectory(dir))
 		throw std::runtime_error("Unable to connect to directory");
@@ -120,7 +120,7 @@ bool Communicator::ConnectToDirectory(const Directory& dir)
 	std::cout << "Connecting to " << StringToIP(dir.ip) << ":" << dir.port << std::endl;
 	
 	// TODO: Changes this from localhost
-	if (sock.connect(sf::IpAddress::LocalHost, dir.port) != sf::Socket::Status::Done)
+	if (sock.connect(StringToIP(dir.ip), dir.port) != sf::Socket::Status::Done)
 		return false;
 	
 	std::cout << "Connected" << std::endl;
