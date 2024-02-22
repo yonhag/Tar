@@ -135,6 +135,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Communicator.cpp" />
+    <ClCompile Include="FileHandler.cpp" />
     <ClCompile Include="Serializer.cpp" />
     <ClCompile Include="Deserializer.cpp" />
     <ClCompile Include="Protocol.h" />
@@ -146,6 +147,7 @@
     <ClInclude Include="Communicator.h" />
     <ClInclude Include="Consts.h" />
     <ClInclude Include="Directory.h" />
+    <ClInclude Include="FileHandler.h" />
     <ClInclude Include="json.hpp" />
     <ClInclude Include="Deserializer.h" />
     <ClInclude Include="Serializer.h" />

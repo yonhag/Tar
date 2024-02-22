@@ -9,17 +9,19 @@
 #include "Deserializer.h"
 #include "Serializer.h"
 #include "SFML/System.hpp"
+#include "FileHandler.h"
 
 const std::chrono::seconds Communicator::timeout = std::chrono::seconds(5);
 
 Communicator::Communicator()
 {
-	// TODO: Change this to use the dirlist.txt file
-	Directory dir;
-	dir.ip = "192.168.0.27";
-	dir.port = 8201;
-	if (!ConnectToDirectory(dir))
-		throw std::runtime_error("Unable to connect to directory");
+	FileHandler fh;
+	while (true)
+	{
+		Directory dir = fh.GetNextDirectory();
+		if (!ConnectToDirectory(dir))
+			throw std::runtime_error("Unable to connect to directory");
+	}
 
 	if (this->_serverSocket.listen(listening_port) != sf::Socket::Status::Done)
 		throw std::runtime_error("Invalid server socket");
