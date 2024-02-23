@@ -129,7 +129,7 @@ bool Communicator::ConnectToDirectory(const Directory& dir)
 	
 	std::cout << "Connected" << std::endl;
 
-	if (SendData(sock, Serializer::SerializeDirectoryConnectionRequest("127.0.0.1", 500, this->listening_port)) != sf::Socket::Status::Done) // TODO: Change this to my actual ip and bandwidth)
+	if (SendData(sock, Serializer::SerializeDirectoryConnectionRequest(sf::IpAddress::getLocalAddress()->toString(), 500, this->listening_port)) != sf::Socket::Status::Done) // TODO: Change this to my actual ip and bandwidth)
 		std::cout << "Error in sending data";
 
 	std::cout << "data sent" << std::endl;
