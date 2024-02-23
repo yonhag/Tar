@@ -34,6 +34,5 @@ private:
 	// Consts
 	static const std::chrono::seconds timeout; // Can be changed in Communicator.cpp file
 	static const unsigned short directory_listening_port = 8201;
-	static const unsigned short relay_listening_port = 8200;
 	static const int max_message_size = 2048; // in bytes
 };

@@ -46,7 +46,7 @@ void Communicator::RunServer()
 Response Communicator::SendRelayConnectionRequest(const Relay& relay, const std::vector<unsigned char>& request)
 {
 	Response response;
-	response.data = Communicator::SendDataThroughNewClientSocket(relay.ip, Communicator::relay_listening_port, request);
+	response.data = Communicator::SendDataThroughNewClientSocket(relay.ip, relay.listening_port, request);
 	return response;
 }
 
