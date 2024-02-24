@@ -7,7 +7,7 @@
 class Communicator
 {
 public:
-	Communicator();
+	Communicator(unsigned short port);
 	~Communicator();
 
 	[[noreturn]] void RunServer();
@@ -19,7 +19,7 @@ private:
 
 	sf::TcpListener _serverSocket;
 	
-	const unsigned short listening_port = 8200;
+	unsigned short _listening_port;
 	const unsigned short client_port = 8202;
 	static const std::chrono::seconds timeout; // Defined in .cpp file
 

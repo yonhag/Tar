@@ -13,7 +13,7 @@
 
 const std::chrono::seconds Communicator::timeout = std::chrono::seconds(5);
 
-Communicator::Communicator()
+Communicator::Communicator(unsigned short port) : _listening_port(port)
 {
 	FileHandler fh;
 	while (true)
@@ -25,7 +25,7 @@ Communicator::Communicator()
 			break;	
 	}
 
-	if (this->_serverSocket.listen(listening_port) != sf::Socket::Status::Done)
+	if (this->_serverSocket.listen(_listening_port) != sf::Socket::Status::Done)
 		throw std::runtime_error("Invalid server socket");
 }
 
@@ -36,7 +36,7 @@ Communicator::~Communicator()
 
 void Communicator::RunServer()
 {
-	std::cout << "Listening on port " << this->listening_port << std::endl;
+	std::cout << "Listening on port " << this->_listening_port << std::endl;
 
 	while (true)
 	{
@@ -129,7 +129,7 @@ bool Communicator::ConnectToDirectory(const Directory& dir)
 	
 	std::cout << "Connected" << std::endl;
 
-	if (SendData(sock, Serializer::SerializeDirectoryConnectionRequest(sf::IpAddress::getLocalAddress()->toString(), 500, this->listening_port)) != sf::Socket::Status::Done) // TODO: Change this to my actual ip and bandwidth)
+	if (SendData(sock, Serializer::SerializeDirectoryConnectionRequest(sf::IpAddress::getLocalAddress()->toString(), 500, this->_listening_port)) != sf::Socket::Status::Done) // TODO: Change this to my actual ip and bandwidth)
 		std::cout << "Error in sending data";
 
 	std::cout << "data sent" << std::endl;
