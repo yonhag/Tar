@@ -136,8 +136,8 @@
   <ItemGroup>
     <ClCompile Include="Communicator.cpp" />
     <ClCompile Include="FileHandler.cpp" />
-    <ClCompile Include="Serializer.cpp" />
     <ClCompile Include="Deserializer.cpp" />
+    <ClCompile Include="Serializer.cpp" />
     <ClCompile Include="Protocol.h" />
     <ClCompile Include="RequestHandler.cpp" />
     <ClCompile Include="RequestHandler.h" />

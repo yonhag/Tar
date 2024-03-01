@@ -90,6 +90,10 @@ bool NetworkHandler::GetRelays(const LoadLevel loadlevel)
     try 
     {
         std::vector<unsigned char> relayResponse = Communicator::GetRelays(this->_dir, loadlevel);
+            
+        for (auto& i : relayResponse)
+            std::cout << i;
+        std::cout << std::endl;
 
         this->_relays = JsonDeserializer::DeserializeGetRelaysResponse(relayResponse);
         

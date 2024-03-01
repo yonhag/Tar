@@ -39,12 +39,25 @@ std::vector<DedicatedRelay> NetworkManager::GetRelays(const LoadLevel loadlevel)
     }
     else if (loadlevel == LoadLevel::Low)
     {
-        std::cout << "low" << std::endl << _relays.size() << std::endl;
-        for (int i = _relays.size() - 1; i > (_relays.size() - 3); i--)
+        std::cout << "low " << _relays.size() << std::endl;
+        for (int i = _relays.size() - 1; i >= (_relays.size() - 3); i--)
         {
             try {
-                std::cout << _relays[i].ip << ' ' << _relays.size() << std::endl;
-                dedicated_relays.push_back(DedicateRelay(_relays[i]));
+                std::cout << _relays[i].ip << ' ' << _relays[i].listening_port << ' ' << _relays.size() << std::endl;
+
+                DedicatedRelay drel = DedicateRelay(_relays[i]);
+
+                // If ip is empty - relay didn't respond.
+                if (drel.ip == "")
+                {
+                    _relays.erase(_relays.begin() + i); // Removing unresponsive relay
+                    if (_relays.size() > 3)
+                        return GetRelays(loadlevel); // Trying again
+                    else if (_relays.size() <= 3)
+                        return std::vector<DedicatedRelay>();
+                }
+
+                dedicated_relays.push_back(drel);
                 _relays[i].assigned_users += AssignedUserWeight::Low;
             }
             catch (std::exception& e) { std::cout << e.what(); }
@@ -55,9 +68,7 @@ std::vector<DedicatedRelay> NetworkManager::GetRelays(const LoadLevel loadlevel)
 
     std::cout << "Relays:" << std::endl;
     for (auto& i : dedicated_relays)
-    {
         std::cout << i.ip;
-    }
 
     return dedicated_relays;
 }
@@ -98,8 +109,11 @@ DedicatedRelay NetworkManager::DedicateRelay(const Relay& relay)
     // Sending the request
     Response response = Communicator::SendRelayConnectionRequest(relay, JsonSerializer::SerializeRelayConnectionRequest());
     
+    DedicatedRelay drel;
+
     // Receiving the answer
-    DedicatedRelay drel = JsonDeserializer::DeserializeRelayDedicationResponse(response);
+    if (!JsonDeserializer::DeserializeRelayDedicationResponse(response))
+        return drel;
     drel.ip = relay.ip;
 
     return drel;

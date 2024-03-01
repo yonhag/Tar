@@ -1,38 +1,25 @@
-#include "Serializer.h"
+#include "Deserializer.h"
 #include "json.hpp"
 
 using json = nlohmann::json;
 
-std::vector<unsigned char> Serializer::SerializeDirectoryConnectionResponse(const int AESKey, const int RSAKey)
+void Deserializer::DeserializeDirectoryConnectionRequest(const std::vector<unsigned char>& data, int& RSAKey, int& AESKey)
 {
-	std::vector<unsigned char> response;
-
 	json j;
-	j["RSAKey"] = RSAKey;
-	j["AESKey"] = AESKey;
+	j = json::parse(data);
 
-	auto dump = j.dump();
-	for (const auto& byte : dump)
-		response.push_back(byte);
-
-	return response;
+	RSAKey = j["RSAKey"];
+	AESKey = j["AESKey"];
 }
 
-std::vector<unsigned char> Serializer::SerializeDirectoryConnectionRequest(const std::string& ip, const unsigned int BandwidthInMb, const unsigned short listeningPort)
+bool Deserializer::DeserializeDirectoryConnectionResponse(const std::vector<unsigned char>& response)
 {
-	std::vector<unsigned char> request;
-
-	json j;
-	j["IP"] = ip; 
-	j["Bandwidth"] = BandwidthInMb;
-	j["Port"] = listeningPort;
-
-	auto dump = j.dump();
-
-	request.push_back('2'); // Adding signature
-
-	for (auto& byte : dump)
-		request.push_back(byte);
-
-	return request;
+	if (response.size() != 2)
+		return false;
+	
+	const std::string OKMessage = "OK";
+	
+	if (response[0] == OKMessage[0] && response[1] == OKMessage[1])
+		return true;
+	return false;
 }

@@ -3,9 +3,9 @@
 #include "Serializer.h"
 #include <array>
 
-RequestHandler::RequestHandler(const std::vector<unsigned char>& data)
+RequestHandler::RequestHandler()
 {
-	Deserializer::DeserializeDirectoryConnectionRequest(data, this->_RSAKey, this->_AESKey);
+	
 }
 
 Request RequestHandler::HandleRequest(std::vector<unsigned char>& data)
@@ -24,8 +24,8 @@ DirResponse RequestHandler::HandleDirRequest(std::vector<unsigned char>& data) c
 	DirResponse request;
 	switch (DetermineDirRequest(data))
 	{
-	case DirRequests::Keys:
-		return HandleKeyRequest();
+	case DirRequests::ServeRequest:
+		return Serializer::SerializeDirectoryServeResponse();
 	}
 	return request;
 }
@@ -37,7 +37,7 @@ DirRequests RequestHandler::DetermineDirRequest(std::vector<unsigned char>& data
 	switch (data[RequestTypeIndex])
 	{
 	case '1':
-		return DirRequests::Keys;
+		return DirRequests::ServeRequest;
 	}
 	return DirRequests();
 }

@@ -45,10 +45,10 @@
     <ClCompile Include="Protocol.h">
       <Filter>Header Files\Consts</Filter>
     </ClCompile>
-    <ClCompile Include="Serializer.cpp">
+    <ClCompile Include="Deserializer.cpp">
       <Filter>Source Files\Serialization</Filter>
     </ClCompile>
-    <ClCompile Include="Deserializer.cpp">
+    <ClCompile Include="Serializer.cpp">
       <Filter>Source Files\Serialization</Filter>
     </ClCompile>
     <ClCompile Include="FileHandler.cpp">

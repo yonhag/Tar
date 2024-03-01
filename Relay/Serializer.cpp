@@ -1,25 +1,46 @@
-#include "Deserializer.h"
+#include "Serializer.h"
 #include "json.hpp"
 
 using json = nlohmann::json;
 
-void Deserializer::DeserializeDirectoryConnectionRequest(const std::vector<unsigned char>& data, int& RSAKey, int& AESKey)
+DirResponse Serializer::SerializeDirectoryServeResponse()
 {
-	json j;
-	j = json::parse(data);
-
-	RSAKey = j["RSAKey"];
-	AESKey = j["AESKey"];
+	DirResponse dr;
+	dr.data.push_back('O');
+	dr.data.push_back('K');
+	return dr;
 }
 
-bool Deserializer::DeserializeDirectoryConnectionResponse(const std::vector<unsigned char>& response)
+std::vector<unsigned char> Serializer::SerializeDirectoryConnectionResponse(const int AESKey, const int RSAKey)
 {
-	if (response.size() != 2)
-		return false;
-	
-	const std::string OKMessage = "OK";
-	
-	if (response[0] == OKMessage[0] && response[1] == OKMessage[1])
-		return true;
-	return false;
+	std::vector<unsigned char> response;
+
+	json j;
+	j["RSAKey"] = RSAKey;
+	j["AESKey"] = AESKey;
+
+	auto dump = j.dump();
+	for (const auto& byte : dump)
+		response.push_back(byte);
+
+	return response;
+}
+
+std::vector<unsigned char> Serializer::SerializeDirectoryConnectionRequest(const std::string& ip, const unsigned int BandwidthInMb, const unsigned short listeningPort)
+{
+	std::vector<unsigned char> request;
+
+	json j;
+	j["IP"] = ip; 
+	j["Bandwidth"] = BandwidthInMb;
+	j["Port"] = listeningPort;
+
+	auto dump = j.dump();
+
+	request.push_back('2'); // Adding signature
+
+	for (auto& byte : dump)
+		request.push_back(byte);
+
+	return request;
 }

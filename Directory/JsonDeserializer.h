@@ -11,7 +11,7 @@ public:
 
 	static Relay DeserializeRelayConnectionRequest(const std::vector<unsigned char>& request);
 	
-	static DedicatedRelay DeserializeRelayDedicationResponse(const Response& response);
+	static bool DeserializeRelayDedicationResponse(const Response& response);
 	
 	static bool DeserializeUpdateDirectoriesResponse(const std::vector<unsigned char>& response);
 	

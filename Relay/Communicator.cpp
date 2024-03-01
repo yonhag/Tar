@@ -65,9 +65,15 @@ void Communicator::HandleConnection(std::unique_ptr<sf::TcpSocket> socket)
 		// Receiving data
 		std::vector<unsigned char> data = ReceiveWithTimeout(*socket);
 
+		for (auto& i : data)
+			std::cout << i;
+		std::cout << std::endl;
+
 		if (IsDirectoryMessage(data))
 		{
-			RequestHandler handler(data);
+			std::cout << "Dir message" << std::endl;
+
+			RequestHandler handler;
 
 			DirResponse response = handler.HandleDirRequest(data);
 			
@@ -77,7 +83,7 @@ void Communicator::HandleConnection(std::unique_ptr<sf::TcpSocket> socket)
 		}
 		else
 		{
-			RequestHandler handler(data);
+			RequestHandler handler;
 			Request request = handler.HandleRequest(data);
 			ServeClient(*socket, request);
 		}

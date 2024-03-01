@@ -31,14 +31,11 @@ Relay JsonDeserializer::DeserializeRelayConnectionRequest(const std::vector<unsi
 }
 
 // Returns a dedicated relay, minus the IP
-DedicatedRelay JsonDeserializer::DeserializeRelayDedicationResponse(const Response& response)
+bool JsonDeserializer::DeserializeRelayDedicationResponse(const Response& response)
 {
-    DedicatedRelay relay;
-    json j = json::parse(response.data);
-
-    // TODO: Fix the key handling
-
-    return relay;
+    if (response.data.size() != 2)
+        return false;
+    return response.data[0] == 'O' && response.data[1] == 'K';
 }
 
 bool JsonDeserializer::DeserializeUpdateDirectoriesResponse(const std::vector<unsigned char>& response)
