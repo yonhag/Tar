@@ -7,7 +7,7 @@
 class Communicator
 {
 public:
-	Communicator(unsigned short port);
+	explicit Communicator(unsigned short port);
 	~Communicator();
 
 	[[noreturn]] void RunServer();

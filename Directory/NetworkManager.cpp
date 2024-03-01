@@ -48,6 +48,7 @@ std::vector<DedicatedRelay> NetworkManager::GetRelays(const LoadLevel loadlevel)
                 DedicatedRelay drel = DedicateRelay(_relays[i]);
 
                 // If ip is empty - relay didn't respond.
+                // #TODO: Move to a different function
                 if (drel.ip == "")
                 {
                     _relays.erase(_relays.begin() + i); // Removing unresponsive relay
@@ -107,11 +108,13 @@ bool NetworkManager::RemoveRelay(const Relay& relay)
 DedicatedRelay NetworkManager::DedicateRelay(const Relay& relay)
 {
     // Sending the request
+    std::cout << "Sending Request" << std::endl;
     Response response = Communicator::SendRelayConnectionRequest(relay, JsonSerializer::SerializeRelayConnectionRequest());
     
     DedicatedRelay drel;
 
     // Receiving the answer
+    std::cout << "Deserializer: " << JsonDeserializer::DeserializeRelayDedicationResponse(response) << std::endl;
     if (!JsonDeserializer::DeserializeRelayDedicationResponse(response))
         return drel;
     drel.ip = relay.ip;

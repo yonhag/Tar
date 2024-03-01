@@ -12,7 +12,7 @@ Request RequestHandler::HandleRequest(std::vector<unsigned char>& data)
 {
 	Request request;
 
-	DecryptData(data);
+	// DecryptData(data);
 	request.dest_ip = ExtractIP(data);
 	request.data = data;
 
@@ -33,6 +33,8 @@ DirResponse RequestHandler::HandleDirRequest(std::vector<unsigned char>& data) c
 DirRequests RequestHandler::DetermineDirRequest(std::vector<unsigned char>& data) const
 {
 	const int RequestTypeIndex = 4;
+
+	std::cout << data[RequestTypeIndex] << std::endl;
 
 	switch (data[RequestTypeIndex])
 	{
