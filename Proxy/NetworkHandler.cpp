@@ -129,6 +129,11 @@ std::string NetworkHandler::GetFirstRelayIP() const
     return this->_relays[0]._ip;
 }
 
+unsigned short NetworkHandler::GetFirstRelayPort() const
+{
+    return this->_relays[0]._port;
+}
+
 std::vector<unsigned char> NetworkHandler::AddIP(const std::vector<unsigned char>& message, const std::string& ip)
 {
     std::vector<unsigned char> updatedMessage = message;

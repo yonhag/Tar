@@ -15,6 +15,7 @@ public:
 	bool IsConnected() const;
 	std::vector<unsigned char> EncryptMessage(const MessageRequest& message);
 	std::string GetFirstRelayIP() const;
+	unsigned short GetFirstRelayPort() const;
 
 	// Helper functions
 

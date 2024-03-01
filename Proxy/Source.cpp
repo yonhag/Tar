@@ -15,7 +15,7 @@ int main()
 		loadlevel = LoadLevel::High;
 	else
 		loadlevel = (LoadLevel)lvl;
-		*/
+	*/
 	try
 	{
 		NetworkHandler nwh(loadlevel);

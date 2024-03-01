@@ -75,10 +75,12 @@ void Communicator::SendMessages()
 {
 	sf::TcpSocket relaySocket;
 
-	if (relaySocket.connect(this->_nwhandler.GetFirstRelayIP(), Communicator::relay_port) != sf::Socket::Status::Done)
+	std::cout << "Connecting to " << this->_nwhandler.GetFirstRelayIP() << ':';
+	if (relaySocket.connect(this->_nwhandler.GetFirstRelayIP()) != sf::Socket::Status::Done)
 	{
 		relaySocket.disconnect();
-		throw std::exception("Relay socket failed");
+		std::cout << "Relay socket creation failed" << std::endl;
+		return;
 	}
 
 	while (true)

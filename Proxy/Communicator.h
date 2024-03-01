@@ -35,6 +35,5 @@ private:
 	// Constants
 	static const std::chrono::seconds timeout; // Defined in .cpp file
 
-	static const unsigned short relay_port = 8200;
 	static const unsigned short server_port = 8202;
 };
