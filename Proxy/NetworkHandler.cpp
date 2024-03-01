@@ -126,7 +126,7 @@ std::vector<unsigned char> NetworkHandler::EncryptMessage(const MessageRequest& 
 
 std::string NetworkHandler::GetFirstRelayIP() const
 {
-    return this->_relays[0]._ip;
+    return "127.0.0.1"; // #TODO: CHANGE THIS BACK TO return this->_relays[0]._ip; 
 }
 
 unsigned short NetworkHandler::GetFirstRelayPort() const
