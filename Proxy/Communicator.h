@@ -28,6 +28,7 @@ private:
 	static bool HasTimeoutPassed(const std::chrono::steady_clock::time_point& start_time);
 	static MessageRequest GetMessageRequest(const std::vector<unsigned char>& httpRequest);
 	static std::string GetHostFromRequest(const std::string& httpRequest);
+	static std::string TrimEndOfHost(const std::string& host);
 
 	// Members
 	std::queue <std::vector<unsigned char>> _messageQueue;

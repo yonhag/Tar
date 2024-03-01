@@ -187,9 +187,19 @@ std::string Communicator::GetHostFromRequest(const std::string& httpRequest)
 		// Find the Host header
 		if (line.substr(0, hostPrefix.size()) == hostPrefix) {
 			// Extract the host value
-			return line.substr(hostPrefix.size());
+			return TrimEndOfHost(line.substr(hostPrefix.size()));
 		}
 	}
 
 	throw std::exception("No host found");
+}
+
+/*
+* Removes the end of the string, if it is either '\n', '\r', or both of them.
+* Returns the fixed string.
+*/
+std::string Communicator::TrimEndOfHost(const std::string& host) 
+{
+	size_t end = host.find_last_not_of("\r\n");
+	return (end == std::string::npos) ? "" : host.substr(0, end + 1);
 }
