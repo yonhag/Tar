@@ -43,7 +43,7 @@ std::vector<DedicatedRelay> NetworkManager::GetRelays(const LoadLevel loadlevel)
         for (int i = _relays.size() - 1; i >= (_relays.size() - 3); i--)
         {
             try {
-                std::cout << _relays[i].ip << ' ' << _relays[i].listening_port << ' ' << _relays.size() << std::endl;
+                std::cout << "IP: " << _relays[i].ip << " Port: " << _relays[i].listening_port << " Relays: " << _relays.size() << std::endl;
 
                 DedicatedRelay drel = DedicateRelay(_relays[i]);
 
@@ -51,6 +51,7 @@ std::vector<DedicatedRelay> NetworkManager::GetRelays(const LoadLevel loadlevel)
                 // #TODO: Move to a different function
                 if (drel.ip == "")
                 {
+                    std::cout << "Empty drel" << std::endl;
                     _relays.erase(_relays.begin() + i); // Removing unresponsive relay
                     if (_relays.size() > 3)
                         return GetRelays(loadlevel); // Trying again
@@ -60,6 +61,9 @@ std::vector<DedicatedRelay> NetworkManager::GetRelays(const LoadLevel loadlevel)
 
                 dedicated_relays.push_back(drel);
                 _relays[i].assigned_users += AssignedUserWeight::Low;
+
+                if (dedicated_relays.size() == 3)
+                    break;
             }
             catch (std::exception& e) { std::cout << e.what(); }
         }
@@ -69,7 +73,8 @@ std::vector<DedicatedRelay> NetworkManager::GetRelays(const LoadLevel loadlevel)
 
     std::cout << "Relays:" << std::endl;
     for (auto& i : dedicated_relays)
-        std::cout << i.ip;
+        std::cout << " IP: " << i.ip;
+    std::cout << std::endl << std::endl;
 
     return dedicated_relays;
 }

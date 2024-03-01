@@ -27,8 +27,8 @@ Response JsonSerializer::SerializeGetRelaysResponse(const std::vector<DedicatedR
 	json j;
 
 	// Adding the relays
-	for (int i = 1; i <= relays_per_user; i++)
-		j["Relay" + std::to_string(i)] = relays[i];
+	for (int i = 0; i < relays_per_user; i++)
+		j["Relay" + std::to_string(i + 1)] = relays[i];
 
 	// Turning the json object to a byte vector
 	auto jsonString = j.dump();
