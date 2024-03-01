@@ -7,8 +7,6 @@ using json = nlohmann::json;
 void from_json(const json& j, Relay& relay)
 {
 	relay._ip = j["IP"];
-	relay._publicAESKey = j["AESKey"];
-	relay._publicRSAKey = j["RSAKey"];
 }
 
 MessageRequest JsonDeserializer::DeserializeClientMessage(const std::vector<unsigned char>& message)
