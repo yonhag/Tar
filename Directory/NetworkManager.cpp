@@ -123,6 +123,7 @@ DedicatedRelay NetworkManager::DedicateRelay(const Relay& relay)
     if (!JsonDeserializer::DeserializeRelayDedicationResponse(response))
         return drel;
     drel.ip = relay.ip;
+    drel.port = relay.listening_port;
 
     return drel;
 }

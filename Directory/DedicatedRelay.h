@@ -5,6 +5,7 @@
 struct DedicatedRelay
 {
 	std::string ip;
+	unsigned short port;
 public:
 	bool operator==(const Relay& other) const
 	{
