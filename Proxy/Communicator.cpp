@@ -40,7 +40,7 @@ void Communicator::RunServer()
 			this->HandleClient(std::move(clientSocket));
 		}
 		else
-			std::cout << "Problems with client connection" << std::endl
+			std::cout << "Problems with client connection" << std::endl;
 	}
 
 }
