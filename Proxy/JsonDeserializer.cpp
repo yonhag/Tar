@@ -1,6 +1,5 @@
 #include "JsonDeserializer.h"
 #include "json.hpp"
-#include <codecvt>
 
 using json = nlohmann::json;
 
@@ -8,19 +7,6 @@ void from_json(const json& j, Relay& relay)
 {
 	relay._ip = j["IP"];
 	relay._port = j["Port"];
-}
-
-MessageRequest JsonDeserializer::DeserializeClientMessage(const std::vector<unsigned char>& message)
-{
-	MessageRequest request;
-
-	json j = json::parse(message);
-	request._destIP = j["DestIP"];
-
-	std::string data = j["Data"];
-	request._data = std::vector<unsigned char>(data.begin(), data.end());
-
-	return request;
 }
 
 std::vector<Relay> JsonDeserializer::DeserializeGetRelaysResponse(const std::vector<unsigned char>& response)

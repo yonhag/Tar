@@ -3,6 +3,7 @@
 #include "Consts.h"
 #include "JsonDeserializer.h"
 #include "JsonSerializer.h"
+#include <sstream>
 #include <thread>
 #include <exception>
 #include <iostream>
@@ -31,12 +32,15 @@ void Communicator::RunServer()
 	{
 		// Accepting clients
 		auto clientSocket = std::make_unique<sf::TcpSocket>();
-		if (this->_serverSocket.accept(*clientSocket) == sf::Socket::Status::Done);
+		if (this->_serverSocket.accept(*clientSocket) == sf::Socket::Status::Done)
+		{
+			std::cout << "Accepting client..." << std::endl;
 
-		std::cout << "Accepting client..." << std::endl;
-
-		// Detaching client handling to a different thread
-		this->HandleClient(std::move(clientSocket));
+			// Detaching client handling to a different thread
+			this->HandleClient(std::move(clientSocket));
+		}
+		else
+			std::cout << "Problems with client connection" << std::endl
 	}
 
 }
@@ -64,7 +68,16 @@ void Communicator::HandleClient(std::unique_ptr<sf::TcpSocket> sock)
 	// Recieving the message
 	std::vector<unsigned char> message = ReceiveWithTimeout(*sock);
 	
-	MessageRequest request = JsonDeserializer::DeserializeClientMessage(message);
+	for (auto& i : message)
+		std::cout << i;
+	std::cout << std::endl;
+
+	MessageRequest request = GetMessageRequest(message);
+
+	std::cout << "Data: ";
+	for (auto& i : request._data)
+		std::cout << i;
+	std::cout << std::endl << " IP: " << request._destIP;
 
 	std::vector<unsigned char> encrypted = this->_nwhandler.EncryptMessage(request);
 
@@ -88,7 +101,7 @@ void Communicator::SendMessages()
 	while (true)
 	{
 		// Sleep if queue is empty
-		if (this->_messageQueue.empty())
+		while (this->_messageQueue.empty())
 			std::this_thread::sleep_for(std::chrono::seconds(3));
 
 		// Getting the message
@@ -97,7 +110,10 @@ void Communicator::SendMessages()
 		
 		// Sending the message
 		if (SendData(relaySocket, message) != sf::Socket::Status::Done)
-			throw std::exception("Error while sending message to client");
+		{
+			std::cout << "Error while sending message to client";
+			return;
+		}
 	}
 }
 
@@ -143,4 +159,37 @@ std::vector<unsigned char> Communicator::ReceiveWithTimeout(sf::TcpSocket& socke
 bool Communicator::HasTimeoutPassed(const std::chrono::steady_clock::time_point& start_time)
 {
 	return std::chrono::steady_clock::now() - start_time > Communicator::timeout;
+}
+
+MessageRequest Communicator::GetMessageRequest(const std::vector<unsigned char>& httpRequest)
+{
+	MessageRequest request;
+
+	request._data = httpRequest;
+
+	// Getting the host from the HTTP Request
+	std::string host = GetHostFromRequest(std::string(httpRequest.begin(), httpRequest.end()));
+	// Checking the IP of the host
+	request._destIP = sf::IpAddress(host).toString();
+
+	return request;
+}
+
+std::string Communicator::GetHostFromRequest(const std::string& httpRequest) 
+{
+	const std::string hostPrefix = "Host: ";
+
+	std::istringstream requestStream(httpRequest);
+	std::string line;
+
+	// Iterate through each line of the request
+	while (std::getline(requestStream, line)) {
+		// Find the Host header
+		if (line.substr(0, hostPrefix.size()) == hostPrefix) {
+			// Extract the host value
+			return line.substr(hostPrefix.size());
+		}
+	}
+
+	throw std::exception("No host found");
 }
