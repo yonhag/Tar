@@ -2,6 +2,9 @@
 #include "JsonSerializer.h"
 #include "JsonDeserializer.h"
 #include "NetworkManager.h"
+#include <iostream> // TODO: Remove this
+
+enum RequestCodes { GetRelays = '1', NewRelay = '2' };
 
 Response RequestHandler::HandleRequest(const std::vector<unsigned char>& request)
 {
@@ -9,13 +12,26 @@ Response RequestHandler::HandleRequest(const std::vector<unsigned char>& request
     
     if (IsDirMessage(request))
         response = HandleDirRequest(request);
-    if (request[request_type_index] == '1')
+
+    std::cout << (request[request_type_index] == RequestCodes::NewRelay) << std::endl;
+
+    if (request[request_type_index] == RequestCodes::GetRelays)
     {
-        LoadLevel llevel = JsonDeserializer::DeserializeGetRelaysRequest(request);
+        LoadLevel llevel = JsonDeserializer::DeserializeGetRelaysRequest(RemoveFirstCharsFromVector(request, 1));
         std::vector<DedicatedRelay> relays = NetworkManager::GetRelays(llevel);
         response = JsonSerializer::SerializeGetRelaysResponse(relays);
     }
 
+    else if (request[request_type_index] == RequestCodes::NewRelay)
+    {
+        Relay newRelay = JsonDeserializer::DeserializeRelayConnectionRequest(RemoveFirstCharsFromVector(request, 1));
+        std::cout << "passed" << std::endl;
+        NetworkManager::AddRelay(newRelay);
+        
+        response.data = std::vector<unsigned char>();
+        response.data.push_back('O');
+        response.data.push_back('K');
+    }
     // TODO: 
     // Encrypt the response using the key
 
@@ -90,4 +106,12 @@ bool RequestHandler::RemoveRelay(const std::vector<unsigned char>& request)
 {
     Relay relay = JsonDeserializer::DeserializeUpdateDirectoryRequest(request);
     return NetworkManager::RemoveRelay(relay);
+}
+
+// Retruns vec if amtofchars > vec.size;
+std::vector<unsigned char> RequestHandler::RemoveFirstCharsFromVector(const std::vector<unsigned char>& vec, const unsigned int amtofchars)
+{
+    if (amtofchars > vec.size())
+        return vec;
+    return std::vector<unsigned char>(vec.begin() + amtofchars, vec.end());
 }

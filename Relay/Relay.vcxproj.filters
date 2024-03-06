@@ -42,25 +42,22 @@
     <ClCompile Include="Source.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="WSAInitializer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Protocol.h">
       <Filter>Header Files\Consts</Filter>
     </ClCompile>
-    <ClCompile Include="JsonDeserializer.cpp">
+    <ClCompile Include="Deserializer.cpp">
       <Filter>Source Files\Serialization</Filter>
     </ClCompile>
-    <ClCompile Include="JsonSerializer.cpp">
+    <ClCompile Include="Serializer.cpp">
       <Filter>Source Files\Serialization</Filter>
+    </ClCompile>
+    <ClCompile Include="FileHandler.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Communicator.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="WSAInitializer.h">
-      <Filter>Header Files\External</Filter>
     </ClInclude>
     <ClInclude Include="Consts.h">
       <Filter>Header Files\Consts</Filter>
@@ -71,11 +68,17 @@
     <ClInclude Include="Request.h">
       <Filter>Header Files\Structs</Filter>
     </ClInclude>
-    <ClInclude Include="JsonSerializer.h">
+    <ClInclude Include="Serializer.h">
       <Filter>Header Files\Serialization</Filter>
     </ClInclude>
-    <ClInclude Include="JsonDeserializer.h">
+    <ClInclude Include="Deserializer.h">
       <Filter>Header Files\Serialization</Filter>
+    </ClInclude>
+    <ClInclude Include="Directory.h">
+      <Filter>Header Files\Structs</Filter>
+    </ClInclude>
+    <ClInclude Include="FileHandler.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

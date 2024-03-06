@@ -9,8 +9,7 @@ void to_json(json& j, const DedicatedRelay& relay)
 {
 	j = json{
 		{ "IP", relay.ip },
-		{ "AESKey", relay.AESKey },
-		{ "RSAKey", relay.RSAKey }
+		{ "Port", relay.port }
 	};
 }
 
@@ -29,8 +28,8 @@ Response JsonSerializer::SerializeGetRelaysResponse(const std::vector<DedicatedR
 	json j;
 
 	// Adding the relays
-	for (int i = 1; i <= relays_per_user; i++)
-		j["Relay" + DigitToChar(i)] = relays[i];
+	for (int i = 0; i < relays_per_user; i++)
+		j["Relay" + std::to_string(i + 1)] = relays[i];
 
 	// Turning the json object to a byte vector
 	auto jsonString = j.dump();
@@ -51,7 +50,8 @@ Request JsonSerializer::SerializeUpdateDirectoryRequest(const Relay& newRelay)
 	std::vector<unsigned char> buffer;
 
 	// Adding signature
-	const char* signature = "DIR" + (int)DirectoryCodes::AddRelay;
+	std::string sigStr = "DIR" + std::to_string(static_cast<int>(DirectoryCodes::AddRelay));
+	const char* signature = sigStr.c_str();
 	buffer.insert(buffer.begin(), signature, signature + sizeof(signature) - 1);
 	
 	// Creating JSON object
@@ -72,16 +72,10 @@ Request JsonSerializer::SerializeUpdateDirectoryRequest(const Relay& newRelay)
 std::vector<unsigned char> JsonSerializer::SerializeRelayConnectionRequest()
 {
 	std::vector<unsigned char> vec;
-
-	const char* signature = "DIR" + (int)DirectoryCodes::RelayConnection;
+	
+	std::string sigStr = "DIR" + std::to_string(static_cast<int>(DirectoryCodes::RelayConnection));
+	const char* signature = sigStr.c_str();
 	vec.insert(vec.begin(), signature, signature + sizeof(signature) - 1);
 
 	return vec;
-}
-
-char JsonSerializer::DigitToChar(const int integer)
-{
-	if (integer > 9 && integer < 0)
-		throw std::exception("Must be a digit");
-	return static_cast<char>(integer + '0');
 }

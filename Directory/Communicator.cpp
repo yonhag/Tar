@@ -3,51 +3,50 @@
 #include "RequestHandler.h"
 #include "FileHandler.h"
 #include "JsonDeserializer.h"
-#include <Ws2tcpip.h>
+#include <sstream>
 #include <thread>
 #include <exception>
 #include <iostream>
 
+const std::chrono::seconds Communicator::timeout = std::chrono::seconds(5);
+
 Communicator::Communicator()
 {
-	this->_serverSocket = socket(AF_INET, SOCK_STREAM, 0);
-	if (this->_serverSocket == INVALID_SOCKET)
-		throw std::exception("Invalid Socket Creation");
+	if (this->_serverSocket.listen(Communicator::directory_listening_port) != sf::Socket::Status::Done)
+		throw std::runtime_error("Invalid server socket");
+	std::cout << "Listening on port " << Communicator::directory_listening_port << std::endl;
 }
 
 Communicator::~Communicator()
 {
-	try
-	{
-		::closesocket(_serverSocket);
-	}
-	catch (...) {}
+	this->_serverSocket.close();
 }
 
 void Communicator::RunServer()
 {
-	BindAndListen();
-
 	while (true)
 	{
 		// Accepting clients
-		SOCKET client_socket = accept(this->_serverSocket, NULL, NULL);
-		if (client_socket == INVALID_SOCKET)
-			throw std::exception(__FUNCTION__);
+		auto client_socket = std::make_unique<sf::TcpSocket>();
+		
+		// If connection is fine
+		if (this->_serverSocket.accept(*client_socket) == sf::Socket::Status::Done)
+		{
+			std::cout << "Accepting client..." << std::endl;
 
-		std::cout << "Accepting client..." << std::endl;
-
-		// Detaching client handling to a different thread
-		std::thread tr(&Communicator::HandleClient, this, std::ref(client_socket));
-		tr.detach();
+			// Detaching client handling to a different thread
+			std::thread tr(&Communicator::HandleClient, this, std::move(client_socket));
+			tr.detach();
+		}
+		else
+			std::cout << "Problems with socket connection" << std::endl;
 	}
-
 }
 
 Response Communicator::SendRelayConnectionRequest(const Relay& relay, const std::vector<unsigned char>& request)
 {
 	Response response;
-	response.data = Communicator::SendDataThroughNewClientSocket(relay.ip, Communicator::network_listening_port, request);
+	response.data = Communicator::SendDataThroughNewClientSocket(relay.ip, relay.listening_port, request);
 	return response;
 }
 
@@ -62,7 +61,7 @@ unsigned int Communicator::UpdateOtherDirectories(const Request& relayRequest)
 		if (ip == "")
 			break;
 
-		std::vector<unsigned char> response = SendDataThroughNewClientSocket(ip, Communicator::network_listening_port, relayRequest.data);
+		std::vector<unsigned char> response = SendDataThroughNewClientSocket(ip, Communicator::directory_listening_port, relayRequest.data);
 		
 		if (JsonDeserializer::DeserializeUpdateDirectoriesResponse(response))
 			directoriesUpdated++;
@@ -70,106 +69,99 @@ unsigned int Communicator::UpdateOtherDirectories(const Request& relayRequest)
 	return directoriesUpdated;
 }
 
-void Communicator::BindAndListen()
-{
-	struct sockaddr_in sa = { 0 };
-
-	sa.sin_port = htons(network_listening_port);
-	sa.sin_family = AF_INET;
-	sa.sin_addr.s_addr = INADDR_ANY;
-
-	// Connects between the socket and the configuration (port and etc..)
-	if (::bind(_serverSocket, (struct sockaddr*)&sa, sizeof(sa)) == SOCKET_ERROR)
-		throw std::exception(__FUNCTION__ " - bind");
-
-	// Start listening for incoming requests of clients
-	if (::listen(_serverSocket, SOMAXCONN) == SOCKET_ERROR)
-		throw std::exception(__FUNCTION__ " - listen");
-	std::cout << "Listening on port " << network_listening_port << std::endl;
-}
-
-void Communicator::HandleClient(SOCKET sock)
+void Communicator::HandleClient(std::unique_ptr<sf::TcpSocket> sock)
 {
 	// Recieving the message
-	unsigned char buffer[Communicator::max_message_size];
-	int len = recv(sock, reinterpret_cast<char*>(buffer), Communicator::max_message_size, NULL);
+	try {
+		auto message = this->ReceiveWithTimeout(*sock);
+		
+		std::cout << "Message: ";
+		for (auto& i : message)
+			std::cout << i;
+		std::cout << std::endl;
 
-	if (len <= 0) // If connection isn't right
-	{
-		if (len == 0)
-			// Client closed the socket
-			std::cout << "Client closed the connection" << std::endl;
-		else
-			// Error occurred, handle it accordingly
-			std::cout << "Error in receiving data from client" << std::endl;
-		return;
+		Response response = RequestHandler::HandleRequest(message);
+		
+		std::cout << "Sending: " << std::endl;
+		for (auto& i : response.data)
+			std::cout << i;
+		std::cout << std::endl;
+
+		Communicator::SendData(*sock, response.data);
 	}
-
-	// Dealing with the message
-	std::vector<unsigned char> message(buffer, buffer + len);
-	
-	Response response = RequestHandler::HandleRequest(message);
-	
-	SendData(sock, response.data);
+	catch (std::exception& e) { std::cout << e.what(); }
 }
 
-std::vector<unsigned char> Communicator::SendDataThroughNewClientSocket(const std::string& ip, const u_short port, const std::vector<unsigned char>& data)
+std::vector<unsigned char> Communicator::SendDataThroughNewClientSocket(const std::string& ip, const unsigned short port, const std::vector<unsigned char>& data)
 {
-	SOCKET sock = socket(AF_INET, SOCK_STREAM, NULL);
-	if (sock == INVALID_SOCKET)
-		throw std::exception("Invalid Socket Creation");
+	sf::TcpSocket sock;
+	if (sock.connect(StringToIP(ip), port) != sf::Socket::Status::Done)
+		throw std::runtime_error("Connection failed");
 
-	// Setting the socket
-	sockaddr_in serverAddress;
-	serverAddress.sin_family = AF_INET;
-	serverAddress.sin_port = htons(port);
-
-	if (InetPton(AF_INET, StringToPCWSTR(ip), &serverAddress.sin_addr) != 1)
-	{
-		closesocket(sock);
-		throw std::exception("Socket creation failed");
-	}
-
-	// Connecting
-	if (connect(sock, (struct sockaddr*)&serverAddress, sizeof(serverAddress)) == SOCKET_ERROR)
-		throw std::exception("Connection Failed");
-
-	SendData(sock, data);
-
-	// Receiving
-	char buffer[Communicator::max_message_size];
-	int len = recv(sock, buffer, sizeof(buffer), NULL);
-
-	if (len <= 0)
-		throw std::exception("Error while receiving");
-
-	// Transferring
-	Response response;
-	std::vector<unsigned char> receivedResponse(reinterpret_cast<unsigned char>(buffer));
-	
-	return receivedResponse;
+	Communicator::SendData(sock, data);
+	return ReceiveWithTimeout(sock);
 }
 
-void Communicator::SendData(SOCKET sock, const std::vector<unsigned char>& data)
+sf::TcpSocket::Status Communicator::SendData(sf::TcpSocket& socket, const std::vector<unsigned char>& data)
 {
-	if (send(sock, reinterpret_cast<const char*>(data.data()), data.size(), 0) == INVALID_SOCKET)
+	return socket.send(data.data(), data.size());
+}
+
+std::vector<unsigned char> Communicator::ReceiveWithTimeout(sf::TcpSocket& socket)
+{
+	socket.setBlocking(false);
+	auto start_time = std::chrono::steady_clock::now();
+	std::size_t received;
+	std::vector<unsigned char> buffer(max_message_size);
+
+	while (true)
 	{
-		throw std::exception("Error while sending message to client");
+		sf::Socket::Status status = socket.receive(buffer.data(), buffer.size(), received);
+		if (status == sf::Socket::Status::Done) // Received data
+		{
+			socket.setBlocking(true);
+			return std::vector<unsigned char>(buffer.begin(), buffer.begin() + received);
+		}
+		else if (status == sf::Socket::Status::NotReady) // No data yet
+		{
+			if (Communicator::HasTimeoutPassed(start_time))
+			{
+				socket.setBlocking(true);
+				throw std::runtime_error("Timeout passed");
+			}
+			// Sleeping for 0.5s to avoid excessive CPU usage
+			std::this_thread::sleep_for(std::chrono::milliseconds(500));
+		}
+		else // Socket error
+		{
+			std::cout << "Error code: " << (int)status << std::endl;
+			socket.setBlocking(true);
+			throw std::runtime_error("Socket error");
+		}
 	}
 }
 
-PCWSTR Communicator::StringToPCWSTR(const std::string& str)
+bool Communicator::HasTimeoutPassed(const std::chrono::steady_clock::time_point& start_time)
 {
-	// Convert std::string to wide string using the system's default code page
-	int bufferSize = MultiByteToWideChar(CP_ACP, 0, str.c_str(), -1, nullptr, 0);
-	if (bufferSize == 0)
-		throw std::exception("Error in StringToPCWSTR");
+	return std::chrono::steady_clock::now() - start_time > Communicator::timeout;
+}
 
-	std::wstring wideBuffer(bufferSize, L'\0');
+sf::IpAddress Communicator::StringToIP(const std::string& ipString)
+{
+	std::uint8_t parts[4] = { 0, 0, 0, 0 };
+	std::stringstream ss(ipString);
+	std::string part;
 
-	// Convert std::string to wide string
-	if (MultiByteToWideChar(CP_ACP, 0, str.c_str(), -1, &wideBuffer[0], bufferSize) == 0)
-		throw std::exception("Error in StringToPCWSTR");
+	for (int i = 0; i < 4 && std::getline(ss, part, '.'); ++i) {
+		int number = std::stoi(part);
+		if (number >= 0 && number <= 255) {
+			parts[i] = static_cast<std::uint8_t>(number);
+		}
+		else {
+			// Handle invalid number
+			throw std::runtime_error("Invalid IP address: " + ipString);
+		}
+	}
 
-	return wideBuffer.c_str();
+	return sf::IpAddress(parts[0], parts[1], parts[2], parts[3]);
 }

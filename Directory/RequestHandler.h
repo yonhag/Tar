@@ -20,5 +20,7 @@ private:
 	static bool AddRelay(const std::vector<unsigned char>& request);
 	static bool RemoveRelay(const std::vector<unsigned char>& request);
 
+	static std::vector<unsigned char> RemoveFirstCharsFromVector(const std::vector<unsigned char>& vec, const unsigned int amtofchars);
+
 	static const int request_type_index = 0;
 };

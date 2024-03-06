@@ -1,10 +1,10 @@
-#include <WinSock2.h>
-#include <Windows.h>
-#include <Ws2tcpip.h>
-#include "JsonSerializer.h"
+#pragma once
 #include "NetworkHandler.h"
+#include "Communicator.h"
+#include "JsonSerializer.h"
 #include "JsonDeserializer.h"
 #include "Consts.h"
+#include <iostream>
 
 NetworkHandler::NetworkHandler(const LoadLevel loadlevel)
 {
@@ -14,17 +14,20 @@ NetworkHandler::NetworkHandler(const LoadLevel loadlevel)
         throw std::exception("File not opening");
 
     bool hasFoundDir = false;
-    while (!hasFoundDir)
+    while (!hasFoundDir && !dirFile.eof())
     {
         this->_dir = GetNextDir(dirFile);
-        
-        // If file is over
-        if (dirFile.eof())
-            throw std::exception("Reached EOF");
+
+        std::cout << "Trying " << this->_dir._ip << ":" << this->_dir._port << std::endl;
 
         hasFoundDir = GetRelays(loadlevel);
     }
     dirFile.close();
+
+    if (hasFoundDir)
+        this->_isConnected = true;
+    else
+        this->_isConnected = false;
 }
 
 NetworkHandler::NetworkHandler(const NetworkHandler& nwh, const LoadLevel loadlevel) :
@@ -38,12 +41,17 @@ NetworkHandler::NetworkHandler(const NetworkHandler& nwh, const LoadLevel loadle
             throw std::exception("File not opening");
 
         bool hasFoundDir = false;
-        while (!hasFoundDir)
+        while (!hasFoundDir && !dirFile.eof())
         {
             this->_dir = GetNextDir(dirFile);
             hasFoundDir = GetRelays(loadlevel);
         }
         dirFile.close();
+
+        if (hasFoundDir)
+            this->_isConnected = true;
+        else
+            this->_isConnected = false;
     }
 }
 
@@ -79,81 +87,23 @@ Directory NetworkHandler::GetNextDir(std::ifstream& dirFile) const
 
 bool NetworkHandler::GetRelays(const LoadLevel loadlevel)
 {
-    // Creating the socket
-    SOCKET sock = socket(AF_INET, SOCK_STREAM, 0);
-    if (sock == INVALID_SOCKET)
-        throw std::exception("Invalid Socket Creation");
-
-    // Setting the socket
-    sockaddr_in serverAddress;
-    serverAddress.sin_family = AF_INET;
-    serverAddress.sin_port = htons(this->_dir._port);
-
-    if (InetPton(AF_INET, StringToPCWSTR(this->_dir._ip), &serverAddress.sin_addr) != 1)
+    try 
     {
-        closesocket(sock);
-        return false;
+        std::vector<unsigned char> relayResponse = Communicator::GetRelays(this->_dir, loadlevel);
+            
+        for (auto& i : relayResponse)
+            std::cout << i;
+        std::cout << std::endl;
+
+        this->_relays = JsonDeserializer::DeserializeGetRelaysResponse(relayResponse);
+        
+        return this->_relays.size() == 3;
     }
-
-    // Connecting
-    if (connect(sock, (struct sockaddr*)&serverAddress, sizeof(serverAddress)) == SOCKET_ERROR)
-        throw std::exception("Connection Failed");
-
-    // Sending
-    std::vector<unsigned char> request = this->GetRelayRequest(loadlevel);
-    if (send(sock, reinterpret_cast<const char*>(request.data()), request.size(), 0) == INVALID_SOCKET)
-        return false;
-    
-    return ReceiveRelays(sock);
-}
-
-PCWSTR NetworkHandler::StringToPCWSTR(const std::string& str)
-{
-    // Convert std::string to wide string using the system's default code page
-    int bufferSize = MultiByteToWideChar(CP_ACP, 0, str.c_str(), -1, nullptr, 0);
-    if (bufferSize == 0)
-        throw std::exception("Error in StringToPCWSTR");
-
-    std::wstring wideBuffer(bufferSize, L'\0');
-
-    // Convert std::string to wide string
-    if (MultiByteToWideChar(CP_ACP, 0, str.c_str(), -1, &wideBuffer[0], bufferSize) == 0)
-        throw std::exception("Error in StringToPCWSTR");
-
-    return wideBuffer.c_str();
-}
-
-std::vector<unsigned char> NetworkHandler::GetRelayRequest(const LoadLevel loadlevel) const
-{
-    return JsonSerializer::SerializeGetRelaysRequest(loadlevel);
-}
-
-bool NetworkHandler::ReceiveRelays(SOCKET sock)
-{
-    const int max_message_size = 4096;
-    
-    unsigned char buffer[max_message_size];
-    int len = recv(sock, reinterpret_cast<char*>(buffer), max_message_size, NULL);
-    
-    try
-    {
-        ::closesocket(sock);
+    catch (std::exception& e) 
+    { 
+        std::cout << e.what() << std::endl; 
+        return false; 
     }
-    catch (...) {};
-
-    if (len <= 0)
-        return false;
-
-    std::vector<unsigned char> message(buffer, buffer + len);
-
-    return HandleConnectionMessage(message);
-}
-
-bool NetworkHandler::HandleConnectionMessage(const std::vector<unsigned char>& message)
-{
-    this->_relays = JsonDeserializer::DeserializeGetRelaysResponse(message);
-
-    return this->_relays.size() == 3;
 }
 
 std::vector<unsigned char> NetworkHandler::EncryptMessage(const MessageRequest& message)
@@ -176,7 +126,12 @@ std::vector<unsigned char> NetworkHandler::EncryptMessage(const MessageRequest& 
 
 std::string NetworkHandler::GetFirstRelayIP() const
 {
-    return this->_relays[0]._ip;
+    return "127.0.0.1"; // #TODO: CHANGE THIS BACK TO return this->_relays[0]._ip; 
+}
+
+unsigned short NetworkHandler::GetFirstRelayPort() const
+{
+    return this->_relays[0]._port;
 }
 
 std::vector<unsigned char> NetworkHandler::AddIP(const std::vector<unsigned char>& message, const std::string& ip)

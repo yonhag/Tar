@@ -1,28 +1,30 @@
 #include "Communicator.h"
 #include "NetworkHandler.h"
-#include "WSAInitializer.h"
 #include "LoadLevel.h"
 #include <exception>
 #include <iostream>
 
 int main()
 {
-	WSAInitializer wsa_init;
-
-	LoadLevel loadlevel;
+	LoadLevel loadlevel = LoadLevel::Low;
 	int lvl;
+	/*
 	std::cout << "Enter load level:\n0: Low\n1: Medium\n2: High\nType: ";
 	std::cin >> lvl;
 	if (lvl < 0 || lvl > 2)
 		loadlevel = LoadLevel::High;
 	else
 		loadlevel = (LoadLevel)lvl;
+	*/
 	try
 	{
 		NetworkHandler nwh(loadlevel);
 
 		if (!nwh.IsConnected())
+		{
+			std::cout << "Directories unavailable" << std::endl;
 			return 1;
+		}
 
 		auto comm = Communicator(nwh);
 

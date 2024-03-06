@@ -19,3 +19,20 @@ std::vector<unsigned char> JsonSerializer::SerializeGetRelaysRequest(const LoadL
 
 	return buffer;
 }
+
+std::vector<unsigned char> JsonSerializer::SerializeRelayDataSendingRequest(const MessageRequest& request)
+{
+	std::vector<unsigned char> message;
+
+	json j;
+	j["DestIP"] = request._destIP;
+	j["Data"] = request._data;
+
+	auto jsonString = j.dump();
+
+	std::vector<unsigned char> buffer;
+	for (const auto& byte : jsonString)
+		buffer.push_back(byte);
+
+	return buffer;
+}

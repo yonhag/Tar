@@ -16,16 +16,26 @@ LoadLevel JsonDeserializer::DeserializeGetRelaysRequest(const std::vector<unsign
     return j["LoadLevel"];
 }
 
-// Returns a dedicated relay, minus the IP
-DedicatedRelay JsonDeserializer::DeserializeRelayConnectionResponse(const Response& response)
+Relay JsonDeserializer::DeserializeRelayConnectionRequest(const std::vector<unsigned char>& request)
 {
-    DedicatedRelay relay;
-    json j = json::parse(response.data);
+    Relay relay;
 
-    relay.AESKey = j["AESKey"];
-    relay.RSAKey = j["RSAKey"];
+    json j = json::parse(request);
+
+    relay.ip = j["IP"];
+    relay.bandwidth = j["Bandwidth"];
+    relay.listening_port = j["Port"];
+    relay.assigned_users = 0; // No Users currently assigned
 
     return relay;
+}
+
+// Returns a dedicated relay, minus the IP
+bool JsonDeserializer::DeserializeRelayDedicationResponse(const Response& response)
+{
+    if (response.data.size() != 2)
+        return false;
+    return response.data[0] == 'O' && response.data[1] == 'K';
 }
 
 bool JsonDeserializer::DeserializeUpdateDirectoriesResponse(const std::vector<unsigned char>& response)

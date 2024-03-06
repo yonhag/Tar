@@ -1,11 +1,18 @@
 #pragma once
+#include "Relay.h"
 #include <string>
 
 struct DedicatedRelay
 {
 	std::string ip;
-	int AESKey;
-	int RSAKey;
+	unsigned short port;
+public:
+	bool operator==(const Relay& other) const
+	{
+		if (this->ip == other.ip)
+			return true;
+		return false;
+	}
 };
 
 // Constant needed in every file this struct's included in

@@ -1,31 +1,34 @@
 #include "RequestHandler.h"
-#include "JsonDeserializer.h"
-#include "JsonSerializer.h"
+#include "Deserializer.h"
+#include "Serializer.h"
 #include <array>
 
-RequestHandler::RequestHandler(const std::vector<unsigned char>& data)
+RequestHandler::RequestHandler()
 {
-	JsonDeserializer::DeserializeDirectoryConnectionRequest(data, this->_RSAKey, this->_AESKey);
+	
 }
 
 Request RequestHandler::HandleRequest(std::vector<unsigned char>& data)
 {
 	Request request;
 
-	DecryptData(data);
-	request.dest_ip = ExtractIP(data);
-	request.data = data;
+	// Insert decryption 
+	
+	std::pair<std::string, std::vector<unsigned char>> deserializedRequest = Deserializer::DeserializeClientMessages(data);
+
+	request.dest_ip = deserializedRequest.first;
+	request.data = deserializedRequest.second;
 
 	return request;
 }
 
-DirResponse RequestHandler::HandleDirRequest(std::vector<unsigned char>& data)
+DirResponse RequestHandler::HandleDirRequest(std::vector<unsigned char>& data) const
 {
 	DirResponse request;
 	switch (DetermineDirRequest(data))
 	{
-	case DirRequests::Keys:
-		return HandleKeyRequest();
+	case DirRequests::ServeRequest:
+		return Serializer::SerializeDirectoryServeResponse();
 	}
 	return request;
 }
@@ -34,18 +37,21 @@ DirRequests RequestHandler::DetermineDirRequest(std::vector<unsigned char>& data
 {
 	const int RequestTypeIndex = 4;
 
+	std::cout << data[RequestTypeIndex] << std::endl;
+
 	switch (data[RequestTypeIndex])
 	{
 	case '1':
-		return DirRequests::Keys;
+		return DirRequests::ServeRequest;
 	}
+	return DirRequests();
 }
 
 DirResponse RequestHandler::HandleKeyRequest() const
 {
 	DirResponse res;
 
-	res.data = JsonSerializer::SerializeDirectoryConnectionResponse(this->_AESKey, this->_RSAKey);
+	res.data = Serializer::SerializeDirectoryConnectionResponse(this->_AESKey, this->_RSAKey);
 
 	return res;
 }
@@ -56,30 +62,6 @@ std::vector<unsigned char> RequestHandler::DecryptData(const std::vector<unsigne
 	decryptedData = DecryptAES(decryptedData);
 
 	return decryptedData;
-}
-
-std::string RequestHandler::ExtractIP(std::vector<unsigned char>& data)
-{
-	std::string ip = "";
-
-	int startIndex = data.size() - ip_size;
-	for (int i = 0; i < 15 && !data.empty(); i++)
-	{
-		ip += data[startIndex];
-		data.erase(data.begin() + startIndex);
-	}
-
-	// Removing the padding
-	for (int i = 0; i < ip_size && ip.size() > i; i++)
-	{
-		if (ip[i] == ',')
-		{
-			ip.erase(i, 1);
-			--i;
-		}
-	}
-
-	return ip;
 }
 
 std::vector<unsigned char> RequestHandler::DecryptAES(const std::vector<unsigned char>& data)

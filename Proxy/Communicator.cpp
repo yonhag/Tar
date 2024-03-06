@@ -2,130 +2,107 @@
 #include "Protocol.h"
 #include "Consts.h"
 #include "JsonDeserializer.h"
-#include <WS2tcpip.h>
+#include "JsonSerializer.h"
+#include <sstream>
 #include <thread>
 #include <exception>
 #include <iostream>
-#include <chrono>
+
+const std::chrono::seconds Communicator::timeout = std::chrono::seconds(5);
 
 Communicator::Communicator(const NetworkHandler& nwh) :
 	_nwhandler(nwh)
 {
-	this->_serverSocket = socket(AF_INET, SOCK_STREAM, 0);
-	if (this->_serverSocket == INVALID_SOCKET)
-		throw std::exception("Invalid Socket Creation");
+	this->_serverSocket.listen(server_port);
 }
 
 Communicator::~Communicator()
 {
-	try
-	{
-		::closesocket(_serverSocket);
-	}
-	catch (...) {}
+	this->_serverSocket.close();
 }
 
 void Communicator::RunServer()
 {
-	bindAndListen();
+	std::cout << "Listening on port " << this->server_port << std::endl;
+
 	std::thread sendingThread(&Communicator::SendMessages, this);
 	sendingThread.detach();
 
 	while (true)
 	{
 		// Accepting clients
-		SOCKET client_socket = accept(this->_serverSocket, NULL, NULL);
-		if (client_socket == INVALID_SOCKET)
-			throw std::exception(__FUNCTION__);
-
-		std::cout << "Accepting client..." << std::endl;
-
-		// Detaching client handling to a different thread
-		this->HandleClient(client_socket);
-	}
-
-}
-
-void Communicator::bindAndListen()
-{
-	struct sockaddr_in sa = { 0 };
-
-	sa.sin_port = htons(server_port);
-	sa.sin_family = AF_INET;
-	sa.sin_addr.s_addr = INADDR_ANY;
-
-	// Connects between the socket and the configuration (port and etc..)
-	if (::bind(_serverSocket, (struct sockaddr*)&sa, sizeof(sa)) == SOCKET_ERROR)
-		throw std::exception(__FUNCTION__ " - bind");
-
-	// Start listening for incoming requests of clients
-	if (::listen(_serverSocket, SOMAXCONN) == SOCKET_ERROR)
-		throw std::exception(__FUNCTION__ " - listen");
-	std::cout << "Listening on port " << server_port << std::endl;
-}
-
-void Communicator::HandleClient(SOCKET sock)
-{
-	// Recieving the message
-	unsigned char buffer[max_message_size];
-	int len = recv(sock, reinterpret_cast<char*>(buffer), max_message_size, NULL);
-	
-	// If connection isn't right
-	if (len <= 0) 
-	{
-		if (len == 0)
+		auto clientSocket = std::make_unique<sf::TcpSocket>();
+		if (this->_serverSocket.accept(*clientSocket) == sf::Socket::Status::Done)
 		{
-			// Client closed the socket
-			std::cout << "Client closed the connection" << std::endl;
+			std::cout << "Accepting client..." << std::endl;
+
+			// Detaching client handling to a different thread
+			this->HandleClient(std::move(clientSocket));
 		}
 		else
-		{
-			// Error occurred, handle it accordingly
-			std::cout << "Error in receiving data from client" << std::endl;
-		}
-		return;
+			std::cout << "Problems with client connection" << std::endl;
 	}
 
-	// Dealing with the message
-	std::vector<unsigned char> message(buffer, buffer + len);
-	
-	MessageRequest request = JsonDeserializer::DeserializeClientMessage(message);
+}
 
-	std::vector<unsigned char> encrypted = this->_nwhandler.EncryptMessage(request);
+std::vector<unsigned char> Communicator::GetRelays(const Directory& dir, const LoadLevel& ll)
+{
+	std::vector<unsigned char> request = JsonSerializer::SerializeGetRelaysRequest(ll);
+
+	sf::TcpSocket directorySocket;
+	
+	directorySocket.connect(dir._ip, dir._port);
+	SendData(directorySocket, request);
+	
+	// Receiving the relays
+	// #TODO: change this
+	std::vector<unsigned char> relays(256);
+	std::size_t recv;
+	directorySocket.receive(relays.data(), relays.size(), recv); //ReceiveWithTimeout(directorySocket);
+
+	return relays;
+}
+
+void Communicator::HandleClient(std::unique_ptr<sf::TcpSocket> sock)
+{
+	// Recieving the message
+	std::vector<unsigned char> message = ReceiveWithTimeout(*sock);
+	
+	for (auto& i : message)
+		std::cout << i;
+	std::cout << std::endl;
+
+	MessageRequest request = GetMessageRequest(message);
+
+	std::cout << "Data: ";
+	for (auto& i : request._data)
+		std::cout << i;
+	std::cout << std::endl << " IP: " << request._destIP;
+
+	//std::vector<unsigned char> encrypted = this->_nwhandler.EncryptMessage(request);
+	std::vector<unsigned char> encrypted = JsonSerializer::SerializeRelayDataSendingRequest(request);
 
 	this->_messageQueue.push(encrypted);
 }
 
 void Communicator::SendMessages()
 {
-	// Creating a socket with the relays
-	SOCKET relaySocket = socket(AF_INET, SOCK_STREAM, 0);
-	if (relaySocket = INVALID_SOCKET)
-		throw std::exception("Relay socket failed");
+	sf::TcpSocket relaySocket;
 
-	// Socket Specifiers
-	sockaddr_in serverAddress;
-	serverAddress.sin_family = AF_INET;
-	serverAddress.sin_port = htons(this->relay_port);
-
-	PCWSTR ip = NetworkHandler::StringToPCWSTR(this->_nwhandler.GetFirstRelayIP());
-	if (InetPton(AF_INET, ip, &(serverAddress.sin_addr)) != 1)
+	std::cout << "Connecting to " << this->_nwhandler.GetFirstRelayIP() << ':' << this->_nwhandler.GetFirstRelayPort() << std::endl;
+	if (relaySocket.connect(this->_nwhandler.GetFirstRelayIP(), this->_nwhandler.GetFirstRelayPort()) != sf::Socket::Status::Done)
 	{
-		closesocket(relaySocket);
-		throw std::exception("Relay socket failed");
+		relaySocket.disconnect();
+		std::cout << "Relay socket creation failed" << std::endl;
+		return;
 	}
 
-	// Connecting
-	if (connect(relaySocket, reinterpret_cast<sockaddr*>(&serverAddress), sizeof(serverAddress)) == INVALID_SOCKET)
-	{
-		closesocket(relaySocket);
-		throw std::exception("Relay socket failed");
-	}
+	std::cout << "Success connecting!" << std::endl;
 
 	while (true)
 	{
-		// Sleep is queue is empty
-		if (this->_messageQueue.empty())
+		// Sleep if queue is empty
+		while (this->_messageQueue.empty())
 			std::this_thread::sleep_for(std::chrono::seconds(3));
 
 		// Getting the message
@@ -133,7 +110,97 @@ void Communicator::SendMessages()
 		this->_messageQueue.pop();
 		
 		// Sending the message
-		if (send(relaySocket, reinterpret_cast<const char*>(message.data()), message.size(), 0) == INVALID_SOCKET)
-			throw std::exception("Error while sending message to client");
+		if (SendData(relaySocket, message) != sf::Socket::Status::Done)
+		{
+			std::cout << "Error while sending message to client";
+			return;
+		}
 	}
+}
+
+sf::TcpSocket::Status Communicator::SendData(sf::TcpSocket& socket, const std::vector<unsigned char>& data)
+{
+	return socket.send(data.data(), data.size());
+}
+
+std::vector<unsigned char> Communicator::ReceiveWithTimeout(sf::TcpSocket& socket)
+{
+	socket.setBlocking(false);
+	auto start_time = std::chrono::steady_clock::now();
+	std::size_t received;
+	std::vector<unsigned char> buffer(max_message_size);
+
+	while (true)
+	{
+		sf::Socket::Status status = socket.receive(buffer.data(), buffer.size(), received);
+		if (status == sf::Socket::Done) // Received data
+		{
+			socket.setBlocking(true);
+			return std::vector<unsigned char>(buffer.begin(), buffer.begin() + received);
+		}
+		else if (status == sf::Socket::NotReady) // No data yet
+		{
+			if (Communicator::HasTimeoutPassed(start_time))
+			{
+				socket.setBlocking(true);
+				throw std::exception("Timeout passed");
+			}
+			// Sleeping for 0.5s to avoid excessive CPU usage
+			std::this_thread::sleep_for(std::chrono::milliseconds(500));
+		}
+		else // Socket error
+		{
+			std::cout << status;
+			socket.setBlocking(true);
+			throw std::exception("Socket error");
+		}
+	}
+}
+
+bool Communicator::HasTimeoutPassed(const std::chrono::steady_clock::time_point& start_time)
+{
+	return std::chrono::steady_clock::now() - start_time > Communicator::timeout;
+}
+
+MessageRequest Communicator::GetMessageRequest(const std::vector<unsigned char>& httpRequest)
+{
+	MessageRequest request;
+
+	request._data = httpRequest;
+
+	// Getting the host from the HTTP Request
+	std::string host = GetHostFromRequest(std::string(httpRequest.begin(), httpRequest.end()));
+	// Checking the IP of the host
+	request._destIP = sf::IpAddress(host).toString();
+
+	return request;
+}
+
+std::string Communicator::GetHostFromRequest(const std::string& httpRequest) 
+{
+	const std::string hostPrefix = "Host: ";
+
+	std::istringstream requestStream(httpRequest);
+	std::string line;
+
+	// Iterate through each line of the request
+	while (std::getline(requestStream, line)) {
+		// Find the Host header
+		if (line.substr(0, hostPrefix.size()) == hostPrefix) {
+			// Extract the host value
+			return TrimEndOfHost(line.substr(hostPrefix.size()));
+		}
+	}
+
+	throw std::exception("No host found");
+}
+
+/*
+* Removes the end of the string, if it is either '\n', '\r', or both of them.
+* Returns the fixed string.
+*/
+std::string Communicator::TrimEndOfHost(const std::string& host) 
+{
+	size_t end = host.find_last_not_of("\r\n");
+	return (end == std::string::npos) ? "" : host.substr(0, end + 1);
 }

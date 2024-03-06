@@ -1,16 +1,16 @@
-#pragma comment (lib, "ws2_32.lib")
 #include "Communicator.h"
-#include "WSAInitializer.h"
-#include <iostream>
-#include <thread>
-#include <chrono>
 
-int main()
+int main(int argc, char** argv)
 {
-	std::cout << "Hello World" << std::endl;
-	std::this_thread::sleep_for(std::chrono::minutes(2));
-	WSAInitializer wsa_init;
-	Communicator().RunServer();
-
-	return 0;
+	if (argc != 2)
+	{
+		std::cout << "Invalid argc" << std::endl;
+		return 1;
+	}
+	try
+	{
+		std::cout << argv[1] << std::endl;
+		Communicator(static_cast<unsigned short>(std::stoul(std::string(argv[1])))).RunServer();
+	}
+	catch (std::exception& e) { std::cout << e.what(); }
 }

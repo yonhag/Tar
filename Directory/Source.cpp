@@ -1,11 +1,13 @@
-#pragma comment (lib, "ws2_32.lib")
 #include "Communicator.h"
-#include "WSAInitializer.h"
+#include <exception>
+#include <iostream>
 
 int main()
 {
-	WSAInitializer wsa_init;
-	Communicator().RunServer();
-
+	try
+	{
+		Communicator().RunServer();
+	}
+	catch (std::exception& e) { std::cout << e.what(); }
 	return 0;
 }
