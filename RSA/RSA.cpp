@@ -17,15 +17,6 @@ RSA::RSA()
     
     SelectPublicKey(t);
     SelectPrivateKey(t);
-    
-    std::cout << "P: " << P << std::endl;
-    std::cout << "Q: " << Q << std::endl;
-    std::cout << "Product: " << this->_product << std::endl;
-    std::cout << "Totient: " << t << std::endl;
-    std::cout << "Public: " << this->_PublicKey << std::endl;
-    std::cout << "Private: " << this->_PrivateKey << std::endl;
-    std::cout << "Form ( == 1): " << (this->_PublicKey * this->_PrivateKey) % t << std::endl;
-    
 }
 
 Cipher RSA::Encrypt(const Plain& message) const
