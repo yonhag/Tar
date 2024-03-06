@@ -11,7 +11,7 @@
 #include "SFML/System.hpp"
 #include "FileHandler.h"
 
-const std::chrono::seconds Communicator::timeout = std::chrono::seconds(5);
+const std::chrono::seconds Communicator::timeout = std::chrono::seconds(50);
 
 Communicator::Communicator(unsigned short port) : _listening_port(port)
 {
