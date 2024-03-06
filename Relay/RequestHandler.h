@@ -26,5 +26,4 @@ private:
 	int _AESKey;
 
 	// Additionals
-	static std::string ExtractIP(std::vector<unsigned char>& data);
 };

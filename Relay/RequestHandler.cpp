@@ -12,9 +12,12 @@ Request RequestHandler::HandleRequest(std::vector<unsigned char>& data)
 {
 	Request request;
 
-	// DecryptData(data);
-	request.dest_ip = ExtractIP(data);
-	request.data = data;
+	// Insert decryption 
+	
+	std::pair<std::string, std::vector<unsigned char>> deserializedRequest = Deserializer::DeserializeClientMessages(data);
+
+	request.dest_ip = deserializedRequest.first;
+	request.data = deserializedRequest.second;
 
 	return request;
 }
@@ -59,30 +62,6 @@ std::vector<unsigned char> RequestHandler::DecryptData(const std::vector<unsigne
 	decryptedData = DecryptAES(decryptedData);
 
 	return decryptedData;
-}
-
-std::string RequestHandler::ExtractIP(std::vector<unsigned char>& data)
-{
-	std::string ip = "";
-
-	int startIndex = data.size() - ip_size;
-	for (int i = 0; i < 15 && !data.empty(); i++)
-	{
-		ip += data[startIndex];
-		data.erase(data.begin() + startIndex);
-	}
-
-	// Removing the padding
-	for (int i = 0; i < ip_size && ip.size() > i; i++)
-	{
-		if (ip[i] == ',')
-		{
-			ip.erase(i, 1);
-			--i;
-		}
-	}
-
-	return ip;
 }
 
 std::vector<unsigned char> RequestHandler::DecryptAES(const std::vector<unsigned char>& data)
