@@ -1,5 +1,7 @@
 #include "RSA.h"
-#include <random> // Used for randomizing primes
+#include <boost/random/uniform_int_distribution.hpp>
+#include <boost/random/mersenne_twister.hpp>
+#include <ctime>
 #include <iostream>
 
 RSA::RSA()
@@ -15,35 +17,40 @@ RSA::RSA()
     
     SelectPublicKey(t);
     SelectPrivateKey(t);
+    
+    std::cout << "P: " << P << std::endl;
+    std::cout << "Q: " << Q << std::endl;
+    std::cout << "Product: " << this->_product << std::endl;
+    std::cout << "Totient: " << t << std::endl;
     std::cout << "Public: " << this->_PublicKey << std::endl;
     std::cout << "Private: " << this->_PrivateKey << std::endl;
-    std::cout << "Totient: " << t << std::endl;
-    std::cout << "Product: " << this->_product << std::endl;
+    std::cout << "Form ( == 1): " << (this->_PublicKey * this->_PrivateKey) % t << std::endl;
+    
 }
 
-std::vector<unsigned char> RSA::Encrypt(const std::vector<unsigned char>& message) const
+Cipher RSA::Encrypt(const Plain& message) const
 {
-    std::vector<unsigned char> cipher;
+    Cipher cipher;
     
     for (const auto& uc : message)
     {
-        Integer n = uc;
-        n = (n ^ this->_PublicKey) % this->_product;
-        cipher.push_back(n);
+        Integer n(uc);
+        n = powm(n, this->_PublicKey, this->_product);
+        cipher.push_back((n));
     }
 
     return cipher;
 }
 
-std::vector<unsigned char> RSA::Decrypt(const std::vector<unsigned char>& cipher) const
+Plain RSA::Decrypt(const Cipher& cipher) const
 {
-    std::vector<unsigned char> message;
+    Plain message;
 
-    for (const auto& val : cipher)
+    for (const Integer& val : cipher)
     {
-        Integer n = val;
-        n = (n ^ this->_PrivateKey) % this->_product;
-        message.push_back(n);
+        Integer n(val);
+        n = powm(n, this->_PrivateKey, this->_product);
+        message.push_back(n.convert_to<unsigned char>());
     }
 
     return message;
@@ -52,9 +59,8 @@ std::vector<unsigned char> RSA::Decrypt(const std::vector<unsigned char>& cipher
 void RSA::GeneratePrimes(Prime& P, Prime& Q) const
 {
 	// Preparing the RNG
-	std::random_device rd;
-	std::mt19937 gen(rd());
-	std::uniform_int_distribution<Prime> distribution(7, this->MAX_PRIMES);
+	boost::random::mt19937 gen(std::time(0));
+	boost::random::uniform_int_distribution<Prime> distribution(7, this->MAX_PRIMES);
 
     do 
     {
@@ -64,25 +70,24 @@ void RSA::GeneratePrimes(Prime& P, Prime& Q) const
     do
     {
         Q = distribution(gen);
-    } while (!IsPrime(Q));
+    } while (!IsPrime(Q) || Q == P);
     // TODO: Add a test for if P and Q have a large difference between each other
 }
 
-Product RSA::CalculateProduct(const Prime P, const Prime Q) const
+Product RSA::CalculateProduct(const Prime& P, const Prime& Q) const
 {
     return static_cast<Product>(P) * static_cast<Product>(Q);
 }
 
-Totient RSA::CalculateTotient(const Prime P, const Prime Q) const
+Totient RSA::CalculateTotient(const Prime& P, const Prime& Q) const
 {
     return (static_cast<Totient>(P) - 1) * (static_cast<Totient>(Q) - 1);
 }
 
 void RSA::SelectPublicKey(const Totient t)
 {
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_int_distribution<PublicKey> distribution(7, t); // TODO: Integrate min_prime
+    boost::random::mt19937 gen(std::time(0));
+    boost::random::uniform_int_distribution<PublicKey> distribution(7, t); // TODO: Integrate min_prime
 
     while (true)
     {
@@ -94,36 +99,36 @@ void RSA::SelectPublicKey(const Totient t)
 
 void RSA::SelectPrivateKey(Totient totient)
 {
-        SignedInteger originalTotient = totient, temp, quotient;
-        SignedInteger prevCoeff = 0, currCoeff = 1;
+    SignedInteger originalTotient = totient, temp, quotient;
+    SignedInteger prevCoeff = 0, currCoeff = 1;
 
-        if (totient == 1) {
-            this->_PrivateKey = 0;
-            return;
-        }
+    if (totient == 1) {
+        this->_PrivateKey = 0;
+        return;
+    }
 
-        SignedInteger publicKeyCopy = this->_PublicKey;
-        while (publicKeyCopy > 1) {
-            quotient = publicKeyCopy / totient;
-            temp = totient;
-            totient = publicKeyCopy % totient;
-            publicKeyCopy = temp;
-            temp = prevCoeff;
-            prevCoeff = currCoeff - quotient * prevCoeff;
-            currCoeff = temp;
-        }
+    SignedInteger publicKeyCopy = this->_PublicKey;
+    while (publicKeyCopy > 1) {
+        quotient = publicKeyCopy / totient;
+        temp = totient;
+        totient = publicKeyCopy % totient;
+        publicKeyCopy = temp;
+        temp = prevCoeff;
+        prevCoeff = currCoeff - quotient * prevCoeff;
+        currCoeff = temp;
+    }
 
-        if (currCoeff < 0)
-            currCoeff += originalTotient;
+    if (currCoeff < 0)
+        currCoeff += originalTotient;
 
-        this->_PrivateKey = currCoeff;
+    this->_PrivateKey = currCoeff;
 }
 
 bool RSA::IsPrime(const PossiblePrime num)
 {
     // No need to check 0/1, out of range for random function
 
-    auto sqrtNumber = static_cast<Integer>(std::sqrt(num));
+    Integer sqrtNumber = sqrt(num);
 
     for (Integer i = 2; i <= sqrtNumber; i++) 
     {

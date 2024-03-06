@@ -2,14 +2,19 @@
 #include "boost_1_84_0/boost/multiprecision/cpp_int.hpp"
 #include <vector>
 
-using PublicKey		= unsigned long long;
-using PrivateKey	= unsigned long long;
-using Totient		= unsigned long long;
-using Product		= unsigned long long;
-using Prime			= unsigned long;
-using PossiblePrime = unsigned long long;
-using Integer		= unsigned long long;
-using SignedInteger = long long;
+using namespace boost::multiprecision;
+
+using PublicKey		= cpp_int;
+using PrivateKey	= cpp_int;
+using Totient		= cpp_int;
+using Product		= cpp_int;
+using Prime			= cpp_int;
+using PossiblePrime = cpp_int;
+using Integer		= cpp_int;
+using SignedInteger = cpp_int;
+
+using Cipher = std::vector<Integer>;
+using Plain = std::vector<unsigned char>;
 
 class RSA
 {
@@ -17,14 +22,14 @@ public:
 	RSA();
 	RSA(const PublicKey& pubk, const PrivateKey& privk);
 
-	std::vector<unsigned char> Encrypt(const std::vector<unsigned char>& message) const;
-	std::vector<unsigned char> Decrypt(const std::vector<unsigned char>& cipher) const;
+	Cipher Encrypt(const Plain& message) const;
+	Plain Decrypt(const Cipher& cipher) const;
 
 private:
 	// Main methods
 	void GeneratePrimes(Prime& P, Prime& Q) const; // P and Q are outputs
-	Product CalculateProduct(const Prime P, const Prime Q) const;
-	Totient CalculateTotient(const Prime P, const Prime Q) const;
+	Product CalculateProduct(const Prime& P, const Prime& Q) const;
+	Totient CalculateTotient(const Prime& P, const Prime& Q) const;
 
 	void SelectPublicKey(const Totient t);
 	void SelectPrivateKey(const Totient t);
@@ -40,5 +45,5 @@ private:
 	// Additionals
 		Product _product;
 
-		const int MAX_PRIMES = 7;
+		const int MAX_PRIMES = 10000;
 };
