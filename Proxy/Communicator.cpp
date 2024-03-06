@@ -79,7 +79,8 @@ void Communicator::HandleClient(std::unique_ptr<sf::TcpSocket> sock)
 		std::cout << i;
 	std::cout << std::endl << " IP: " << request._destIP;
 
-	std::vector<unsigned char> encrypted = this->_nwhandler.EncryptMessage(request);
+	//std::vector<unsigned char> encrypted = this->_nwhandler.EncryptMessage(request);
+	std::vector<unsigned char> encrypted = JsonSerializer::SerializeRelayDataSendingRequest(request);
 
 	this->_messageQueue.push(encrypted);
 }

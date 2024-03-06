@@ -23,3 +23,15 @@ bool Deserializer::DeserializeDirectoryConnectionResponse(const std::vector<unsi
 		return true;
 	return false;
 }
+
+std::pair<std::string, std::vector<unsigned char>> Deserializer::DeserializeClientMessages(const std::vector<unsigned char>& data)
+{
+	std::pair<std::string, std::vector<unsigned char>> desUserMessage;
+	
+	json j;
+	j = json::parse(data);
+	desUserMessage.first = j["DestIP"];
+	desUserMessage.second = std::vector<unsigned char>(j["Data"]);
+
+	return desUserMessage;
+}
