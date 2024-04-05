@@ -27,6 +27,9 @@ public:
 	Cipher Encrypt(const Plain& message) const;
 	Plain Decrypt(const Cipher& cipher) const;
 
+	PublicKey GetPublicKey() const;
+	PrivateKey GetPrivateKey() const;
+
 private:
 	// Main methods
 	void GeneratePrimes(Prime& P, Prime& Q) const; // P and Q are outputs
