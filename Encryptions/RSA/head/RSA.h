@@ -1,4 +1,5 @@
 #pragma once
+
 #include <boost/multiprecision/cpp_int.hpp>
 #include <vector>
 
@@ -20,7 +21,8 @@ class RSA
 {
 public:
 	RSA();
-	RSA(const PublicKey& pubk, const PrivateKey& privk);
+	RSA(const RSA& other);
+	RSA(const PublicKey& pubk, const PrivateKey& privk, const Product& product);
 
 	Cipher Encrypt(const Plain& message) const;
 	Plain Decrypt(const Cipher& cipher) const;
@@ -45,5 +47,5 @@ private:
 	// Additionals
 	Product _product;
 
-	const int MAX_PRIMES = 10000;
+	static constexpr int MAX_PRIMES = 10000;
 };

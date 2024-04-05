@@ -19,6 +19,14 @@ RSA::RSA()
     SelectPrivateKey(t);
 }
 
+RSA::RSA(const RSA& other) : _PublicKey(other._PublicKey), _PrivateKey(other._PrivateKey), _product(other._product)
+{
+}
+
+RSA::RSA(const PublicKey& pubk, const PrivateKey& privk, const Product& product) : _PublicKey(pubk), _PrivateKey(privk), _product(product)
+{
+}
+
 Cipher RSA::Encrypt(const Plain& message) const
 {
     Cipher cipher;
