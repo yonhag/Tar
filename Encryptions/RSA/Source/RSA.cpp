@@ -55,6 +55,16 @@ Plain RSA::Decrypt(const Cipher& cipher) const
     return message;
 }
 
+PublicKey RSA::GetPublicKey() const
+{
+    return this->_PublicKey;
+}
+
+PrivateKey RSA::GetPrivateKey() const
+{
+    return this->_PrivateKey;
+}
+
 void RSA::GeneratePrimes(Prime& P, Prime& Q) const
 {
 	// Preparing the RNG

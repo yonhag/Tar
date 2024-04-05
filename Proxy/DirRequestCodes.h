@@ -1,2 +1,2 @@
 #pragma once
-enum DirRequestCodes { GetRelays = '1', JoinNetwork = '4' };
+enum DirRequestCodes { RSAHandshake = '0', GetRelays = '1', JoinNetwork = '4' };
