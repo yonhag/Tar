@@ -109,6 +109,8 @@ void Communicator::SendMessages()
 		std::vector<unsigned char> message = this->_messageQueue.front();
 		this->_messageQueue.pop();
 		
+		// std::vector<unsigned char> EncryptedMessage = Serialize
+
 		// Sending the message
 		if (SendData(relaySocket, message) != sf::Socket::Status::Done)
 		{
