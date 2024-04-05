@@ -13,7 +13,7 @@ const std::chrono::seconds Communicator::timeout = std::chrono::seconds(5);
 Communicator::Communicator(const NetworkHandler& nwh) :
 	_nwhandler(nwh)
 {
-	this->_serverSocket.listen(server_port);
+	this->_serverSocket.listen(Communicator::server_port);
 }
 
 Communicator::~Communicator()
@@ -23,7 +23,7 @@ Communicator::~Communicator()
 
 void Communicator::RunServer()
 {
-	std::cout << "Listening on port " << this->server_port << std::endl;
+	std::cout << "Listening on port " << Communicator::server_port << std::endl;
 
 	std::thread sendingThread(&Communicator::SendMessages, this);
 	sendingThread.detach();
