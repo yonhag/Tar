@@ -96,7 +96,7 @@
     <IncludePath>..\SFML-2.6.1-Windows\include;</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>..\SFML-2.6.1-Windows\include</IncludePath>
+    <IncludePath>..\SFML-2.6.1-Windows\include;..\Encryptions\RSA\head;..\RSA\boost_1_84_0;</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -138,8 +138,8 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>ws2_32.lib;winmm.lib;sfml-network-s-d.lib;sfml-system-s-d.lib;</AdditionalDependencies>
-      <AdditionalLibraryDirectories>..\SFML-2.6.1-Windows\lib</AdditionalLibraryDirectories>
+      <AdditionalDependencies>ws2_32.lib;winmm.lib;sfml-network-s-d.lib;sfml-system-s-d.lib;RSA.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\SFML-2.6.1-Windows\lib;..\Encryption\</AdditionalLibraryDirectories>
     </Link>
     <ProjectReference>
       <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
@@ -151,17 +151,17 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>SFML_STATIC</PreprocessorDefinitions>
+      <PreprocessorDefinitions>SFML_STATIC;BOOST_ALL_NO_LIB;BOOST_USE_STATIC_LIBS;</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..\SFML-2.6.1-Windows\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\SFML-2.6.1-Windows\include;..\Encryptions\RSA\head;C:\Users\test0\OneDrive\מסמכים\Magshimim\netanya-1102-tor\RSA\boost_1_84_0\boost\multiprecision</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>ws2_32.lib;winmm.lib;sfml-network-s.lib;sfml-system-s.lib;</AdditionalDependencies>
-      <AdditionalLibraryDirectories>..\SFML-2.6.1-Windows\lib</AdditionalLibraryDirectories>
+      <AdditionalDependencies>ws2_32.lib;winmm.lib;sfml-network-s.lib;sfml-system-s.lib;RSA.lib;libboost_multiprecision-vc143-mt-x64-1_84.lib;</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\SFML-2.6.1-Windows\lib;..\Encryptions\RSA\lib;</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
