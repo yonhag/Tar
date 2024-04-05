@@ -4,13 +4,13 @@
 
 using namespace boost::multiprecision;
 
-using PublicKey		= cpp_int;
-using PrivateKey	= cpp_int;
-using Totient		= cpp_int;
-using Product		= cpp_int;
-using Prime			= cpp_int;
+using PublicKey = cpp_int;
+using PrivateKey = cpp_int;
+using Totient = cpp_int;
+using Product = cpp_int;
+using Prime = cpp_int;
 using PossiblePrime = cpp_int;
-using Integer		= cpp_int;
+using Integer = cpp_int;
 using SignedInteger = cpp_int;
 
 using Cipher = std::vector<Integer>;
@@ -33,17 +33,17 @@ private:
 
 	void SelectPublicKey(const Totient t);
 	void SelectPrivateKey(const Totient t);
-	
+
 	// Assistance methods
 	static bool IsPrime(const PossiblePrime num);
 	bool CheckPublicKeyValidity(const Totient t) const;
 
 	// Members
 	// Keys
-		PublicKey _PublicKey;
-		PrivateKey _PrivateKey;
+	PublicKey _PublicKey;
+	PrivateKey _PrivateKey;
 	// Additionals
-		Product _product;
+	Product _product;
 
-		const int MAX_PRIMES = 10000;
+	const int MAX_PRIMES = 10000;
 };
