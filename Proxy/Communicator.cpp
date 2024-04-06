@@ -47,6 +47,7 @@ void Communicator::RunServer()
 
 std::vector<unsigned char> Communicator::GetRelays(const Directory& dir, const LoadLevel& ll)
 {
+	// Add RSA key exchange
 	std::vector<unsigned char> request = JsonSerializer::SerializeGetRelaysRequest(ll);
 
 	sf::TcpSocket directorySocket;
@@ -157,6 +158,18 @@ std::vector<unsigned char> Communicator::ReceiveWithTimeout(sf::TcpSocket& socke
 			throw std::exception("Socket error");
 		}
 	}
+}
+
+AES Communicator::RSAKeyExchange(sf::TcpSocket& directorySocket)
+{
+	RSA rsa;
+
+	std::vector<unsigned char> request = JsonSerializer::SerializeRSAHandshake(rsa.GetPublicKey());
+
+	SendData(directorySocket, request);
+
+	std::vector<unsigned char> response = ReceiveWithTimeout(directorySocket);
+	return JsonDeserializer::DesierlizeRSAHandshake(rsa.Decrypt(response));
 }
 
 bool Communicator::HasTimeoutPassed(const std::chrono::steady_clock::time_point& start_time)

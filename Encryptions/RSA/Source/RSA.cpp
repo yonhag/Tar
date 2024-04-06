@@ -93,7 +93,7 @@ Totient RSA::CalculateTotient(const Prime& P, const Prime& Q) const
     return (static_cast<Totient>(P) - 1) * (static_cast<Totient>(Q) - 1);
 }
 
-void RSA::SelectPublicKey(const Totient t)
+void RSA::SelectPublicKey(const Totient& t)
 {
     boost::random::mt19937 gen(std::time(0));
     boost::random::uniform_int_distribution<PublicKey> distribution(7, t); // TODO: Integrate min_prime
@@ -106,7 +106,7 @@ void RSA::SelectPublicKey(const Totient t)
     }
 }
 
-void RSA::SelectPrivateKey(Totient totient)
+void RSA::SelectPrivateKey(Totient& totient)
 {
     SignedInteger originalTotient = totient, temp, quotient;
     SignedInteger prevCoeff = 0, currCoeff = 1;
@@ -133,7 +133,7 @@ void RSA::SelectPrivateKey(Totient totient)
     this->_PrivateKey = currCoeff;
 }
 
-bool RSA::IsPrime(const PossiblePrime num)
+bool RSA::IsPrime(const PossiblePrime& num)
 {
     // No need to check 0/1, out of range for random function
 
@@ -148,7 +148,7 @@ bool RSA::IsPrime(const PossiblePrime num)
     return true;
 }
 
-bool RSA::CheckPublicKeyValidity(const Totient t) const
+bool RSA::CheckPublicKeyValidity(const Totient& t) const
 {
     // Guarenteed to be larger than totient, since generation
     // If key is a factor of totient
@@ -158,4 +158,44 @@ bool RSA::CheckPublicKeyValidity(const Totient t) const
     if (!IsPrime(this->_PublicKey))
         return false;
     return true;
+}
+
+Plain RSA::CipherToPlain(const Cipher& input)
+{
+    Plain output;
+    for (const auto& num : input) {
+        std::vector<unsigned char> temp;
+        export_bits(num, back_inserter(temp), 8);
+
+        // Prefix each number with its byte length (assuming 4 bytes for the length prefix)
+        size_t length = temp.size();
+        for (int i = 3; i >= 0; --i) {
+            output.push_back((length >> (i * 8)) & 0xFF);
+        }
+
+        // Append the serialized number
+        output.insert(output.end(), temp.begin(), temp.end());
+    }
+    return output;
+}
+
+Cipher RSA::PlainToCipher(const Plain& input)
+{
+    Cipher output;
+    size_t i = 0;
+    while (i < input.size()) {
+        // Read the length prefix (assuming 4 bytes for the length)
+        size_t length = 0;
+        for (int j = 0; j < 4; ++j) {
+            length = (length << 8) | input[i++];
+        }
+
+        // Read the bytes for the current number
+        cpp_int num;
+        import_bits(num, input.begin() + i, input.begin() + i + length, 8);
+        output.push_back(num);
+
+        i += length;
+    }
+    return output;
 }
