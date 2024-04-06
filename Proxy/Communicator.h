@@ -23,6 +23,7 @@ private:
 	void SendMessages();
 	static sf::TcpSocket::Status SendData(sf::TcpSocket& socket, const std::vector<unsigned char>& data);
 	static std::vector<unsigned char> ReceiveWithTimeout(sf::TcpSocket& socket);
+	static AES RSAKeyExchange(sf::TcpSocket& directorySocket);
 
 	// Helper functions
 	static bool HasTimeoutPassed(const std::chrono::steady_clock::time_point& start_time);
