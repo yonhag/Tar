@@ -169,7 +169,7 @@ AES Communicator::RSAKeyExchange(sf::TcpSocket& directorySocket)
 	SendData(directorySocket, request);
 
 	std::vector<unsigned char> response = ReceiveWithTimeout(directorySocket);
-	return JsonDeserializer::DesierlizeRSAHandshake(rsa.Decrypt(response));
+	return JsonDeserializer::DesierlizeRSAHandshake(rsa.Decrypt(RSA::PlainToCipher(response)));
 }
 
 bool Communicator::HasTimeoutPassed(const std::chrono::steady_clock::time_point& start_time)
