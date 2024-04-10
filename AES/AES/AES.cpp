@@ -1,6 +1,32 @@
 #include "AES.h"
+#include <random>
+#include <chrono>
 
 AES::AES(const AESKeyLength keyLength) {
+    int key_length = 0;
+    switch (keyLength) {
+    case AESKeyLength::AES_128:
+        this->Nk = 4;
+        this->Nr = 10;
+        key_length = 16;
+        break;
+    case AESKeyLength::AES_192:
+        this->Nk = 6;
+        this->Nr = 12;
+        key_length = 24;
+        break;
+    case AESKeyLength::AES_256:
+        this->Nk = 8;
+        this->Nr = 14;
+        key_length = 32;
+        break;
+    }
+    generateRandomBytes(key, key_length);
+    generateRandomBytes(iv, key_length);
+}
+
+AES::AES(unsigned char key[], unsigned char iv[], const AESKeyLength keyLength)
+{
     switch (keyLength) {
     case AESKeyLength::AES_128:
         this->Nk = 4;
@@ -15,42 +41,35 @@ AES::AES(const AESKeyLength keyLength) {
         this->Nr = 14;
         break;
     }
+    this->key = key;
+    this->iv = iv;
 }
 
-unsigned char* AES::EncryptECB(const unsigned char in[], unsigned int inLen,
-    const unsigned char key[]) {
-    CheckLength(inLen);
-    unsigned char* out = new unsigned char[inLen];
-    unsigned char* roundKeys = new unsigned char[4 * Nb * (Nr + 1)];
-    KeyExpansion(key, roundKeys);
-    for (unsigned int i = 0; i < inLen; i += blockBytesLen) {
-        EncryptBlock(in + i, out + i, roundKeys);
+void AES::generateRandomBytes(unsigned char* buffer, int length)
+{
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<> dis(0, 255);
+
+    for (int i = 0; i < length; ++i) {
+        buffer[i] = static_cast<unsigned char>(dis(gen));
     }
-
-    delete[] roundKeys;
-
-    return out;
 }
 
-unsigned char* AES::DecryptECB(const unsigned char in[], unsigned int inLen,
-    const unsigned char key[]) {
-    CheckLength(inLen);
-    unsigned char* out = new unsigned char[inLen];
-    unsigned char* roundKeys = new unsigned char[4 * Nb * (Nr + 1)];
-    KeyExpansion(key, roundKeys);
-    for (unsigned int i = 0; i < inLen; i += blockBytesLen) {
-        DecryptBlock(in + i, out + i, roundKeys);
-    }
-
-    delete[] roundKeys;
-
-    return out;
+unsigned char* AES::get_key()
+{
+    return key;
 }
 
-unsigned char* AES::EncryptCBC(const unsigned char in[], unsigned int inLen,
-    const unsigned char key[],
-    const unsigned char* iv) {
-    CheckLength(inLen);
+unsigned char* AES::get_iv()
+{
+    return iv;
+}
+
+unsigned char* AES::EncryptCBC(unsigned char in[], unsigned int inLen)
+{
+    padToMultipleOf16(in, inLen);
+    //CheckLength(inLen);
     unsigned char* out = new unsigned char[inLen];
     unsigned char block[blockBytesLen];
     unsigned char* roundKeys = new unsigned char[4 * Nb * (Nr + 1)];
@@ -67,10 +86,9 @@ unsigned char* AES::EncryptCBC(const unsigned char in[], unsigned int inLen,
     return out;
 }
 
-unsigned char* AES::DecryptCBC(const unsigned char in[], unsigned int inLen,
-    const unsigned char key[],
-    const unsigned char* iv) {
-    CheckLength(inLen);
+unsigned char* AES::DecryptCBC(unsigned char in[], unsigned int inLen) 
+{
+    //CheckLength(inLen);
     unsigned char* out = new unsigned char[inLen];
     unsigned char block[blockBytesLen];
     unsigned char* roundKeys = new unsigned char[4 * Nb * (Nr + 1)];
@@ -83,54 +101,13 @@ unsigned char* AES::DecryptCBC(const unsigned char in[], unsigned int inLen,
     }
 
     delete[] roundKeys;
-
-    return out;
-}
-
-unsigned char* AES::EncryptCFB(const unsigned char in[], unsigned int inLen,
-    const unsigned char key[],
-    const unsigned char* iv) {
-    CheckLength(inLen);
-    unsigned char* out = new unsigned char[inLen];
-    unsigned char block[blockBytesLen];
-    unsigned char encryptedBlock[blockBytesLen];
-    unsigned char* roundKeys = new unsigned char[4 * Nb * (Nr + 1)];
-    KeyExpansion(key, roundKeys);
-    memcpy(block, iv, blockBytesLen);
-    for (unsigned int i = 0; i < inLen; i += blockBytesLen) {
-        EncryptBlock(block, encryptedBlock, roundKeys);
-        XorBlocks(in + i, encryptedBlock, out + i, blockBytesLen);
-        memcpy(block, out + i, blockBytesLen);
-    }
-
-    delete[] roundKeys;
-
-    return out;
-}
-
-unsigned char* AES::DecryptCFB(const unsigned char in[], unsigned int inLen,
-    const unsigned char key[],
-    const unsigned char* iv) {
-    CheckLength(inLen);
-    unsigned char* out = new unsigned char[inLen];
-    unsigned char block[blockBytesLen];
-    unsigned char encryptedBlock[blockBytesLen];
-    unsigned char* roundKeys = new unsigned char[4 * Nb * (Nr + 1)];
-    KeyExpansion(key, roundKeys);
-    memcpy(block, iv, blockBytesLen);
-    for (unsigned int i = 0; i < inLen; i += blockBytesLen) {
-        EncryptBlock(block, encryptedBlock, roundKeys);
-        XorBlocks(in + i, encryptedBlock, out + i, blockBytesLen);
-        memcpy(block, in + i, blockBytesLen);
-    }
-
-    delete[] roundKeys;
-
+    removePadding(out, inLen);
     return out;
 }
 
 void AES::CheckLength(unsigned int len) {
-    if (len % blockBytesLen != 0) {
+    if (len % blockBytesLen != 0) 
+    {
         throw std::length_error("Plaintext length must be divisible by " +
             std::to_string(blockBytesLen));
     }
@@ -165,6 +142,48 @@ void AES::EncryptBlock(const unsigned char in[], unsigned char out[],
             out[i + 4 * j] = state[i][j];
         }
     }
+}
+
+void AES::padToMultipleOf16(unsigned char* array, unsigned int length)
+{
+    int remainder = length % 16;
+    int paddingNeeded = remainder == 0 ? 0 : (16 - remainder);
+
+    if (paddingNeeded > 0) {
+        unsigned char paddingValue = static_cast<unsigned char>(paddingNeeded);
+        unsigned char* newArray = new unsigned char[length + paddingNeeded];
+        memcpy(newArray, array, length);
+        for (int i = length; i < length + paddingNeeded; ++i) {
+            newArray[i] = paddingValue;
+        }
+        delete[] array;
+        array = newArray;
+        length += paddingNeeded;
+    }
+}
+
+void AES::removePadding(unsigned char* array, unsigned int length)
+{
+    if (length == 0) {
+        return;
+    }
+
+    int paddingLength = array[length - 1];
+    if (paddingLength > length) {
+        // Invalid padding length, do nothing
+        return;
+    }
+
+    // Check if the padding bytes are consistent
+    for (int i = length - paddingLength; i < length; ++i) {
+        if (array[i] != paddingLength) {
+            // Invalid padding bytes, do nothing
+            return;
+        }
+    }
+
+    // Remove padding bytes
+    length -= paddingLength;
 }
 
 void AES::DecryptBlock(const unsigned char in[], unsigned char out[],
@@ -396,59 +415,17 @@ unsigned char* AES::VectorToArray(std::vector<unsigned char>& a) {
     return a.data();
 }
 
-std::vector<unsigned char> AES::EncryptECB(std::vector<unsigned char> in,
-    std::vector<unsigned char> key) {
-    unsigned char* out = EncryptECB(VectorToArray(in), (unsigned int)in.size(),
-        VectorToArray(key));
+std::vector<unsigned char> AES::EncryptCBC(std::vector<unsigned char> in) 
+{
+    unsigned char* out = EncryptCBC(VectorToArray(in), (unsigned int)in.size());
     std::vector<unsigned char> v = ArrayToVector(out, in.size());
     delete[] out;
     return v;
 }
 
-std::vector<unsigned char> AES::DecryptECB(std::vector<unsigned char> in,
-    std::vector<unsigned char> key) {
-    unsigned char* out = DecryptECB(VectorToArray(in), (unsigned int)in.size(),
-        VectorToArray(key));
-    std::vector<unsigned char> v = ArrayToVector(out, (unsigned int)in.size());
-    delete[] out;
-    return v;
-}
-
-std::vector<unsigned char> AES::EncryptCBC(std::vector<unsigned char> in,
-    std::vector<unsigned char> key,
-    std::vector<unsigned char> iv) {
-    unsigned char* out = EncryptCBC(VectorToArray(in), (unsigned int)in.size(),
-        VectorToArray(key), VectorToArray(iv));
-    std::vector<unsigned char> v = ArrayToVector(out, in.size());
-    delete[] out;
-    return v;
-}
-
-std::vector<unsigned char> AES::DecryptCBC(std::vector<unsigned char> in,
-    std::vector<unsigned char> key,
-    std::vector<unsigned char> iv) {
-    unsigned char* out = DecryptCBC(VectorToArray(in), (unsigned int)in.size(),
-        VectorToArray(key), VectorToArray(iv));
-    std::vector<unsigned char> v = ArrayToVector(out, (unsigned int)in.size());
-    delete[] out;
-    return v;
-}
-
-std::vector<unsigned char> AES::EncryptCFB(std::vector<unsigned char> in,
-    std::vector<unsigned char> key,
-    std::vector<unsigned char> iv) {
-    unsigned char* out = EncryptCFB(VectorToArray(in), (unsigned int)in.size(),
-        VectorToArray(key), VectorToArray(iv));
-    std::vector<unsigned char> v = ArrayToVector(out, in.size());
-    delete[] out;
-    return v;
-}
-
-std::vector<unsigned char> AES::DecryptCFB(std::vector<unsigned char> in,
-    std::vector<unsigned char> key,
-    std::vector<unsigned char> iv) {
-    unsigned char* out = DecryptCFB(VectorToArray(in), (unsigned int)in.size(),
-        VectorToArray(key), VectorToArray(iv));
+std::vector<unsigned char> AES::DecryptCBC(std::vector<unsigned char> in) 
+{
+    unsigned char* out = DecryptCBC(VectorToArray(in), (unsigned int)in.size());
     std::vector<unsigned char> v = ArrayToVector(out, (unsigned int)in.size());
     delete[] out;
     return v;
