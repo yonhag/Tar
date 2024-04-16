@@ -27,18 +27,16 @@ RSA::RSA(const PublicKey& pubk, const PrivateKey& privk, const Product& product)
 {
 }
 
+/*
+    * SHOULD NOT BE USED EXCEPT FOR RSA HANDSHAKE,
+*/
+RSA::RSA(const PublicKey& pubk, const Product& product) : _PublicKey(pubk), _PrivateKey(0), _product(product)
+{
+}
+
 Cipher RSA::Encrypt(const Plain& message) const
 {
-    Cipher cipher;
-    
-    for (const auto& uc : message)
-    {
-        Integer n(uc);
-        n = powm(n, this->_PublicKey, this->_product);
-        cipher.push_back((n));
-    }
-
-    return cipher;
+    return RSA::Encrypt(message, this->_PublicKey, this->_product);
 }
 
 Plain RSA::Decrypt(const Cipher& cipher) const
@@ -55,6 +53,20 @@ Plain RSA::Decrypt(const Cipher& cipher) const
     return message;
 }
 
+Cipher RSA::Encrypt(const Plain& message, const PublicKey& pkey, const Product& prod)
+{
+    Cipher cipher;
+
+    for (const auto& uc : message)
+    {
+        Integer n(uc);
+        n = powm(n, pkey, prod);
+        cipher.push_back((n));
+    }
+
+    return cipher;
+}
+
 PublicKey RSA::GetPublicKey() const
 {
     return this->_PublicKey;
@@ -63,6 +75,11 @@ PublicKey RSA::GetPublicKey() const
 PrivateKey RSA::GetPrivateKey() const
 {
     return this->_PrivateKey;
+}
+
+Product RSA::GetProduct() const
+{
+    return this->_product;
 }
 
 void RSA::GeneratePrimes(Prime& P, Prime& Q) const

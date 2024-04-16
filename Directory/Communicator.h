@@ -1,6 +1,8 @@
 #include "Relay.h"
 #include "Response.h"
 #include "Request.h"
+#include "RSA.h"
+#include "AES.h"
 #include <string>
 #include <memory>
 #include <vector>
@@ -19,6 +21,7 @@ public:
 
 private:
 	void HandleClient(std::unique_ptr<sf::TcpSocket> clientSocket);
+	void RSAHandshake(sf::TcpSocket& socket, const AES& aes);
 
 	// Helper functions
 	static std::vector<unsigned char> SendDataThroughNewClientSocket(const std::string& ip, const unsigned short port, const std::vector<unsigned char>& data);
@@ -26,6 +29,7 @@ private:
 	static std::vector<unsigned char> ReceiveWithTimeout(sf::TcpSocket& socket);
 	static bool HasTimeoutPassed(const std::chrono::steady_clock::time_point& start_time);
 	static sf::IpAddress StringToIP(const std::string& ipString);
+	
 
 	// Members
 	sf::TcpListener _serverSocket;

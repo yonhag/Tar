@@ -6,7 +6,7 @@
 class JsonSerializer
 {
 public:
-	static std::vector<unsigned char> SerializeRSAHandshake(const PublicKey& key);
+	static std::vector<unsigned char> SerializeRSAHandshake(const PublicKey& key, const Product& prod);
 	static std::vector<unsigned char> SerializeGetRelaysRequest(const LoadLevel loadlevel);
 	static std::vector<unsigned char> SerializeRelayDataSendingRequest(const MessageRequest& request);
 };

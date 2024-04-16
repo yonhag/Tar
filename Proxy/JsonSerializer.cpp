@@ -7,15 +7,15 @@ using json = nlohmann::json;
 /*
 * Returns "0{"RSAKey"=<key>}"
 */
-std::vector<unsigned char> JsonSerializer::SerializeRSAHandshake(const PublicKey& key)
+std::vector<unsigned char> JsonSerializer::SerializeRSAHandshake(const PublicKey& key, const Product& prod)
 {
 	json j;
 	j["RSAKey"] = key.convert_to<std::string>();
-	
+	j["RSAProduct"] = prod.convert_to<std::string>();
+
 	auto jsonString = j.dump();
 
 	std::vector<unsigned char> buffer;
-	buffer.push_back(DirRequestCodes::RSAHandshake);
 	for (const auto& byte : jsonString)
 		buffer.push_back(byte);
 

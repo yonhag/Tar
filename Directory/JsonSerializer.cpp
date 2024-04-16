@@ -79,3 +79,10 @@ std::vector<unsigned char> JsonSerializer::SerializeRelayConnectionRequest()
 
 	return vec;
 }
+
+std::vector<unsigned char> JsonSerializer::SerializeRSAKeyExchange(const AES& aes, const RSA& rsa)
+{
+	json j;
+	j["AESKey"] = 0;
+	aes.
+}
