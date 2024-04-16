@@ -165,7 +165,7 @@ AES Communicator::RSAKeyExchange(sf::TcpSocket& directorySocket)
 {
 	RSA rsa;
 
-	std::vector<unsigned char> request = JsonSerializer::SerializeRSAHandshake(rsa.GetPublicKey());
+	std::vector<unsigned char> request = JsonSerializer::SerializeRSAHandshake(rsa.GetPublicKey(), rsa.GetProduct());
 
 	SendData(directorySocket, request);
 

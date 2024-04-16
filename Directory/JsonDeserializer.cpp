@@ -55,3 +55,13 @@ Relay JsonDeserializer::DeserializeUpdateDirectoryRequest(const std::vector<unsi
 
     return relay;
 }
+
+RSA JsonDeserializer::DeserializeRSAKeyExchange(const std::vector<unsigned char>& message)
+{
+    json j = json::parse(message);
+
+    PublicKey key = RSA::PlainToCipher(j["RSAKey"])[0]; // PTC returns an array, we only need one number from it - hence [0]
+    Product prod = RSA::PlainToCipher(j["RSAProduct"])[0];
+
+    return RSA(key, prod);
+}

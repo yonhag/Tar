@@ -23,12 +23,16 @@ public:
 	RSA();
 	RSA(const RSA& other);
 	RSA(const PublicKey& pubk, const PrivateKey& privk, const Product& product);
+	RSA(const PublicKey& pubk, const Product& product);
 
 	Cipher Encrypt(const Plain& message) const;
 	Plain Decrypt(const Cipher& cipher) const;
 
+	static Cipher Encrypt(const Plain& message, const PublicKey& pkey, const Product& prod);
+
 	PublicKey GetPublicKey() const;
 	PrivateKey GetPrivateKey() const;
+	Product GetProduct() const;
 
 	// Convertion methods
 	static Plain CipherToPlain(const Cipher& input);
