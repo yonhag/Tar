@@ -1,5 +1,6 @@
 #include "AES.h"
 #include <random>
+#include <iterator>
 #include <chrono>
 
 AES::AES(const AESKeyLength keyLength) {
@@ -21,6 +22,10 @@ AES::AES(const AESKeyLength keyLength) {
         key_length = 32;
         break;
     }
+    key = new unsigned char[16];
+    iv = new unsigned char[16];
+    std::memset(key, 0, 16);
+    std::memset(iv, 0, 16);
     generateRandomBytes(key, key_length);
     generateRandomBytes(iv, key_length);
 }
@@ -47,7 +52,17 @@ AES::AES(unsigned char key[], unsigned char iv[], const AESKeyLength keyLength)
 
 void AES::generateRandomBytes(unsigned char* buffer, int length)
 {
+    if (length <= 0) {
+        std::cerr << "Invalid buffer or length\n";
+        return;
+    }
+
     std::random_device rd;
+    if (!rd.entropy()) {
+        std::cerr << "Random device entropy not available\n";
+        return;
+    }
+
     std::mt19937 gen(rd());
     std::uniform_int_distribution<> dis(0, 255);
 
@@ -68,12 +83,11 @@ unsigned char* AES::get_iv()
 
 unsigned char* AES::EncryptCBC(unsigned char in[], unsigned int inLen)
 {
-    padToMultipleOf16(in, inLen);
-    //CheckLength(inLen);
+    CheckLength(inLen);
     unsigned char* out = new unsigned char[inLen];
     unsigned char block[blockBytesLen];
     unsigned char* roundKeys = new unsigned char[4 * Nb * (Nr + 1)];
-    KeyExpansion(key, roundKeys);
+    KeyExpansion(this->key, roundKeys);
     memcpy(block, iv, blockBytesLen);
     for (unsigned int i = 0; i < inLen; i += blockBytesLen) {
         XorBlocks(block, in + i, block, blockBytesLen);
@@ -82,7 +96,6 @@ unsigned char* AES::EncryptCBC(unsigned char in[], unsigned int inLen)
     }
 
     delete[] roundKeys;
-
     return out;
 }
 
@@ -101,7 +114,6 @@ unsigned char* AES::DecryptCBC(unsigned char in[], unsigned int inLen)
     }
 
     delete[] roundKeys;
-    removePadding(out, inLen);
     return out;
 }
 
@@ -110,6 +122,39 @@ void AES::CheckLength(unsigned int len) {
     {
         throw std::length_error("Plaintext length must be divisible by " +
             std::to_string(blockBytesLen));
+    }
+}
+
+std::vector<unsigned char> AES::padToMultipleOf16(std::vector<unsigned char>& array, size_t& length)
+{
+    int remainder = length % 16;
+    int paddingNeeded = remainder == 0 ? 16 : (16 - remainder);
+
+    std::vector<unsigned char> newArray(length + paddingNeeded);
+    memcpy(newArray.data(), array.data(), length);
+
+    unsigned char paddingValue = static_cast<unsigned char>(paddingNeeded);
+    for (size_t i = length; i < length + paddingNeeded; ++i) {
+        newArray[i] = paddingValue;
+    }
+
+    array = newArray; // Update the original vector with the padded one
+    length += paddingNeeded; // Update the length
+
+    return array;
+}
+
+void AES::removePadding(std::vector<unsigned char>& array)
+{
+    if (array.empty()) {
+        return;
+    }
+
+    unsigned char paddingValue = array.back();
+    size_t paddingLength = static_cast<size_t>(paddingValue);
+
+    if (paddingLength <= array.size()) {
+        array.resize(array.size() - paddingLength);
     }
 }
 
@@ -144,46 +189,23 @@ void AES::EncryptBlock(const unsigned char in[], unsigned char out[],
     }
 }
 
-void AES::padToMultipleOf16(unsigned char* array, unsigned int length)
+void AES::deleteBytesAccordingToLastByte(std::vector<unsigned char> data)
 {
-    int remainder = length % 16;
-    int paddingNeeded = remainder == 0 ? 0 : (16 - remainder);
-
-    if (paddingNeeded > 0) {
-        unsigned char paddingValue = static_cast<unsigned char>(paddingNeeded);
-        unsigned char* newArray = new unsigned char[length + paddingNeeded];
-        memcpy(newArray, array, length);
-        for (int i = length; i < length + paddingNeeded; ++i) {
-            newArray[i] = paddingValue;
-        }
-        delete[] array;
-        array = newArray;
-        length += paddingNeeded;
-    }
-}
-
-void AES::removePadding(unsigned char* array, unsigned int length)
-{
-    if (length == 0) {
-        return;
+    if (data.empty()) {
+        return; // If the vector is empty, there's nothing to delete
     }
 
-    int paddingLength = array[length - 1];
-    if (paddingLength > length) {
-        // Invalid padding length, do nothing
-        return;
-    }
+    // Get the last byte of the vector
+    unsigned char lastByte = data.back();
 
-    // Check if the padding bytes are consistent
-    for (int i = length - paddingLength; i < length; ++i) {
-        if (array[i] != paddingLength) {
-            // Invalid padding bytes, do nothing
-            return;
-        }
-    }
+    // Calculate the number of bytes to delete
+    size_t bytesToDelete = static_cast<size_t>(lastByte);
 
-    // Remove padding bytes
-    length -= paddingLength;
+    // Ensure bytesToDelete doesn't exceed the vector size
+    bytesToDelete = std::min(bytesToDelete, data.size() - 1); // Exclude the last byte itself
+
+    // Erase the specified number of bytes from the end of the vector
+    data.erase(data.end() - bytesToDelete, data.end());
 }
 
 void AES::DecryptBlock(const unsigned char in[], unsigned char out[],
@@ -320,7 +342,7 @@ void AES::KeyExpansion(const unsigned char key[], unsigned char w[]) {
 
     unsigned int i = 0;
     while (i < 4 * Nk) {
-        w[i] = key[i];
+        w[i] = this->key[i];
         i++;
     }
 
@@ -417,6 +439,9 @@ unsigned char* AES::VectorToArray(std::vector<unsigned char>& a) {
 
 std::vector<unsigned char> AES::EncryptCBC(std::vector<unsigned char> in) 
 {
+    size_t size = in.size();
+    in = padToMultipleOf16(in, size);
+    //std::cout << (unsigned int)in.size();
     unsigned char* out = EncryptCBC(VectorToArray(in), (unsigned int)in.size());
     std::vector<unsigned char> v = ArrayToVector(out, in.size());
     delete[] out;
@@ -426,7 +451,10 @@ std::vector<unsigned char> AES::EncryptCBC(std::vector<unsigned char> in)
 std::vector<unsigned char> AES::DecryptCBC(std::vector<unsigned char> in) 
 {
     unsigned char* out = DecryptCBC(VectorToArray(in), (unsigned int)in.size());
-    std::vector<unsigned char> v = ArrayToVector(out, (unsigned int)in.size());
+    //std::cout << (unsigned int)in.size();
+    std::vector<unsigned char> v = ArrayToVector(out, in.size());
+    std::cout << std::endl;
+    this->removePadding(v);
     delete[] out;
     return v;
 }

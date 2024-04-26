@@ -49,9 +49,11 @@ private:
 
     void CheckLength(unsigned int len);
 
-    void padToMultipleOf16(unsigned char* array, unsigned int length);
+    std::vector<unsigned char> padToMultipleOf16(std::vector<unsigned char>& array, size_t& length);
 
-    void removePadding(unsigned char* array, unsigned int length);
+    void removePadding(std::vector<unsigned char>& array);
+
+    void deleteBytesAccordingToLastByte(std::vector<unsigned char> data);
 
     void KeyExpansion(const unsigned char key[], unsigned char w[]);
 
