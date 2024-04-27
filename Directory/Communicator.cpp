@@ -3,6 +3,7 @@
 #include "RequestHandler.h"
 #include "FileHandler.h"
 #include "JsonDeserializer.h"
+#include "JsonSerializer.h"
 #include <sstream>
 #include <thread>
 #include <exception>
@@ -71,7 +72,11 @@ unsigned int Communicator::UpdateOtherDirectories(const Request& relayRequest)
 
 void Communicator::HandleClient(std::unique_ptr<sf::TcpSocket> sock)
 {
+	AES aes;
 	// Recieving the message
+
+	RSAHandshake(*sock, aes);
+
 	try {
 		auto message = this->ReceiveWithTimeout(*sock);
 		
@@ -90,6 +95,13 @@ void Communicator::HandleClient(std::unique_ptr<sf::TcpSocket> sock)
 		Communicator::SendData(*sock, response.data);
 	}
 	catch (std::exception& e) { std::cout << e.what(); }
+}
+
+void Communicator::RSAHandshake(sf::TcpSocket& socket, const AES& aes)
+{
+	RSA rsa(JsonDeserializer::DeserializeRSAKeyExchange(ReceiveWithTimeout(socket)));
+
+	SendData(socket, JsonSerializer::SerializeRSAKeyExchange(aes, rsa));
 }
 
 std::vector<unsigned char> Communicator::SendDataThroughNewClientSocket(const std::string& ip, const unsigned short port, const std::vector<unsigned char>& data)

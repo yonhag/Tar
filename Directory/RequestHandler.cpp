@@ -2,6 +2,8 @@
 #include "JsonSerializer.h"
 #include "JsonDeserializer.h"
 #include "NetworkManager.h"
+#include "RSA.h"
+#include "AES.h"
 #include <iostream> // TODO: Remove this
 
 enum RequestCodes { GetRelays = '1', NewRelay = '2' };

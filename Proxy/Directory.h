@@ -1,5 +1,6 @@
 #pragma once
-#include "../Encryptions/RSA/head/RSA.h"
+#include <RSA.h>
+#include <AES.h>
 #include <string>
 
 struct Directory
@@ -7,5 +8,5 @@ struct Directory
 	std::string _ip;
 	unsigned short _port;
 	RSA _rsa;
-	//AES _aes;
+	AES _aes;
 };

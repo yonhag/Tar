@@ -13,7 +13,7 @@ const std::chrono::seconds Communicator::timeout = std::chrono::seconds(5);
 Communicator::Communicator(const NetworkHandler& nwh) :
 	_nwhandler(nwh)
 {
-	this->_serverSocket.listen(server_port);
+	this->_serverSocket.listen(Communicator::server_port);
 }
 
 Communicator::~Communicator()
@@ -23,7 +23,7 @@ Communicator::~Communicator()
 
 void Communicator::RunServer()
 {
-	std::cout << "Listening on port " << this->server_port << std::endl;
+	std::cout << "Listening on port " << Communicator::server_port << std::endl;
 
 	std::thread sendingThread(&Communicator::SendMessages, this);
 	sendingThread.detach();
@@ -50,12 +50,14 @@ std::vector<unsigned char> Communicator::GetRelays(const Directory& dir, const L
 	std::vector<unsigned char> request = JsonSerializer::SerializeGetRelaysRequest(ll);
 
 	sf::TcpSocket directorySocket;
-	
 	directorySocket.connect(dir._ip, dir._port);
+	
+	AES aes(Communicator::RSAKeyExchange(directorySocket));
+	
 	SendData(directorySocket, request);
 	
 	// Receiving the relays
-	// #TODO: change this
+	// #TODO: change the vector size to something more normal
 	std::vector<unsigned char> relays(256);
 	std::size_t recv;
 	directorySocket.receive(relays.data(), relays.size(), recv); //ReceiveWithTimeout(directorySocket);
@@ -157,6 +159,18 @@ std::vector<unsigned char> Communicator::ReceiveWithTimeout(sf::TcpSocket& socke
 			throw std::exception("Socket error");
 		}
 	}
+}
+
+AES Communicator::RSAKeyExchange(sf::TcpSocket& directorySocket)
+{
+	RSA rsa;
+
+	std::vector<unsigned char> request = JsonSerializer::SerializeRSAHandshake(rsa.GetPublicKey(), rsa.GetProduct());
+
+	SendData(directorySocket, request);
+
+	std::vector<unsigned char> response = ReceiveWithTimeout(directorySocket);
+	return JsonDeserializer::DesierlizeRSAHandshake(rsa.Decrypt(RSA::PlainToCipher(response)));
 }
 
 bool Communicator::HasTimeoutPassed(const std::chrono::steady_clock::time_point& start_time)

@@ -20,3 +20,8 @@ std::vector<Relay> JsonDeserializer::DeserializeGetRelaysResponse(const std::vec
 
 	return relays;
 }
+
+AES JsonDeserializer::DeserializeRSAHandshake(const std::vector<unsigned char>& response)
+{
+	return AES(); // #TODO: Implement this
+}

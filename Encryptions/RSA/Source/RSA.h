@@ -23,22 +23,32 @@ public:
 	RSA();
 	RSA(const RSA& other);
 	RSA(const PublicKey& pubk, const PrivateKey& privk, const Product& product);
+	RSA(const PublicKey& pubk, const Product& product);
 
 	Cipher Encrypt(const Plain& message) const;
 	Plain Decrypt(const Cipher& cipher) const;
 
+	static Cipher Encrypt(const Plain& message, const PublicKey& pkey, const Product& prod);
+
+	PublicKey GetPublicKey() const;
+	PrivateKey GetPrivateKey() const;
+	Product GetProduct() const;
+
+	// Convertion methods
+	static Plain CipherToPlain(const Cipher& input);
+	static Cipher PlainToCipher(const Plain& input);
 private:
 	// Main methods
 	void GeneratePrimes(Prime& P, Prime& Q) const; // P and Q are outputs
 	Product CalculateProduct(const Prime& P, const Prime& Q) const;
 	Totient CalculateTotient(const Prime& P, const Prime& Q) const;
 
-	void SelectPublicKey(const Totient t);
-	void SelectPrivateKey(const Totient t);
+	void SelectPublicKey(const Totient& t);
+	void SelectPrivateKey(Totient& t);
 
 	// Assistance methods
-	static bool IsPrime(const PossiblePrime num);
-	bool CheckPublicKeyValidity(const Totient t) const;
+	static bool IsPrime(const PossiblePrime& num);
+	bool CheckPublicKeyValidity(const Totient& t) const;
 
 	// Members
 	// Keys

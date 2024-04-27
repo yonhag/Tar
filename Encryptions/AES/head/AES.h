@@ -12,17 +12,9 @@ enum class AESKeyLength { AES_128, AES_192, AES_256 };
 
 class AES {
 private:
-<<<<<<< HEAD
-
-    static constexpr unsigned int Nb = 4;
-    static constexpr unsigned int blockBytesLen = 4 * Nb * sizeof(unsigned char);
-    unsigned char* key;
-    unsigned char* iv;
-=======
     static constexpr unsigned int Nb = 4;
     static constexpr unsigned int blockBytesLen = 4 * Nb * sizeof(unsigned char);
 
->>>>>>> 3ad780a19c5ef448bba1248911e5d07875d5d07a
     unsigned int Nk;
     unsigned int Nr;
 
@@ -55,15 +47,6 @@ private:
 
     void CheckLength(unsigned int len);
 
-<<<<<<< HEAD
-    std::vector<unsigned char> padToMultipleOf16(std::vector<unsigned char>& array, size_t& length);
-
-    void removePadding(std::vector<unsigned char>& array);
-
-    void deleteBytesAccordingToLastByte(std::vector<unsigned char> data);
-
-=======
->>>>>>> 3ad780a19c5ef448bba1248911e5d07875d5d07a
     void KeyExpansion(const unsigned char key[], unsigned char w[]);
 
     void EncryptBlock(const unsigned char in[], unsigned char out[],
@@ -80,25 +63,6 @@ private:
     unsigned char* VectorToArray(std::vector<unsigned char>& a);
 
 public:
-<<<<<<< HEAD
-    explicit AES(const AESKeyLength keyLength = AESKeyLength::AES_128);
-
-    explicit AES(unsigned char key[], unsigned char iv[], const AESKeyLength keyLength = AESKeyLength::AES_128);
-
-    void generateRandomBytes(unsigned char* buffer, int length);
-
-    unsigned char* get_key();
-
-    unsigned char* get_iv();
-
-    unsigned char* EncryptCBC(unsigned char in[], unsigned int inLen);
-
-    unsigned char* DecryptCBC(unsigned char in[], unsigned int inLen);
-
-    std::vector<unsigned char> EncryptCBC(std::vector<unsigned char> in);
-
-    std::vector<unsigned char> DecryptCBC(std::vector<unsigned char> in);
-=======
     explicit AES(const AESKeyLength keyLength = AESKeyLength::AES_256);
 
     unsigned char* EncryptECB(const unsigned char in[], unsigned int inLen,
@@ -140,7 +104,6 @@ public:
     std::vector<unsigned char> DecryptCFB(std::vector<unsigned char> in,
         std::vector<unsigned char> key,
         std::vector<unsigned char> iv);
->>>>>>> 3ad780a19c5ef448bba1248911e5d07875d5d07a
 
     void printHexArray(unsigned char a[], unsigned int n);
 
