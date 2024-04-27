@@ -47,22 +47,22 @@ void Communicator::RunServer()
 
 std::vector<unsigned char> Communicator::GetRelays(const Directory& dir, const LoadLevel& ll)
 {
+	const int max_relay_response_size = 512;
+
 	std::vector<unsigned char> request = JsonSerializer::SerializeGetRelaysRequest(ll);
 
 	sf::TcpSocket directorySocket;
 	directorySocket.connect(dir._ip, dir._port);
 	
 	AES aes(Communicator::RSAKeyExchange(directorySocket));
+
+	SendData(directorySocket, aes.EncryptCBC(request));
 	
-	SendData(directorySocket, request);
-	
-	// Receiving the relays
-	// #TODO: change the vector size to something more normal
-	std::vector<unsigned char> relays(256);
+	std::vector<unsigned char> relays(max_relay_response_size);
 	std::size_t recv;
 	directorySocket.receive(relays.data(), relays.size(), recv); //#TODO: ReceiveWithTimeout(directorySocket);
 
-	return relays;
+	return aes.DecryptCBC(relays);
 }
 
 void Communicator::HandleClient(std::unique_ptr<sf::TcpSocket> sock)
