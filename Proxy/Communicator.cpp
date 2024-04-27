@@ -60,7 +60,7 @@ std::vector<unsigned char> Communicator::GetRelays(const Directory& dir, const L
 	// #TODO: change the vector size to something more normal
 	std::vector<unsigned char> relays(256);
 	std::size_t recv;
-	directorySocket.receive(relays.data(), relays.size(), recv); //ReceiveWithTimeout(directorySocket);
+	directorySocket.receive(relays.data(), relays.size(), recv); //#TODO: ReceiveWithTimeout(directorySocket);
 
 	return relays;
 }
@@ -170,7 +170,7 @@ AES Communicator::RSAKeyExchange(sf::TcpSocket& directorySocket)
 	SendData(directorySocket, request);
 
 	std::vector<unsigned char> response = ReceiveWithTimeout(directorySocket);
-	return JsonDeserializer::DesierlizeRSAHandshake(rsa.Decrypt(RSA::PlainToCipher(response)));
+	return JsonDeserializer::DeserializeRSAHandshake(rsa.Decrypt(RSA::PlainToCipher(response)));
 }
 
 bool Communicator::HasTimeoutPassed(const std::chrono::steady_clock::time_point& start_time)
