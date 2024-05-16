@@ -22,19 +22,21 @@ std::vector<Relay> JsonDeserializer::DeserializeGetRelaysResponse(const std::vec
 
 AES JsonDeserializer::DeserializeRSAHandshake(const std::vector<unsigned char>& DecipheredResponse)
 {
+	const int AES_128_key_size = 128;
 	json j = json::parse(DecipheredResponse);
-	auto key = JsonToUCArray(j["AESKey"]);
-	auto iv = JsonToUCArray(j["AESIV"]);
-	return AES(key.get(), iv.get(), AESKeyLength::AES_128);
-}
 
-std::unique_ptr<unsigned char[]> JsonDeserializer::JsonToUCArray(const json& jsonArray)
-{
-	size_t size = jsonArray.size();
-	std::unique_ptr<unsigned char[]> result(new unsigned char[size]);
+	unsigned char key[AES_128_key_size];
+	unsigned char iv[AES_128_key_size];
 
-	for (size_t i = 0; i < size; ++i)
-		result[i] = jsonArray[i];
+	std::string storedKey = j["AESKey"];
+	std::string storedIV = j["AESIV"];
 
-	return result;
+	// Retreiving the keys
+	for (size_t i = 0; i < AES_128_key_size; i += 2) 
+	{
+		key[i / 2] = static_cast<unsigned char>(std::stoi(storedKey.substr(i, 2), nullptr, 16));
+		key[i / 2] = static_cast<unsigned char>(std::stoi(storedIV.substr(i, 2), nullptr, 16));
+	}
+
+	return AES(key, iv, AESKeyLength::AES_128);
 }

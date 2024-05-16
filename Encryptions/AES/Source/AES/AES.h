@@ -76,9 +76,9 @@ public:
 
     void generateRandomBytes(unsigned char* buffer, int length);
 
-    unsigned char* get_key();
+    unsigned char* get_key() const;
 
-    unsigned char* get_iv();
+    unsigned char* get_iv() const;
 
     unsigned char* EncryptCBC(unsigned char in[], unsigned int inLen);
 

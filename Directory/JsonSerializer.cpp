@@ -83,6 +83,30 @@ std::vector<unsigned char> JsonSerializer::SerializeRelayConnectionRequest()
 std::vector<unsigned char> JsonSerializer::SerializeRSAKeyExchange(const AES& aes, const RSA& rsa)
 {
 	json j;
-	j["AESKey"] = 0;
-	aes.
+	std::vector<unsigned char> buffer;
+	auto aesKey = aes.get_key();
+	std::stringstream ss1;
+	std::stringstream ss2;
+
+	ss1 << std::hex << std::setfill('0');
+	ss2 << std::hex << std::setfill('0');
+	
+	for (size_t i = 0; i < sizeof(aesKey); ++i) 
+	{
+		ss1 << std::setw(2) << static_cast<int>(aesKey[i]);
+		ss2 << std::setw(2) << static_cast<int>(aesKey[i]);
+	}
+
+	std::string hexKey = ss1.str();
+	std::string hexIV = ss2.str();
+
+	j["AESKey"] = hexKey;
+	j["AESIV"] = hexIV;
+
+	auto jsonString = j.dump();
+
+	for (const auto& byte : jsonString)
+		buffer.push_back(byte);
+
+	return buffer;
 }

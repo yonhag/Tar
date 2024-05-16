@@ -71,12 +71,12 @@ void AES::generateRandomBytes(unsigned char* buffer, int length)
     }
 }
 
-unsigned char* AES::get_key()
+unsigned char* AES::get_key() const
 {
     return key;
 }
 
-unsigned char* AES::get_iv()
+unsigned char* AES::get_iv() const
 {
     return iv;
 }
