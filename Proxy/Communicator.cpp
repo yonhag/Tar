@@ -170,6 +170,7 @@ AES Communicator::RSAKeyExchange(sf::TcpSocket& directorySocket)
 	SendData(directorySocket, request);
 
 	std::vector<unsigned char> response = ReceiveWithTimeout(directorySocket);
+
 	return JsonDeserializer::DeserializeRSAHandshake(rsa.Decrypt(RSA::PlainToCipher(response)));
 }
 

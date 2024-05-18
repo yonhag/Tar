@@ -3,6 +3,8 @@
 #include <vector>
 #include <chrono>
 #include "SFML/Network.hpp"
+#include <RSA.h>
+#include <AES.h>
 
 class Communicator
 {
@@ -16,6 +18,8 @@ private:
 	void HandleConnection(std::unique_ptr<sf::TcpSocket> socket);
 	void ServeClient(sf::TcpSocket& incomingSocket, const Request& initialRequest);
 	bool ConnectToDirectory(const Directory& dir);
+	static RSA RecieveRSAHandshake(sf::TcpSocket& socket, const AES& aes);
+	static AES SendRSAHandshake(sf::TcpSocket& socket);
 
 	sf::TcpListener _serverSocket;
 	
@@ -24,7 +28,7 @@ private:
 	static const std::chrono::seconds timeout; // Defined in .cpp file
 
 	// Helper functions
-	sf::TcpSocket::Status SendData(sf::TcpSocket& socket, const std::vector<unsigned char>& data) const;
+	static sf::TcpSocket::Status SendData(sf::TcpSocket& socket, const std::vector<unsigned char>& data);
 	static std::vector<unsigned char> ReceiveWithTimeout(sf::TcpSocket& socket);
 	static bool IsDirectoryMessage(const std::vector<unsigned char>& message);
 	static bool HasTimeoutPassed(const std::chrono::steady_clock::time_point& start_time);

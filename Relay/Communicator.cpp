@@ -149,6 +149,26 @@ bool Communicator::ConnectToDirectory(const Directory& dir)
 		return true;
 	return false;
 }
+AES Communicator::SendRSAHandshake(sf::TcpSocket& socket)
+{
+	RSA rsa;
+
+	std::vector<unsigned char> request = Serializer::SerializeRSAKeyExchangeInitiation(rsa.GetPublicKey(), rsa.GetProduct());
+
+	SendData(socket, request);
+
+	std::vector<unsigned char> response = ReceiveWithTimeout(socket);
+
+	return Deserializer::DeserializeRSAKeyExchangeInitiation(rsa.Decrypt(RSA::PlainToCipher(response)));
+}
+
+RSA Communicator::RecieveRSAHandshake(sf::TcpSocket& socket, const AES& aes)
+{
+	RSA rsa(Deserializer::DeserializeReceivedRSAKeyExchange(ReceiveWithTimeout(socket)));
+
+	SendData(socket, Serializer::SerializeReceivedRSAKeyExchange(aes, rsa));
+}
+
 
 bool Communicator::IsDirectoryMessage(const std::vector<unsigned char>& message)
 {
@@ -157,11 +177,10 @@ bool Communicator::IsDirectoryMessage(const std::vector<unsigned char>& message)
 	return false;
 }
 
-sf::TcpSocket::Status Communicator::SendData(sf::TcpSocket& socket, const std::vector<unsigned char>& data) const
+sf::TcpSocket::Status Communicator::SendData(sf::TcpSocket& socket, const std::vector<unsigned char>& data)
 {
 	return socket.send(data.data(), data.size());
 }
-
 
 std::vector<unsigned char> Communicator::ReceiveWithTimeout(sf::TcpSocket& socket)
 {
@@ -190,13 +209,12 @@ std::vector<unsigned char> Communicator::ReceiveWithTimeout(sf::TcpSocket& socke
 		}
 		else // Socket error
 		{
-			socket.setBlocking(true);
 			std::cout << "Error code: " << (int)status << std::endl;
+			socket.setBlocking(true);
 			throw std::runtime_error("Socket error");
 		}
 	}
 }
-
 
 bool Communicator::HasTimeoutPassed(const std::chrono::steady_clock::time_point& start_time)
 {

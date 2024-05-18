@@ -35,3 +35,34 @@ std::pair<std::string, std::vector<unsigned char>> Deserializer::DeserializeClie
 
 	return desUserMessage;
 }
+
+RSA Deserializer::DeserializeReceivedRSAKeyExchange(std::vector<unsigned char>& message)
+{
+	json j = json::parse(message);
+
+	PublicKey key = RSA::PlainToCipher(j["RSAKey"])[0]; // PTC returns an array, we only need one number from it - hence [0]
+	Product prod = RSA::PlainToCipher(j["RSAProduct"])[0];
+
+	return RSA(key, prod);
+}
+
+AES Deserializer::DeserializeRSAKeyExchangeInitiation(std::vector<unsigned char>& DecipheredResponse)
+{
+	const int AES_128_key_size = 128;
+	json j = json::parse(DecipheredResponse);
+
+	unsigned char key[AES_128_key_size];
+	unsigned char iv[AES_128_key_size];
+
+	std::string storedKey = j["AESKey"];
+	std::string storedIV = j["AESIV"];
+
+	// Retreiving the keys
+	for (size_t i = 0; i < AES_128_key_size; i += 2)
+	{
+		key[i / 2] = static_cast<unsigned char>(std::stoi(storedKey.substr(i, 2), nullptr, 16));
+		key[i / 2] = static_cast<unsigned char>(std::stoi(storedIV.substr(i, 2), nullptr, 16));
+	}
+
+	return AES(key, iv, AESKeyLength::AES_128);
+}3
