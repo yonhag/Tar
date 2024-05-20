@@ -132,6 +132,7 @@ std::vector<unsigned char> Communicator::ReceiveWithTimeout(sf::TcpSocket& socke
 		if (status == sf::Socket::Status::Done) // Received data
 		{
 			socket.setBlocking(true);
+			std::cout << "Message Received: " << std::string(buffer.begin(), buffer.begin() + received) << std::endl;
 			return std::vector<unsigned char>(buffer.begin(), buffer.begin() + received);
 		}
 		else if (status == sf::Socket::Status::NotReady) // No data yet

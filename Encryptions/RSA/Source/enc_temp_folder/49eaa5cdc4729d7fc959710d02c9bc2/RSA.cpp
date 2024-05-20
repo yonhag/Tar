@@ -11,6 +11,8 @@ RSA::RSA()
 
     GeneratePrimes(P, Q);
 
+    std::cout << P << std::endl << Q << std::endl;
+
     this->_product = CalculateProduct(P, Q);
     
     Totient t = CalculateTotient(P, Q);
