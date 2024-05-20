@@ -101,6 +101,8 @@ void Communicator::RSAHandshake(sf::TcpSocket& socket, const AES& aes)
 {
 	RSA rsa(JsonDeserializer::DeserializeRSAKeyExchange(ReceiveWithTimeout(socket)));
 
+	std::cout << rsa.GetPublicKey() << std::endl;
+
 	SendData(socket, JsonSerializer::SerializeRSAKeyExchange(aes, rsa));
 }
 

@@ -130,6 +130,7 @@ void Communicator::ServeClient(sf::TcpSocket& incomingSocket, const Request& ini
 
 bool Communicator::ConnectToDirectory(const Directory& dir)
 {
+
 	sf::TcpSocket sock;
 
 	std::cout << "Connecting to " << StringToIP(dir.ip) << ":" << dir.port << std::endl;
@@ -139,6 +140,8 @@ bool Communicator::ConnectToDirectory(const Directory& dir)
 		return false;
 	
 	std::cout << "Connected" << std::endl;
+
+	AES aes = SendRSAHandshake(sock);
 
 	if (SendData(sock, Serializer::SerializeDirectoryConnectionRequest(sf::IpAddress::getLocalAddress()->toString(), 500, this->_listening_port)) != sf::Socket::Status::Done) // TODO: Change this to my actual ip and bandwidth)
 		std::cout << "Error in sending data";
@@ -152,7 +155,7 @@ bool Communicator::ConnectToDirectory(const Directory& dir)
 AES Communicator::SendRSAHandshake(sf::TcpSocket& socket)
 {
 	RSA rsa;
-
+	std::cout << rsa.GetPublicKey() << std::endl;
 	std::vector<unsigned char> request = Serializer::SerializeRSAKeyExchangeInitiation(rsa.GetPublicKey(), rsa.GetProduct());
 
 	SendData(socket, request);
@@ -172,7 +175,6 @@ RSA Communicator::RecieveRSAHandshake(sf::TcpSocket& socket, const AES& aes)
 
 	SendData(socket, Serializer::SerializeReceivedRSAKeyExchange(aes, rsa));
 }
-
 
 bool Communicator::IsDirectoryMessage(const std::vector<unsigned char>& message)
 {
