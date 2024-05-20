@@ -72,7 +72,9 @@ unsigned int Communicator::UpdateOtherDirectories(const Request& relayRequest)
 
 void Communicator::HandleClient(std::unique_ptr<sf::TcpSocket> sock)
 {
+	std::cout << "balls";
 	AES aes;
+	std::cout << "balls";
 	// Recieving the message
 
 	RSAHandshake(*sock, aes);

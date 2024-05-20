@@ -159,12 +159,16 @@ AES Communicator::SendRSAHandshake(sf::TcpSocket& socket)
 
 	std::vector<unsigned char> response = ReceiveWithTimeout(socket);
 
-	return Deserializer::DeserializeRSAKeyExchangeInitiation(rsa.Decrypt(RSA::PlainToCipher(response)));
+	auto deciphered = rsa.Decrypt(RSA::PlainToCipher(response));
+
+	return Deserializer::DeserializeRSAKeyExchangeInitiation(deciphered);
 }
 
 RSA Communicator::RecieveRSAHandshake(sf::TcpSocket& socket, const AES& aes)
 {
-	RSA rsa(Deserializer::DeserializeReceivedRSAKeyExchange(ReceiveWithTimeout(socket)));
+	auto recv = ReceiveWithTimeout(socket);
+
+	RSA rsa(Deserializer::DeserializeReceivedRSAKeyExchange(recv));
 
 	SendData(socket, Serializer::SerializeReceivedRSAKeyExchange(aes, rsa));
 }

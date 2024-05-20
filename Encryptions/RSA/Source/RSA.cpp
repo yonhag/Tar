@@ -6,6 +6,7 @@
 
 RSA::RSA()
 {
+    /*
     Prime P = 0;
     Prime Q = 0;
 
@@ -17,11 +18,13 @@ RSA::RSA()
     
     SelectPublicKey(t);
     SelectPrivateKey(t);
-    std::cout << P << " " << Q << std::endl << this->_product << std::endl << this->_PublicKey << std::endl << this->_PrivateKey << std::endl;
-
+   */
     this->_product = 1485403;
     this->_PublicKey = 1358689;
     this->_PrivateKey = 837529;
+
+    std::cout << this->_product << std::endl << this->_PublicKey << std::endl << this->_PrivateKey << std::endl;
+
 }
 
 RSA::RSA(const RSA& other) : _PublicKey(other._PublicKey), _PrivateKey(other._PrivateKey), _product(other._product)
@@ -90,7 +93,7 @@ Product RSA::GetProduct() const
 void RSA::GeneratePrimes(Prime& P, Prime& Q) const
 {
 	// Preparing the RNG
-
+    
 	boost::random::mt19937 gen(std::time(0));
 	boost::random::uniform_int_distribution<Prime> distribution(7, this->MAX_PRIMES);
 

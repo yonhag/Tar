@@ -58,10 +58,6 @@ void AES::generateRandomBytes(unsigned char* buffer, int length)
     }
 
     std::random_device rd;
-    if (!rd.entropy()) {
-        std::cerr << "Random device entropy not available\n";
-        return;
-    }
 
     std::mt19937 gen(rd());
     std::uniform_int_distribution<> dis(0, 255);
