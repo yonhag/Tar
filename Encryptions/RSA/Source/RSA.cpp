@@ -136,8 +136,8 @@ void RSA::SelectPrivateKey(Totient& totient)
 {
     SignedInteger originalTotient = totient, temp, quotient;
     SignedInteger prevCoeff = 0, currCoeff = 1;
-
     SignedInteger publicKeyCopy = this->_PublicKey;
+
     while (publicKeyCopy > 1)
     {
         quotient = publicKeyCopy / totient;
