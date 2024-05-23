@@ -135,7 +135,6 @@ bool Communicator::ConnectToDirectory(const Directory& dir)
 
 	std::cout << "Connecting to " << StringToIP(dir.ip) << ":" << dir.port << std::endl;
 	
-	// TODO: Changes this from localhost
 	if (sock.connect(StringToIP(dir.ip), dir.port) != sf::Socket::Status::Done)
 		return false;
 	
@@ -143,7 +142,16 @@ bool Communicator::ConnectToDirectory(const Directory& dir)
 
 	AES aes = SendRSAHandshake(sock);
 
-	if (SendData(sock, Serializer::SerializeDirectoryConnectionRequest(sf::IpAddress::getLocalAddress()->toString(), 500, this->_listening_port)) != sf::Socket::Status::Done) // TODO: Change this to my actual ip and bandwidth)
+	std::cout << "AES DONE";
+
+	auto EncMsg = aes.EncryptCBC(Serializer::SerializeDirectoryConnectionRequest(sf::IpAddress::getLocalAddress()->toString(), 500, this->_listening_port));
+
+	std::cout << "Message: ";
+	for (auto& i : aes.DecryptCBC(EncMsg))
+		std::cout << i;
+	std::cout << std::endl;
+
+	if (SendData(sock, EncMsg) != sf::Socket::Status::Done) // TODO: Change this to my actual ip and bandwidth)
 		std::cout << "Error in sending data";
 
 	std::cout << "data sent" << std::endl;
@@ -152,22 +160,28 @@ bool Communicator::ConnectToDirectory(const Directory& dir)
 		return true;
 	return false;
 }
+
 AES Communicator::SendRSAHandshake(sf::TcpSocket& socket)
 {
 	RSA rsa;
-	std::cout << rsa.GetPublicKey() << std::endl;
+	std::cout << "RSAKey: " << rsa.GetPublicKey() << std::endl;
 	std::vector<unsigned char> request = Serializer::SerializeRSAKeyExchangeInitiation(rsa.GetPublicKey(), rsa.GetProduct());
-
+	
+	std::cout << '1';
 	SendData(socket, request);
 
+	std::cout << '1';
 	std::vector<unsigned char> response = ReceiveWithTimeout(socket);
 
+	std::cout << '1';
 	auto deciphered = rsa.Decrypt(RSA::PlainToCipher(response));
+
+	std::cout << '1';
 
 	return Deserializer::DeserializeRSAKeyExchangeInitiation(deciphered);
 }
 
-RSA Communicator::RecieveRSAHandshake(sf::TcpSocket& socket, const AES& aes)
+void Communicator::RecieveRSAHandshake(sf::TcpSocket& socket, const AES& aes)
 {
 	auto recv = ReceiveWithTimeout(socket);
 

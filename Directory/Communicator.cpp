@@ -9,7 +9,7 @@
 #include <exception>
 #include <iostream>
 
-const std::chrono::seconds Communicator::timeout = std::chrono::seconds(5);
+const std::chrono::seconds Communicator::timeout = std::chrono::seconds(10);
 
 Communicator::Communicator()
 {
@@ -99,7 +99,13 @@ void Communicator::HandleClient(std::unique_ptr<sf::TcpSocket> sock)
 
 void Communicator::RSAHandshake(sf::TcpSocket& socket, const AES& aes)
 {
-	RSA rsa(JsonDeserializer::DeserializeRSAKeyExchange(ReceiveWithTimeout(socket)));
+	auto msg = ReceiveWithTimeout(socket);
+	
+	for (auto& i : msg)
+		std::cout << i;
+	std::cout << std::endl;
+
+	RSA rsa(JsonDeserializer::DeserializeRSAKeyExchange(msg));
 
 	std::cout << rsa.GetPublicKey() << std::endl;
 

@@ -8,6 +8,6 @@ int main()
 	{
 		Communicator().RunServer();
 	}
-	catch (std::exception& e) { std::cout << e.what(); }
+	catch (std::exception& e) { std::cout << "Error Caught: " << e.what(); }
 	return 0;
 }

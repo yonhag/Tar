@@ -12,5 +12,5 @@ int main(int argc, char** argv)
 		std::cout << argv[1] << std::endl;
 		Communicator(static_cast<unsigned short>(std::stoul(std::string(argv[1])))).RunServer();
 	}
-	catch (std::exception& e) { std::cout << e.what(); }
+	catch (std::exception& e) { std::cout << "Exception: " << e.what(); }
 }

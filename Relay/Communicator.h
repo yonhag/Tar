@@ -18,7 +18,7 @@ private:
 	void HandleConnection(std::unique_ptr<sf::TcpSocket> socket);
 	void ServeClient(sf::TcpSocket& incomingSocket, const Request& initialRequest);
 	bool ConnectToDirectory(const Directory& dir);
-	static RSA RecieveRSAHandshake(sf::TcpSocket& socket, const AES& aes);
+	static void RecieveRSAHandshake(sf::TcpSocket& socket, const AES& aes);
 	static AES SendRSAHandshake(sf::TcpSocket& socket);
 
 	sf::TcpListener _serverSocket;

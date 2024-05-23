@@ -78,9 +78,20 @@ std::vector<unsigned char> Serializer::SerializeReceivedRSAKeyExchange(const AES
 
 std::vector<unsigned char> Serializer::SerializeRSAKeyExchangeInitiation(const PublicKey& key, const Product& prod)
 {
+	std::cout << "Started Ser " << key << " and " << prod;
+	std::cout << "k";
 	json j;
-	j["RSAKey"] = key.convert_to<std::string>();
-	j["RSAProduct"] = prod.convert_to<std::string>();
+	std::cout << "k";
+	std::ostringstream oss;
+	std::cout << "k";
+	oss << key.str();
+	std::cout << "k";
+	j["RSAKey"] = oss.str();
+	oss.clear();
+	oss << prod.str();
+	j["RSAProduct"] = oss.str();
+
+	std::cout << "2";
 
 	auto jsonString = j.dump();
 

@@ -60,8 +60,14 @@ RSA JsonDeserializer::DeserializeRSAKeyExchange(const std::vector<unsigned char>
 {
     json j = json::parse(message);
 
-    PublicKey key = RSA::PlainToCipher(j["RSAKey"])[0]; // PTC returns an array, we only need one number from it - hence [0]
-    Product prod = RSA::PlainToCipher(j["RSAProduct"])[0];
+    // Convert strings to vectors of unsigned char
+    std::string rsaKeyString = j["RSAKey"].get<std::string>();
+    std::string rsaProductString = j["RSAProduct"].get<std::string>();
+
+    Integer key(rsaKeyString);
+    Integer prod(rsaProductString);
+
+    std::cout << "Key: " << key << std::endl;
 
     return RSA(key, prod);
 }

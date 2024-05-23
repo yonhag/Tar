@@ -137,13 +137,9 @@ void RSA::SelectPrivateKey(Totient& totient)
     SignedInteger originalTotient = totient, temp, quotient;
     SignedInteger prevCoeff = 0, currCoeff = 1;
 
-    if (totient == 1) {
-        this->_PrivateKey = 0;
-        return;
-    }
-
     SignedInteger publicKeyCopy = this->_PublicKey;
-    while (publicKeyCopy > 1) {
+    while (publicKeyCopy > 1)
+    {
         quotient = publicKeyCopy / totient;
         temp = totient;
         totient = publicKeyCopy % totient;
@@ -217,7 +213,7 @@ Cipher RSA::PlainToCipher(const Plain& input)
         }
 
         // Read the bytes for the current number
-        cpp_int num;
+        Integer num;
         import_bits(num, input.begin() + i, input.begin() + i + length, 8);
         output.push_back(num);
 
