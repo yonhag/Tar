@@ -74,8 +74,8 @@ void Communicator::HandleClient(std::unique_ptr<sf::TcpSocket> sock)
 		std::cout << i;
 	std::cout << std::endl;
 
-	MessageRequest request = GetMessageRequest(message);
-
+	MessageRequest request = GetMessageRequest(message, this->_nwhandler);
+	
 	std::cout << "Data: ";
 	for (auto& i : request._data)
 		std::cout << i;
@@ -178,7 +178,7 @@ bool Communicator::HasTimeoutPassed(const std::chrono::steady_clock::time_point&
 	return std::chrono::steady_clock::now() - start_time > Communicator::timeout;
 }
 
-MessageRequest Communicator::GetMessageRequest(const std::vector<unsigned char>& httpRequest)
+MessageRequest Communicator::GetMessageRequest(const std::vector<unsigned char>& httpRequest, const NetworkHandler& nwh)
 {
 	MessageRequest request;
 
@@ -188,6 +188,8 @@ MessageRequest Communicator::GetMessageRequest(const std::vector<unsigned char>&
 	std::string host = GetHostFromRequest(std::string(httpRequest.begin(), httpRequest.end()));
 	// Checking the IP of the host
 	request._destIP = sf::IpAddress(host).toString();
+
+	request._sessionID = nwh.GetSessionID();
 
 	return request;
 }

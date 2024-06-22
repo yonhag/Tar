@@ -27,7 +27,7 @@ private:
 
 	// Helper functions
 	static bool HasTimeoutPassed(const std::chrono::steady_clock::time_point& start_time);
-	static MessageRequest GetMessageRequest(const std::vector<unsigned char>& httpRequest);
+	static MessageRequest GetMessageRequest(const std::vector<unsigned char>& httpRequest, const NetworkHandler& nwh);
 	static std::string GetHostFromRequest(const std::string& httpRequest);
 	static std::string TrimEndOfHost(const std::string& host);
 

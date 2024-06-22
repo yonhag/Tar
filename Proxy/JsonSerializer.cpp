@@ -45,6 +45,7 @@ std::vector<unsigned char> JsonSerializer::SerializeRelayDataSendingRequest(cons
 	json j;
 	j["DestIP"] = request._destIP;
 	j["Data"] = request._data;
+	j["SessionID"] = request._sessionID;
 
 	auto jsonString = j.dump();
 

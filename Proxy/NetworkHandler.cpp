@@ -112,7 +112,7 @@ bool NetworkHandler::GetRelays(const LoadLevel loadlevel)
 std::vector<unsigned char> NetworkHandler::EncryptMessage(const MessageRequest& message)
 {
     // Adding the original destination for last relay to open
-    MessageRequest currRequest = MessageRequest(message._data, message._destIP);
+    MessageRequest currRequest = MessageRequest(message._data, message._destIP, this->_sessionID);
     std::vector<unsigned char> encrypted = JsonSerializer::SerializeRelayDataSendingRequest(currRequest);
 
     // Encrypting with last relay key
@@ -122,7 +122,7 @@ std::vector<unsigned char> NetworkHandler::EncryptMessage(const MessageRequest& 
     // Adding the next relay for the rest of them
     for (int i = this->_relays.size() - 2; i >= 0; i--)
     {
-        MessageRequest currRequest = MessageRequest(encrypted, this->_relays[i + 1]._ip);
+        MessageRequest currRequest = MessageRequest(encrypted, this->_relays[i + 1]._ip, this->_sessionID);
         encrypted = JsonSerializer::SerializeRelayDataSendingRequest(currRequest);
 
         auto key = this->_relays[i]._AESKey;
@@ -140,4 +140,9 @@ std::string NetworkHandler::GetFirstRelayIP() const
 unsigned short NetworkHandler::GetFirstRelayPort() const
 {
     return this->_relays[0]._port;
+}
+
+unsigned int NetworkHandler::GetSessionID() const
+{
+    return this->_sessionID;
 }

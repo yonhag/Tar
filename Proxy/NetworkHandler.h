@@ -12,12 +12,12 @@ public:
 	explicit NetworkHandler(const LoadLevel loadlevel);
 	NetworkHandler(const NetworkHandler& nwh, const LoadLevel loadlevel);
 
-	bool IsConnected() const;
 	std::vector<unsigned char> EncryptMessage(const MessageRequest& message);
+	
+	bool IsConnected() const;
 	std::string GetFirstRelayIP() const;
 	unsigned short GetFirstRelayPort() const;
-
-	// Helper functions
+	unsigned int GetSessionID() const;
 
 private:
 	// Network connection
