@@ -147,6 +147,7 @@ bool Communicator::ConnectToDirectory(const Directory& dir)
 
 	std::cout << "AES DONE";
 
+	// Following line shouldn't compile on Windows, it's meant for the Linux version of SFML
 	auto EncMsg = aes.EncryptCBC(Serializer::SerializeDirectoryConnectionRequest(sf::IpAddress::getLocalAddress()->toString(), 500, this->_listening_port));
 
 	std::cout << "Message: ";
@@ -167,19 +168,13 @@ bool Communicator::ConnectToDirectory(const Directory& dir)
 AES Communicator::SendRSAHandshake(sf::TcpSocket& socket)
 {
 	RSA rsa;
-	std::cout << "RSAKey: " << rsa.GetPublicKey() << std::endl;
 	std::vector<unsigned char> request = Serializer::SerializeRSAKeyExchangeInitiation(rsa.GetPublicKey(), rsa.GetProduct());
 	
-	std::cout << '1';
 	SendData(socket, request);
 
-	std::cout << '1';
 	std::vector<unsigned char> response = ReceiveWithTimeout(socket);
 
-	std::cout << '1';
 	auto deciphered = rsa.Decrypt(RSA::PlainToCipher(response));
-
-	std::cout << '1';
 
 	return Deserializer::DeserializeRSAKeyExchangeInitiation(deciphered);
 }
@@ -190,7 +185,7 @@ void Communicator::RecieveRSAHandshake(sf::TcpSocket& socket, const AES& aes)
 
 	RSA rsa(Deserializer::DeserializeReceivedRSAKeyExchange(recv));
 
-	SendData(socket, Serializer::SerializeReceivedRSAKeyExchange(aes, rsa));
+	SendData(socket, Serializer::SerializeAES(aes));
 }
 
 bool Communicator::IsDirectoryMessage(const std::vector<unsigned char>& message)

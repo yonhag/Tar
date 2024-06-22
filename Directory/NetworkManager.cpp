@@ -14,7 +14,7 @@ std::unordered_set<unsigned int> NetworkManager::_sessionIDs;
 
 enum AssignedUserWeight { Low = 1, Medium = 2, High = 4 };
 
-Session NetworkManager::GetRelays(const LoadLevel loadlevel)
+std::vector<DedicatedRelay> NetworkManager::GetRelays(const LoadLevel loadlevel)
 {
     for (auto& i : _relays)
     {
@@ -25,7 +25,7 @@ Session NetworkManager::GetRelays(const LoadLevel loadlevel)
     if (_relays.size() < 3)
     {
         std::cout << "Not enough relays" << std::endl;
-        return Session();
+        return std::vector<DedicatedRelay>();
     }
     std::vector<DedicatedRelay> dedicated_relays;
 
@@ -39,25 +39,14 @@ Session NetworkManager::GetRelays(const LoadLevel loadlevel)
     }
     else if (loadlevel == LoadLevel::Low)
     {
-        std::cout << "low " << _relays.size() << std::endl;
         for (int i = _relays.size() - 1; i >= (_relays.size() - 3); i--)
         {
             try {
-                std::cout << "IP: " << _relays[i].ip << " Port: " << _relays[i].listening_port << " Relays: " << _relays.size() << std::endl;
-
                 DedicatedRelay drel = DedicateRelay(_relays[i]);
 
                 // If ip is empty - relay didn't respond.
-                // #TODO: Move to a different function
                 if (drel.ip == "")
-                {
-                    std::cout << "Empty drel" << std::endl;
-                    _relays.erase(_relays.begin() + i); // Removing unresponsive relay
-                    if (_relays.size() > 3)
-                        return GetRelays(loadlevel); // Trying again
-                    else if (_relays.size() <= 3)
-                        return Session();
-                }
+                    return HandleEmptyDedicatedRelay(loadlevel, i);
 
                 dedicated_relays.push_back(drel);
                 _relays[i].assigned_users += AssignedUserWeight::Low;
@@ -76,11 +65,7 @@ Session NetworkManager::GetRelays(const LoadLevel loadlevel)
         std::cout << " IP: " << i.ip;
     std::cout << std::endl << std::endl;
 
-    Session session;
-    session._relays = dedicated_relays;
-    session._id = GenerateSessionID();
-
-    return session;
+    return dedicated_relays;
 }
 
 void NetworkManager::JoinNetwork(const std::string& ip, const unsigned int bandwidth)
@@ -130,13 +115,26 @@ unsigned int NetworkManager::GenerateSessionID()
     return id;
 }
 
+std::vector<DedicatedRelay> NetworkManager::HandleEmptyDedicatedRelay(const LoadLevel& loadlevel, const int i)
+{
+    std::cout << "Empty drel" << std::endl;
+    _relays.erase(_relays.begin() + i); // Removing unresponsive relay
+    if (_relays.size() > 3)
+        return GetRelays(loadlevel); // Trying again
+    else if (_relays.size() <= 3)
+        return std::vector<DedicatedRelay>();
+}
+
 DedicatedRelay NetworkManager::DedicateRelay(const Relay& relay)
 {
+    unsigned int id = GenerateSessionID();
     std::cout << "Sending Request" << std::endl;
-    Response response = Communicator::SendRelayConnectionRequest(relay, JsonSerializer::SerializeRelayConnectionRequest());
+
+    Response response = Communicator::SendRelayConnectionRequest(relay, JsonSerializer::SerializeRelayConnectionRequest(id));
     
     DedicatedRelay drel;
 
+    drel.sessionID = id;
     drel.ip = relay.ip;
     drel.port = relay.listening_port;
     drel.key = JsonDeserializer::DeserializeRelayDedicationResponse(response);

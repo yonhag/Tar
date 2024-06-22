@@ -9,9 +9,8 @@ class Serializer
 {
 public:
 	static DirResponse SerializeDirectoryServeResponse();
-	static std::vector<unsigned char> SerializeDirectoryConnectionResponse(const int AESKey, const int RSAKey);
+	static std::vector<unsigned char> SerializeAES(const AES& aes);
 	static std::vector<unsigned char> SerializeDirectoryConnectionRequest(const std::string& ip, const unsigned int BandwidthInMb, const unsigned short listeningPort);
 	
-	static std::vector<unsigned char> SerializeReceivedRSAKeyExchange(const AES& aes, const RSA& rsa);
 	static std::vector<unsigned char> SerializeRSAKeyExchangeInitiation(const PublicKey& key, const Product& prod);
 };

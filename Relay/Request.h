@@ -7,6 +7,7 @@ struct Request
 {
 	std::string dest_ip;
 	std::vector<unsigned char> data;
+	unsigned int sessionID;
 };
 
 struct DirResponse

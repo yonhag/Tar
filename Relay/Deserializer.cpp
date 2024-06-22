@@ -31,6 +31,7 @@ Request Deserializer::DeserializeClientMessages(const std::vector<unsigned char>
 	json j;
 	j = json::parse(data);
 	request.dest_ip = j["DestIP"];
+	request.sessionID = j["SessionID"];
 	request.data = std::vector<unsigned char>(j["Data"]);
 
 	return request;

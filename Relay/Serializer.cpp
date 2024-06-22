@@ -11,45 +11,12 @@ DirResponse Serializer::SerializeDirectoryServeResponse()
 	return dr;
 }
 
-std::vector<unsigned char> Serializer::SerializeDirectoryConnectionResponse(const AES AESKey, const RSA RSAKey)
-{
-	std::vector<unsigned char> response;
-
-	json j;
-	j["RSAKey"] = RSAKey;
-	j["AESKey"] = AESKey;
-
-	auto dump = j.dump();
-	for (const auto& byte : dump)
-		response.push_back(byte);
-
-	return response;
-}
-
-std::vector<unsigned char> Serializer::SerializeDirectoryConnectionRequest(const std::string& ip, const unsigned int BandwidthInMb, const unsigned short listeningPort)
-{
-	std::vector<unsigned char> request;
-
-	json j;
-	j["IP"] = ip; 
-	j["Bandwidth"] = BandwidthInMb;
-	j["Port"] = listeningPort;
-
-	auto dump = j.dump();
-
-	request.push_back('2'); // Adding signature
-
-	for (auto& byte : dump)
-		request.push_back(byte);
-
-	return request;
-}
-
-std::vector<unsigned char> Serializer::SerializeReceivedRSAKeyExchange(const AES& aes, const RSA& rsa)
+std::vector<unsigned char> Serializer::SerializeAES(const AES& aes)
 {
 	json j;
 	std::vector<unsigned char> buffer;
 	auto aesKey = aes.get_key();
+
 	std::stringstream ss1;
 	std::stringstream ss2;
 
@@ -74,6 +41,25 @@ std::vector<unsigned char> Serializer::SerializeReceivedRSAKeyExchange(const AES
 		buffer.push_back(byte);
 
 	return buffer;
+}
+
+std::vector<unsigned char> Serializer::SerializeDirectoryConnectionRequest(const std::string& ip, const unsigned int BandwidthInMb, const unsigned short listeningPort)
+{
+	std::vector<unsigned char> request;
+
+	json j;
+	j["IP"] = ip; 
+	j["Bandwidth"] = BandwidthInMb;
+	j["Port"] = listeningPort;
+
+	auto dump = j.dump();
+
+	request.push_back('2'); // Adding signature
+
+	for (auto& byte : dump)
+		request.push_back(byte);
+
+	return request;
 }
 
 std::vector<unsigned char> Serializer::SerializeRSAKeyExchangeInitiation(const PublicKey& key, const Product& prod)

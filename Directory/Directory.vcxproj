@@ -157,7 +157,6 @@
     <ClInclude Include="RequestHandler.h" />
     <ClInclude Include="Response.h" />
     <ClInclude Include="DedicatedRelay.h" />
-    <ClInclude Include="Session.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

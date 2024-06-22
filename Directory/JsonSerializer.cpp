@@ -7,9 +7,11 @@ using json = nlohmann::json;
 
 void to_json(json& j, const DedicatedRelay& relay)
 {
-	j = json{
+	j = json {
 		{ "IP", relay.ip },
-		{ "Port", relay.port }
+		{ "Port", relay.port },
+		{ "AESKey", JsonSerializer::SerializeAES(relay.key) },
+		{ "SessionID", relay.sessionID }
 	};
 }
 
@@ -21,7 +23,7 @@ void to_json(json& j, const Relay& relay)
 	};
 }
 
-Response JsonSerializer::SerializeGetRelaysResponse(const std::vector<DedicatedRelay>& relays, const unsigned int sessionID)
+Response JsonSerializer::SerializeGetRelaysResponse(const std::vector<DedicatedRelay>& relays)
 {
 	Response response;
 	std::vector<unsigned char> buffer;
@@ -30,8 +32,6 @@ Response JsonSerializer::SerializeGetRelaysResponse(const std::vector<DedicatedR
 	// Adding the relays
 	for (int i = 0; i < relays_per_user; i++)
 		j["Relay" + std::to_string(i + 1)] = relays[i];
-
-	j["SessionID"] = sessionID;
 
 	// Turning the json object to a byte vector
 	auto jsonString = j.dump();
@@ -56,7 +56,6 @@ Request JsonSerializer::SerializeUpdateDirectoryRequest(const Relay& newRelay)
 	const char* signature = sigStr.c_str();
 	buffer.insert(buffer.begin(), signature, signature + sizeof(signature) - 1);
 	
-	// Creating JSON object
 	json j;
 	j["Relay"] = newRelay;
 
@@ -71,7 +70,7 @@ Request JsonSerializer::SerializeUpdateDirectoryRequest(const Relay& newRelay)
 	return request;
 }
 
-std::vector<unsigned char> JsonSerializer::SerializeRelayConnectionRequest()
+std::vector<unsigned char> JsonSerializer::SerializeRelayConnectionRequest(const unsigned int sessionID)
 {
 	std::vector<unsigned char> vec;
 	
@@ -79,10 +78,18 @@ std::vector<unsigned char> JsonSerializer::SerializeRelayConnectionRequest()
 	const char* signature = sigStr.c_str();
 	vec.insert(vec.begin(), signature, signature + sizeof(signature) - 1);
 
+	json j;
+	j["SessionID"] = sessionID;
+
+	auto str = j.dump();
+
+	for (const auto& i : str)
+		vec.push_back(i);
+
 	return vec;
 }
 
-std::vector<unsigned char> JsonSerializer::SerializeRSAKeyExchange(const AES& aes)
+std::vector<unsigned char> JsonSerializer::SerializeAES(const AES& aes)
 {
 	json j;
 	std::vector<unsigned char> buffer;

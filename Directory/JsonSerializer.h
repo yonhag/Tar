@@ -9,8 +9,8 @@
 class JsonSerializer
 {
 public:
-	static Response SerializeGetRelaysResponse(const std::vector<DedicatedRelay>& relays, const unsigned int sessionID);
+	static Response SerializeGetRelaysResponse(const std::vector<DedicatedRelay>& relays);
 	static Request SerializeUpdateDirectoryRequest(const Relay& newRelay);
-	static std::vector<unsigned char> SerializeRelayConnectionRequest();
-	static std::vector<unsigned char> SerializeRSAKeyExchange(const AES& aes);
+	static std::vector<unsigned char> SerializeRelayConnectionRequest(const unsigned int sessionID);
+	static std::vector<unsigned char> SerializeAES(const AES& aes);
 };

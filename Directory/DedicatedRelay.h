@@ -8,6 +8,7 @@ struct DedicatedRelay
 	std::string ip;
 	unsigned short port;
 	AES key;
+	unsigned int sessionID;
 
 	bool operator==(const Relay& other) const
 	{

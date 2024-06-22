@@ -5,19 +5,12 @@
 
 Request RequestHandler::HandleRequest(std::vector<unsigned char>& data)
 {
-	Request request;
-
-	// TODO: Insert decryption 
-	
-	std::pair<std::string, std::vector<unsigned char>> deserializedRequest = Deserializer::DeserializeClientMessages(data);
-
-	request.dest_ip = deserializedRequest.first;
-	request.data = deserializedRequest.second;
+	Request request = Deserializer::DeserializeClientMessages(data);
 
 	return request;
 }
 
-DirResponse RequestHandler::HandleDirRequest(std::vector<unsigned char>& data) const
+DirResponse RequestHandler::HandleDirRequest(std::vector<unsigned char>& data)
 {
 	DirResponse request;
 	switch (DetermineDirRequest(data))
@@ -28,7 +21,7 @@ DirResponse RequestHandler::HandleDirRequest(std::vector<unsigned char>& data) c
 	return request;
 }
 
-DirRequests RequestHandler::DetermineDirRequest(std::vector<unsigned char>& data) const
+DirRequests RequestHandler::DetermineDirRequest(std::vector<unsigned char>& data)
 {
 	const int RequestTypeIndex = 4;
 
@@ -42,7 +35,7 @@ DirRequests RequestHandler::DetermineDirRequest(std::vector<unsigned char>& data
 	return DirRequests();
 }
 
-DirResponse RequestHandler::HandleKeyRequest() const
+DirResponse RequestHandler::HandleKeyRequest()
 {
 	DirResponse res;
 

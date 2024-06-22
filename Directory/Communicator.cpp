@@ -108,7 +108,7 @@ void Communicator::RSAHandshake(sf::TcpSocket& socket, const AES& aes)
 
 	std::cout << rsa.GetPublicKey() << std::endl;
 
-	SendData(socket, JsonSerializer::SerializeRSAKeyExchange(aes));
+	SendData(socket, JsonSerializer::SerializeAES(aes));
 }
 
 std::vector<unsigned char> Communicator::SendDataThroughNewClientSocket(const std::string& ip, const unsigned short port, const std::vector<unsigned char>& data)

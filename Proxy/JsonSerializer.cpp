@@ -5,7 +5,7 @@
 using json = nlohmann::json;
 
 /*
-* Returns "0{"RSAKey"=<key>}"
+* Returns "0{"RSAKey"=<key>, "RSAProduct"=<prod>}"
 */
 std::vector<unsigned char> JsonSerializer::SerializeRSAHandshake(const PublicKey& key, const Product& prod)
 {
