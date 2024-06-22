@@ -26,7 +26,7 @@ private:
 
 	// Encryption
 	static std::vector<unsigned char> AddIP(const std::vector<unsigned char>& message, const std::string& ip);
-	static std::vector<unsigned char> EncryptAES(const std::vector<unsigned char>& message, const AES& key);
+	static std::vector<unsigned char> EncryptAES(std::vector<unsigned char>& message, AES& key);
 
 	// Decryption
 	

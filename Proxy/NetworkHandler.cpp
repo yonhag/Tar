@@ -143,7 +143,7 @@ std::vector<unsigned char> NetworkHandler::AddIP(const std::vector<unsigned char
     return updatedMessage;
 }
 
-std::vector<unsigned char> NetworkHandler::EncryptAES(const std::vector<unsigned char>& message, const AES& key)
+std::vector<unsigned char> NetworkHandler::EncryptAES(const std::vector<unsigned char>& message, AES& key)
 {
     std::vector<unsigned char> encrypted = key.EncryptCBC(message);
     return encrypted;

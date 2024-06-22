@@ -50,7 +50,7 @@ private:
 
     std::vector<unsigned char> padToMultipleOf16(std::vector<unsigned char>& array, size_t& length) const;
 
-    void removePadding(std::vector<unsigned char>& array);
+    void removePadding(std::vector<unsigned char>& array) const;
 
     void deleteBytesAccordingToLastByte(std::vector<unsigned char> data);
 
@@ -65,9 +65,9 @@ private:
     void XorBlocks(const unsigned char* a, const unsigned char* b,
         unsigned char* c, unsigned int len) const;
 
-    std::vector<unsigned char> ArrayToVector(unsigned char* a, unsigned int len);
+    std::vector<unsigned char> ArrayToVector(unsigned char* a, unsigned int len) const;
 
-    unsigned char* VectorToArray(std::vector<unsigned char>& a);
+    unsigned char* VectorToArray(std::vector<unsigned char>& a) const;
 
 public:
     explicit AES(const AESKeyLength keyLength = AESKeyLength::AES_128);
@@ -84,7 +84,7 @@ public:
 
     unsigned char* DecryptCBC(const unsigned char in[], const unsigned int inLen) const;
 
-    std::vector<unsigned char> EncryptCBC(std::vector<unsigned char> in);
+    std::vector<unsigned char> EncryptCBC(std::vector<unsigned char> in) const;
 
     std::vector<unsigned char> DecryptCBC(std::vector<unsigned char> in);
 

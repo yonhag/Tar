@@ -140,7 +140,7 @@ std::vector<unsigned char> AES::padToMultipleOf16(std::vector<unsigned char>& ar
     return array;
 }
 
-void AES::removePadding(std::vector<unsigned char>& array)
+void AES::removePadding(std::vector<unsigned char>& array) const
 {
     if (array.empty()) {
         return;
@@ -424,16 +424,16 @@ void AES::printHexVector(std::vector<unsigned char> a) {
 }
 
 std::vector<unsigned char> AES::ArrayToVector(unsigned char* a,
-    unsigned int len) {
+    unsigned int len) const {
     std::vector<unsigned char> v(a, a + len * sizeof(unsigned char));
     return v;
 }
 
-unsigned char* AES::VectorToArray(std::vector<unsigned char>& a) {
+unsigned char* AES::VectorToArray(std::vector<unsigned char>& a) const {
     return a.data();
 }
 
-std::vector<unsigned char> AES::EncryptCBC(std::vector<unsigned char> in)
+std::vector<unsigned char> AES::EncryptCBC(std::vector<unsigned char> in) const
 {
     size_t size = in.size();
     in = padToMultipleOf16(in, size);
@@ -443,7 +443,7 @@ std::vector<unsigned char> AES::EncryptCBC(std::vector<unsigned char> in)
     return v;
 }
 
-std::vector<unsigned char> AES::DecryptCBC(std::vector<unsigned char> in) 
+std::vector<unsigned char> AES::DecryptCBC(std::vector<unsigned char> in) const
 {
     unsigned char* out = DecryptCBC(VectorToArray(in), (unsigned int)in.size());
     //std::cout << (unsigned int)in.size();
