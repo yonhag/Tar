@@ -50,7 +50,7 @@ AES::AES(unsigned char key[], unsigned char iv[], const AESKeyLength keyLength)
     this->iv = iv;
 }
 
-void AES::generateRandomBytes(unsigned char* buffer, int length)
+void AES::generateRandomBytes(unsigned char* buffer, int length) const
 {
     if (length <= 0) {
         std::cerr << "Invalid buffer or length\n";
@@ -185,7 +185,7 @@ void AES::EncryptBlock(const unsigned char in[], unsigned char out[],
     }
 }
 
-void AES::deleteBytesAccordingToLastByte(std::vector<unsigned char> data)
+void AES::deleteBytesAccordingToLastByte(std::vector<unsigned char> data) const
 {
     if (data.empty()) {
         return; // If the vector is empty, there's nothing to delete
