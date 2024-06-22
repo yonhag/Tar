@@ -20,8 +20,8 @@ Response RequestHandler::HandleRequest(const std::vector<unsigned char>& request
     if (request[request_type_index] == RequestCodes::GetRelays)
     {
         LoadLevel llevel = JsonDeserializer::DeserializeGetRelaysRequest(RemoveFirstCharsFromVector(request, 1));
-        std::vector<DedicatedRelay> relays = NetworkManager::GetRelays(llevel);
-        response = JsonSerializer::SerializeGetRelaysResponse(relays, );
+        auto Session = NetworkManager::GetRelays(llevel);
+        response = JsonSerializer::SerializeGetRelaysResponse(Session._relays, Session._id);
     }
 
     else if (request[request_type_index] == RequestCodes::NewRelay)

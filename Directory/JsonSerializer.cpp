@@ -82,11 +82,12 @@ std::vector<unsigned char> JsonSerializer::SerializeRelayConnectionRequest()
 	return vec;
 }
 
-std::vector<unsigned char> JsonSerializer::SerializeRSAKeyExchange(const AES& aes, const RSA& rsa)
+std::vector<unsigned char> JsonSerializer::SerializeRSAKeyExchange(const AES& aes)
 {
 	json j;
 	std::vector<unsigned char> buffer;
 	auto aesKey = aes.get_key();
+
 	std::stringstream ss1;
 	std::stringstream ss2;
 

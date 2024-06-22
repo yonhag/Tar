@@ -12,5 +12,5 @@ public:
 	static Response SerializeGetRelaysResponse(const std::vector<DedicatedRelay>& relays, const unsigned int sessionID);
 	static Request SerializeUpdateDirectoryRequest(const Relay& newRelay);
 	static std::vector<unsigned char> SerializeRelayConnectionRequest();
-	static std::vector<unsigned char> SerializeRSAKeyExchange(const AES& aes, const RSA& rsa);
+	static std::vector<unsigned char> SerializeRSAKeyExchange(const AES& aes);
 };

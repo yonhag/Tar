@@ -14,7 +14,7 @@ std::unordered_set<unsigned int> NetworkManager::_sessionIDs;
 
 enum AssignedUserWeight { Low = 1, Medium = 2, High = 4 };
 
-std::vector<DedicatedRelay> NetworkManager::GetRelays(const LoadLevel loadlevel)
+Session NetworkManager::GetRelays(const LoadLevel loadlevel)
 {
     for (auto& i : _relays)
     {
@@ -25,7 +25,7 @@ std::vector<DedicatedRelay> NetworkManager::GetRelays(const LoadLevel loadlevel)
     if (_relays.size() < 3)
     {
         std::cout << "Not enough relays" << std::endl;
-        return std::vector<DedicatedRelay>();
+        return Session();
     }
     std::vector<DedicatedRelay> dedicated_relays;
 
@@ -56,7 +56,7 @@ std::vector<DedicatedRelay> NetworkManager::GetRelays(const LoadLevel loadlevel)
                     if (_relays.size() > 3)
                         return GetRelays(loadlevel); // Trying again
                     else if (_relays.size() <= 3)
-                        return std::vector<DedicatedRelay>();
+                        return Session();
                 }
 
                 dedicated_relays.push_back(drel);
@@ -76,7 +76,11 @@ std::vector<DedicatedRelay> NetworkManager::GetRelays(const LoadLevel loadlevel)
         std::cout << " IP: " << i.ip;
     std::cout << std::endl << std::endl;
 
-    return dedicated_relays;
+    Session session;
+    session._relays = dedicated_relays;
+    session._id = GenerateSessionID();
+
+    return session;
 }
 
 void NetworkManager::JoinNetwork(const std::string& ip, const unsigned int bandwidth)
@@ -106,6 +110,24 @@ bool NetworkManager::RemoveRelay(const Relay& relay)
     int size = _relays.size();
     _relays.erase(std::remove_if(_relays.begin(), _relays.end(), [=](const Relay& rel) { return rel.ip == relay.ip && rel.bandwidth == relay.bandwidth; }));
     return size == _relays.size();
+}
+
+unsigned int NetworkManager::GenerateSessionID()
+{
+    unsigned int id;
+
+    // Generating random session id;
+    do {
+        std::random_device rd;
+        std::mt19937 mt{ rd() };
+        std::uniform_int_distribution<unsigned int> dist(0, UINT_MAX);
+
+        id = dist(mt);
+    } while (_sessionIDs.find(id) != _sessionIDs.end());
+
+    _sessionIDs.insert(id);
+
+    return id;
 }
 
 DedicatedRelay NetworkManager::DedicateRelay(const Relay& relay)

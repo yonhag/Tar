@@ -33,11 +33,11 @@ Relay JsonDeserializer::DeserializeRelayConnectionRequest(const std::vector<unsi
 // Returns a dedicated relay, minus the IP
 AES JsonDeserializer::DeserializeRelayDedicationResponse(const Response& response)
 {
-    const int AES_128_key_size = 128;
-    json j = json::parse(response);
+    const int AES_128_key_size = 16; // Measured in bytes
+    json j = json::parse(response.data);
 
-    unsigned char key[AES_128_key_size]{};
-    unsigned char iv[AES_128_key_size]{};
+    unsigned char key[AES_128_key_size];
+    unsigned char iv[AES_128_key_size];
 
     std::string storedKey = j["AESKey"];
     std::string storedIV = j["AESIV"];

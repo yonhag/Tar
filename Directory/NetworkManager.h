@@ -1,5 +1,6 @@
 #pragma once
 #include "Relay.h"
+#include "Session.h"
 #include "DedicatedRelay.h"
 #include "LoadLevel.h"
 #include <unordered_set>
@@ -10,10 +11,11 @@ enum class LevelBandwidths { Low = 10, Medium = 100, High = 1000 };
 class NetworkManager
 {
 public:
-	static std::vector<DedicatedRelay> GetRelays(const LoadLevel loadlevel);
+	static Session GetRelays(const LoadLevel loadlevel);
 	static void JoinNetwork(const std::string& ip, const unsigned int bandwidth);
 	static bool AddRelay(const Relay& relay);
 	static bool RemoveRelay(const Relay& relay);
+	static unsigned int GenerateSessionID();
 
 private:
 	static DedicatedRelay DedicateRelay(const Relay& relay);
