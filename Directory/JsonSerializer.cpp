@@ -21,7 +21,7 @@ void to_json(json& j, const Relay& relay)
 	};
 }
 
-Response JsonSerializer::SerializeGetRelaysResponse(const std::vector<DedicatedRelay>& relays)
+Response JsonSerializer::SerializeGetRelaysResponse(const std::vector<DedicatedRelay>& relays, const unsigned int sessionID)
 {
 	Response response;
 	std::vector<unsigned char> buffer;
@@ -30,6 +30,8 @@ Response JsonSerializer::SerializeGetRelaysResponse(const std::vector<DedicatedR
 	// Adding the relays
 	for (int i = 0; i < relays_per_user; i++)
 		j["Relay" + std::to_string(i + 1)] = relays[i];
+
+	j["SessionID"] = sessionID;
 
 	// Turning the json object to a byte vector
 	auto jsonString = j.dump();
