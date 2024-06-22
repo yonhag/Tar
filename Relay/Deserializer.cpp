@@ -37,6 +37,13 @@ Request Deserializer::DeserializeClientMessages(const std::vector<unsigned char>
 	return request;
 }
 
+unsigned int Deserializer::DeserializeServeRequest(const std::vector<unsigned char>& data)
+{
+	json j = json::parse(data);
+	unsigned int id = j["SessionID"];
+	return id;
+}
+
 RSA Deserializer::DeserializeReceivedRSAKeyExchange(std::vector<unsigned char>& message)
 {
 	json j = json::parse(message);

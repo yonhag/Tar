@@ -15,4 +15,5 @@ private:
 	// Directory
 	static DirRequests DetermineDirRequest(std::vector<unsigned char>& data);
 	static DirResponse HandleKeyRequest();
+	static DirResponse HandleServeRequest(const std::vector<unsigned char>& data);
 };

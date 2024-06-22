@@ -16,7 +16,9 @@ DirResponse RequestHandler::HandleDirRequest(std::vector<unsigned char>& data)
 	switch (DetermineDirRequest(data))
 	{
 	case DirRequests::ServeRequest:
-		return Serializer::SerializeDirectoryServeResponse();
+		return RequestHandler::HandleServeRequest(data);
+	default:
+		throw std::exception("Unknown Directory Code");
 	}
 	return request;
 }
@@ -42,6 +44,12 @@ DirResponse RequestHandler::HandleKeyRequest()
 	res.data = Serializer::SerializeDirectoryConnectionResponse(this->_AESKey, this->_RSAKey);
 
 	return res;
+}
+
+DirResponse RequestHandler::HandleServeRequest(const std::vector<unsigned char>& data)
+{
+	unsigned int id = Deserializer::DeserializeServeRequest(data);
+	Serializer::SerializeDirectoryServeResponse()
 }
 
 std::vector<unsigned char> RequestHandler::DecryptData(const std::vector<unsigned char>& data)
