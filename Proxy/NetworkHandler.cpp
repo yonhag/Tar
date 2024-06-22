@@ -95,8 +95,11 @@ bool NetworkHandler::GetRelays(const LoadLevel loadlevel)
             std::cout << i;
         std::cout << std::endl;
 
-        this->_relays = JsonDeserializer::DeserializeGetRelaysResponse(relayResponse);
+        Session session = JsonDeserializer::DeserializeGetRelaysResponse(relayResponse);
         
+        this->_relays = session._relays;
+        this->_sessionID = session._id;
+
         return this->_relays.size() == 3;
     }
     catch (std::exception& e) 

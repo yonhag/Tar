@@ -1,5 +1,5 @@
 #pragma once
-#include "Relay.h"
+#include "Session.h"
 #include "Directory.h"
 #include "MessageRequest.h"
 #include "LoadLevel.h"
@@ -27,6 +27,7 @@ private:
 	bool _isConnected;
 	std::vector<Relay> _relays;
 	Directory _dir;
+	unsigned int _sessionID;
 
 	// Directory Finding
 	const std::string _dirFileName = "dirlist.txt";

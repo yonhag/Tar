@@ -8,8 +8,9 @@ void from_json(const json& j, Relay& relay)
 	relay._port = j["Port"];
 }
 
-std::vector<Relay> JsonDeserializer::DeserializeGetRelaysResponse(const std::vector<unsigned char>& response)
+Session JsonDeserializer::DeserializeGetRelaysResponse(const std::vector<unsigned char>& response)
 {
+	Session session;
 	std::vector<Relay> relays;
 	
 	json j = json::parse(response);
@@ -17,7 +18,10 @@ std::vector<Relay> JsonDeserializer::DeserializeGetRelaysResponse(const std::vec
 	for (int i = 1; i <= 3; i++)
 		relays.push_back(j["Relay" + std::to_string(i)]);
 
-	return relays;
+	session._relays = relays;
+	session._id = j["SessionID"];
+
+	return session;
 }
 
 AES JsonDeserializer::DeserializeRSAHandshake(const std::vector<unsigned char>& DecipheredResponse)
@@ -25,8 +29,8 @@ AES JsonDeserializer::DeserializeRSAHandshake(const std::vector<unsigned char>& 
 	const int AES_128_key_size = 128;
 	json j = json::parse(DecipheredResponse);
 
-	unsigned char key[AES_128_key_size];
-	unsigned char iv[AES_128_key_size];
+	unsigned char key[AES_128_key_size]{};
+	unsigned char iv[AES_128_key_size]{};
 
 	std::string storedKey = j["AESKey"];
 	std::string storedIV = j["AESIV"];
