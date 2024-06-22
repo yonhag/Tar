@@ -21,7 +21,7 @@ Response RequestHandler::HandleRequest(const std::vector<unsigned char>& request
     {
         LoadLevel llevel = JsonDeserializer::DeserializeGetRelaysRequest(RemoveFirstCharsFromVector(request, 1));
         std::vector<DedicatedRelay> relays = NetworkManager::GetRelays(llevel);
-        response = JsonSerializer::SerializeGetRelaysResponse(relays);
+        response = JsonSerializer::SerializeGetRelaysResponse(relays, );
     }
 
     else if (request[request_type_index] == RequestCodes::NewRelay)

@@ -110,18 +110,14 @@ bool NetworkManager::RemoveRelay(const Relay& relay)
 
 DedicatedRelay NetworkManager::DedicateRelay(const Relay& relay)
 {
-    // Sending the request
     std::cout << "Sending Request" << std::endl;
     Response response = Communicator::SendRelayConnectionRequest(relay, JsonSerializer::SerializeRelayConnectionRequest());
     
     DedicatedRelay drel;
 
-    // Receiving the answer
-    std::cout << "Deserializer: " << JsonDeserializer::DeserializeRelayDedicationResponse(response) << std::endl;
-    if (!JsonDeserializer::DeserializeRelayDedicationResponse(response))
-        return drel;
     drel.ip = relay.ip;
     drel.port = relay.listening_port;
+    drel.key = JsonDeserializer::DeserializeRelayDedicationResponse(response);
 
     return drel;
 }

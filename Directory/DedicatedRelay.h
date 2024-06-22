@@ -9,7 +9,6 @@ struct DedicatedRelay
 	unsigned short port;
 	AES key;
 
-public:
 	bool operator==(const Relay& other) const
 	{
 		if (this->ip == other.ip)
