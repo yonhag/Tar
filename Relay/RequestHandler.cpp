@@ -38,15 +38,6 @@ DirRequests RequestHandler::DetermineDirRequest(std::vector<unsigned char>& data
 	return DirRequests();
 }
 
-DirResponse RequestHandler::HandleKeyRequest()
-{
-	DirResponse res;
-
-	res.data = Serializer::SerializeDirectoryConnectionResponse(this->_AESKey, this->_RSAKey);
-
-	return res;
-}
-
 std::vector<unsigned char> RequestHandler::HandleServeRequest(const std::vector<unsigned char>& data, const AES& aes)
 {
 	unsigned int id = Deserializer::DeserializeServeRequest(data);
