@@ -60,7 +60,7 @@ std::vector<unsigned char> Communicator::GetRelays(const Directory& dir, const L
 	
 	std::vector<unsigned char> relays(max_relay_response_size);
 	std::size_t recv;
-	directorySocket.receive(relays.data(), relays.size(), recv); //#TODO: ReceiveWithTimeout(directorySocket);
+	directorySocket.receive(relays.data(), relays.size(), recv); //#TODO: Figure out why is ReceiveWithTimeout(directorySocket) not working here;
 
 	return aes.DecryptCBC(relays);
 }

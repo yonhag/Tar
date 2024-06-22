@@ -115,7 +115,6 @@ std::vector<unsigned char> NetworkHandler::EncryptMessage(const MessageRequest& 
     for (int i = this->_relays.size(); i > 0; i--)
     {
         encrypted = EncryptAES(encrypted, this->_relays[i]._publicAESKey);
-        encrypted = EncryptRSA(encrypted, this->_relays[i]._publicRSAKey);
         
         if (i != 1) // To not add the first relay
             encrypted = AddIP(encrypted, this->_relays[i]._ip);
@@ -145,12 +144,6 @@ std::vector<unsigned char> NetworkHandler::AddIP(const std::vector<unsigned char
 }
 
 std::vector<unsigned char> NetworkHandler::EncryptAES(const std::vector<unsigned char>& message, const unsigned long key)
-{
-    std::vector<unsigned char> encrypted = message;
-    return encrypted;
-}
-
-std::vector<unsigned char> NetworkHandler::EncryptRSA(const std::vector<unsigned char>& message, const unsigned long key)
 {
     std::vector<unsigned char> encrypted = message;
     return encrypted;
