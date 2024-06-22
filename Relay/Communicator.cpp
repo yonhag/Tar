@@ -62,7 +62,6 @@ void Communicator::HandleConnection(std::unique_ptr<sf::TcpSocket> socket)
 {
 	while (true)
 	{
-		// All conversations start with a handshake
 		AES aes;
 		RecieveRSAHandshake(*socket, aes);
 
@@ -78,8 +77,6 @@ void Communicator::HandleConnection(std::unique_ptr<sf::TcpSocket> socket)
 		{
 			std::cout << "Dir message" << std::endl;
 
-			AES aes;
-
 			auto response = RequestHandler::HandleDirRequest(data);
 			
 			std::cout << "Sending data: ";
@@ -87,7 +84,7 @@ void Communicator::HandleConnection(std::unique_ptr<sf::TcpSocket> socket)
 				std::cout << i;
 			std::cout << std::endl;
 
-			this->SendData(*socket, response);
+			this->SendData(*socket, aes.EncryptCBC(response));
 
 			return;
 		}
@@ -110,7 +107,7 @@ void Communicator::ServeClient(sf::TcpSocket& incomingSocket, const Request& ini
 
 		targetAES = SendRSAHandshake(targetSocket);
 	}
-	catch (std::exception& e) { std::cout << e.what() << std::endl << "Error connecting to next destination" << std::endl; return; }
+	catch (std::runtime_error& e) { std::cout << e.what() << std::endl << "Error connecting to next destination" << std::endl; return; }
 
 	// While loop closes on its own when RecieveWithTimeout or SendData fail.
 	try
@@ -147,11 +144,11 @@ bool Communicator::ConnectToDirectory(const Directory& dir)
 
 	std::cout << "AES DONE";
 
-	// Following line shouldn't compile on Windows, it's meant for the Linux version of SFML
+	// Following line should create ~11 errors on Windows, it's meant for the Linux version of SFML
 	auto EncMsg = aes.EncryptCBC(Serializer::SerializeDirectoryConnectionRequest(sf::IpAddress::getLocalAddress()->toString(), 500, this->_listening_port));
 
 	std::cout << "Message: ";
-	for (auto& i : aes.DecryptCBC(EncMsg))
+	for (const auto& i : aes.DecryptCBC(EncMsg))
 		std::cout << i;
 	std::cout << std::endl;
 

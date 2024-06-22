@@ -19,7 +19,7 @@ std::vector<unsigned char> RequestHandler::HandleDirRequest(std::vector<unsigned
 	case DirRequests::ServeRequest:
 		return RequestHandler::HandleServeRequest(data);
 	default:
-		throw std::exception("Unknown Directory Code");
+		throw std::runtime_error("Unknown Directory Code");
 	}
 	return request;
 }
