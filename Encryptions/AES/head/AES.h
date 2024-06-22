@@ -19,51 +19,51 @@ private:
     unsigned int Nk;
     unsigned int Nr;
 
-    void SubBytes(unsigned char state[4][Nb]);
+    void SubBytes(unsigned char state[4][Nb]) const;
 
     void ShiftRow(unsigned char state[4][Nb], unsigned int i,
-        unsigned int n);  // shift row i on n positions
+        unsigned int n) const;  // shift row i on n positions
 
-    void ShiftRows(unsigned char state[4][Nb]);
+    void ShiftRows(unsigned char state[4][Nb]) const;
 
-    unsigned char xtime(unsigned char b);  // multiply on x
+    unsigned char xtime(unsigned char b) const;  // multiply on x
 
-    void MixColumns(unsigned char state[4][Nb]);
+    void MixColumns(unsigned char state[4][Nb]) const;
 
-    void AddRoundKey(unsigned char state[4][Nb], unsigned char* key);
+    void AddRoundKey(unsigned char state[4][Nb], unsigned char* key) const;
 
-    void SubWord(unsigned char* a);
+    void SubWord(unsigned char* a) const;
 
-    void RotWord(unsigned char* a);
+    void RotWord(unsigned char* a) const;
 
-    void XorWords(unsigned char* a, unsigned char* b, unsigned char* c);
+    void XorWords(unsigned char* a, unsigned char* b, unsigned char* c) const;
 
-    void Rcon(unsigned char* a, unsigned int n);
+    void Rcon(unsigned char* a, unsigned int n) const;
 
-    void InvSubBytes(unsigned char state[4][Nb]);
+    void InvSubBytes(unsigned char state[4][Nb]) const;
 
-    void InvMixColumns(unsigned char state[4][Nb]);
+    void InvMixColumns(unsigned char state[4][Nb]) const;
 
-    void InvShiftRows(unsigned char state[4][Nb]);
+    void InvShiftRows(unsigned char state[4][Nb]) const;
 
-    void CheckLength(unsigned int len);
+    void CheckLength(unsigned int len) const;
 
-    std::vector<unsigned char> padToMultipleOf16(std::vector<unsigned char>& array, size_t& length);
+    std::vector<unsigned char> padToMultipleOf16(std::vector<unsigned char>& array, size_t& length) const;
 
     void removePadding(std::vector<unsigned char>& array);
 
     void deleteBytesAccordingToLastByte(std::vector<unsigned char> data);
 
-    void KeyExpansion(const unsigned char key[], unsigned char w[]);
+    void KeyExpansion(const unsigned char key[], unsigned char w[]) const;
 
     void EncryptBlock(const unsigned char in[], unsigned char out[],
-        unsigned char* roundKeys);
+        unsigned char* roundKeys) const;
 
     void DecryptBlock(const unsigned char in[], unsigned char out[],
-        unsigned char* roundKeys);
+        unsigned char* roundKeys) const;
 
     void XorBlocks(const unsigned char* a, const unsigned char* b,
-        unsigned char* c, unsigned int len);
+        unsigned char* c, unsigned int len) const;
 
     std::vector<unsigned char> ArrayToVector(unsigned char* a, unsigned int len);
 
@@ -80,9 +80,9 @@ public:
 
     unsigned char* get_iv() const;
 
-    unsigned char* EncryptCBC(unsigned char in[], unsigned int inLen);
+    unsigned char* EncryptCBC(const unsigned char in[], const unsigned int inLen) const;
 
-    unsigned char* DecryptCBC(unsigned char in[], unsigned int inLen);
+    unsigned char* DecryptCBC(const unsigned char in[], const unsigned int inLen) const;
 
     std::vector<unsigned char> EncryptCBC(std::vector<unsigned char> in);
 

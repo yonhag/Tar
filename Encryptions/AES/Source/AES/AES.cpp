@@ -77,7 +77,7 @@ unsigned char* AES::get_iv() const
     return iv;
 }
 
-unsigned char* AES::EncryptCBC(unsigned char in[], unsigned int inLen)
+unsigned char* AES::EncryptCBC(const unsigned char in[], const unsigned int inLen) const
 {
     CheckLength(inLen);
     unsigned char* out = new unsigned char[inLen];
@@ -95,7 +95,7 @@ unsigned char* AES::EncryptCBC(unsigned char in[], unsigned int inLen)
     return out;
 }
 
-unsigned char* AES::DecryptCBC(unsigned char in[], unsigned int inLen) 
+unsigned char* AES::DecryptCBC(const unsigned char in[], const unsigned int inLen) const
 {
     //CheckLength(inLen);
     unsigned char* out = new unsigned char[inLen];
@@ -113,7 +113,7 @@ unsigned char* AES::DecryptCBC(unsigned char in[], unsigned int inLen)
     return out;
 }
 
-void AES::CheckLength(unsigned int len) {
+void AES::CheckLength(unsigned int len) const {
     if (len % blockBytesLen != 0) 
     {
         throw std::length_error("Plaintext length must be divisible by " +
@@ -121,7 +121,7 @@ void AES::CheckLength(unsigned int len) {
     }
 }
 
-std::vector<unsigned char> AES::padToMultipleOf16(std::vector<unsigned char>& array, size_t& length)
+std::vector<unsigned char> AES::padToMultipleOf16(std::vector<unsigned char>& array, size_t& length) const
 {
     int remainder = length % 16;
     int paddingNeeded = remainder == 0 ? 16 : (16 - remainder);
@@ -155,7 +155,7 @@ void AES::removePadding(std::vector<unsigned char>& array)
 }
 
 void AES::EncryptBlock(const unsigned char in[], unsigned char out[],
-    unsigned char* roundKeys) {
+    unsigned char* roundKeys) const {
     unsigned char state[4][Nb];
     unsigned int i, j, round;
 
@@ -205,7 +205,7 @@ void AES::deleteBytesAccordingToLastByte(std::vector<unsigned char> data)
 }
 
 void AES::DecryptBlock(const unsigned char in[], unsigned char out[],
-    unsigned char* roundKeys) {
+    unsigned char* roundKeys) const {
     unsigned char state[4][Nb];
     unsigned int i, j, round;
 
@@ -235,7 +235,7 @@ void AES::DecryptBlock(const unsigned char in[], unsigned char out[],
     }
 }
 
-void AES::SubBytes(unsigned char state[4][Nb]) {
+void AES::SubBytes(unsigned char state[4][Nb]) const {
     unsigned int i, j;
     unsigned char t;
     for (i = 0; i < 4; i++) {
@@ -247,7 +247,7 @@ void AES::SubBytes(unsigned char state[4][Nb]) {
 }
 
 void AES::ShiftRow(unsigned char state[4][Nb], unsigned int i,
-    unsigned int n)  // shift row i on n positions
+    unsigned int n) const  // shift row i on n positions
 {
     unsigned char tmp[Nb];
     for (unsigned int j = 0; j < Nb; j++) {
@@ -256,18 +256,18 @@ void AES::ShiftRow(unsigned char state[4][Nb], unsigned int i,
     memcpy(state[i], tmp, Nb * sizeof(unsigned char));
 }
 
-void AES::ShiftRows(unsigned char state[4][Nb]) {
+void AES::ShiftRows(unsigned char state[4][Nb]) const {
     ShiftRow(state, 1, 1);
     ShiftRow(state, 2, 2);
     ShiftRow(state, 3, 3);
 }
 
-unsigned char AES::xtime(unsigned char b)  // multiply on x
+unsigned char AES::xtime(unsigned char b) const  // multiply on x
 {
     return (b << 1) ^ (((b >> 7) & 1) * 0x1b);
 }
 
-void AES::MixColumns(unsigned char state[4][Nb]) {
+void AES::MixColumns(unsigned char state[4][Nb]) const {
     unsigned char temp_state[4][Nb];
 
     for (size_t i = 0; i < 4; ++i) {
@@ -290,7 +290,7 @@ void AES::MixColumns(unsigned char state[4][Nb]) {
     }
 }
 
-void AES::AddRoundKey(unsigned char state[4][Nb], unsigned char* key) {
+void AES::AddRoundKey(unsigned char state[4][Nb], unsigned char* key) const {
     unsigned int i, j;
     for (i = 0; i < 4; i++) {
         for (j = 0; j < Nb; j++) {
@@ -299,14 +299,14 @@ void AES::AddRoundKey(unsigned char state[4][Nb], unsigned char* key) {
     }
 }
 
-void AES::SubWord(unsigned char* a) {
+void AES::SubWord(unsigned char* a) const {
     int i;
     for (i = 0; i < 4; i++) {
         a[i] = sbox[a[i] / 16][a[i] % 16];
     }
 }
 
-void AES::RotWord(unsigned char* a) {
+void AES::RotWord(unsigned char* a) const {
     unsigned char c = a[0];
     a[0] = a[1];
     a[1] = a[2];
@@ -314,14 +314,14 @@ void AES::RotWord(unsigned char* a) {
     a[3] = c;
 }
 
-void AES::XorWords(unsigned char* a, unsigned char* b, unsigned char* c) {
+void AES::XorWords(unsigned char* a, unsigned char* b, unsigned char* c) const {
     int i;
     for (i = 0; i < 4; i++) {
         c[i] = a[i] ^ b[i];
     }
 }
 
-void AES::Rcon(unsigned char* a, unsigned int n) {
+void AES::Rcon(unsigned char* a, unsigned int n) const {
     unsigned int i;
     unsigned char c = 1;
     for (i = 0; i < n - 1; i++) {
@@ -332,7 +332,7 @@ void AES::Rcon(unsigned char* a, unsigned int n) {
     a[1] = a[2] = a[3] = 0;
 }
 
-void AES::KeyExpansion(const unsigned char key[], unsigned char w[]) {
+void AES::KeyExpansion(const unsigned char key[], unsigned char w[]) const {
     unsigned char temp[4];
     unsigned char rcon[4];
 
@@ -367,7 +367,7 @@ void AES::KeyExpansion(const unsigned char key[], unsigned char w[]) {
     }
 }
 
-void AES::InvSubBytes(unsigned char state[4][Nb]) {
+void AES::InvSubBytes(unsigned char state[4][Nb]) const {
     unsigned int i, j;
     unsigned char t;
     for (i = 0; i < 4; i++) {
@@ -378,7 +378,7 @@ void AES::InvSubBytes(unsigned char state[4][Nb]) {
     }
 }
 
-void AES::InvMixColumns(unsigned char state[4][Nb]) {
+void AES::InvMixColumns(unsigned char state[4][Nb]) const {
     unsigned char temp_state[4][Nb];
 
     for (size_t i = 0; i < 4; ++i) {
@@ -398,14 +398,14 @@ void AES::InvMixColumns(unsigned char state[4][Nb]) {
     }
 }
 
-void AES::InvShiftRows(unsigned char state[4][Nb]) {
+void AES::InvShiftRows(unsigned char state[4][Nb]) const {
     ShiftRow(state, 1, Nb - 1);
     ShiftRow(state, 2, Nb - 2);
     ShiftRow(state, 3, Nb - 3);
 }
 
 void AES::XorBlocks(const unsigned char* a, const unsigned char* b,
-    unsigned char* c, unsigned int len) {
+    unsigned char* c, unsigned int len) const {
     for (unsigned int i = 0; i < len; i++) {
         c[i] = a[i] ^ b[i];
     }
@@ -433,11 +433,10 @@ unsigned char* AES::VectorToArray(std::vector<unsigned char>& a) {
     return a.data();
 }
 
-std::vector<unsigned char> AES::EncryptCBC(std::vector<unsigned char> in) 
+std::vector<unsigned char> AES::EncryptCBC(std::vector<unsigned char> in)
 {
     size_t size = in.size();
     in = padToMultipleOf16(in, size);
-    //std::cout << (unsigned int)in.size();
     unsigned char* out = EncryptCBC(VectorToArray(in), (unsigned int)in.size());
     std::vector<unsigned char> v = ArrayToVector(out, in.size());
     delete[] out;
