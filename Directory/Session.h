@@ -6,5 +6,5 @@
 struct Session 
 {
 	std::vector<DedicatedRelay> _relays;
-	std::vector<AES> _keys;
+	unsigned int _id;
 };
