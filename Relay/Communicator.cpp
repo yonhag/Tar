@@ -78,7 +78,7 @@ void Communicator::HandleConnection(std::unique_ptr<sf::TcpSocket> socket)
 		{
 			std::cout << "Dir message" << std::endl;
 
-			auto response = RequestHandler::HandleDirRequest(data);
+			auto response = DirRequestHandler::HandleDirRequest(data);
 			
 			std::cout << "Sending data: ";
 			for (auto& i : response)

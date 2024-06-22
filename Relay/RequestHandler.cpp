@@ -4,27 +4,20 @@
 #include "EncryptionManager.h"
 #include <array>
 
-Request RequestHandler::HandleRequest(std::vector<unsigned char>& data)
-{
-	Request request = Deserializer::DeserializeClientMessages(data);
-
-	return request;
-}
-
-std::vector<unsigned char> RequestHandler::HandleDirRequest(std::vector<unsigned char>& data)
+std::vector<unsigned char> DirRequestHandler::HandleDirRequest(std::vector<unsigned char>& data)
 {
 	std::vector<unsigned char> request;
 	switch (DetermineDirRequest(data))
 	{
 	case DirRequests::ServeRequest:
-		return RequestHandler::HandleServeRequest(data);
+		return DirRequestHandler::HandleServeRequest(data);
 	default:
 		throw std::runtime_error("Unknown Directory Code");
 	}
 	return request;
 }
 
-DirRequests RequestHandler::DetermineDirRequest(std::vector<unsigned char>& data)
+DirRequests DirRequestHandler::DetermineDirRequest(std::vector<unsigned char>& data)
 {
 	const int RequestTypeIndex = 4;
 
@@ -38,7 +31,7 @@ DirRequests RequestHandler::DetermineDirRequest(std::vector<unsigned char>& data
 	return DirRequests();
 }
 
-std::vector<unsigned char> RequestHandler::HandleServeRequest(const std::vector<unsigned char>& data)
+std::vector<unsigned char> DirRequestHandler::HandleServeRequest(const std::vector<unsigned char>& data)
 {
 	unsigned int id = Deserializer::DeserializeServeRequest(data);
 	

@@ -5,10 +5,9 @@
 
 enum class DirRequests { ServeRequest };
 
-class RequestHandler
+class DirRequestHandler
 {
 public:
-	static Request HandleRequest(std::vector<unsigned char>& data);
 	static std::vector<unsigned char> HandleDirRequest(std::vector<unsigned char>& data);
 
 private:
