@@ -9,8 +9,3 @@ struct Request
 	std::vector<unsigned char> data;
 	unsigned int sessionID;
 };
-
-struct DirResponse
-{
-	std::vector<unsigned char> data;
-};

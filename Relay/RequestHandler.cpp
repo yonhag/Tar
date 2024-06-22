@@ -11,9 +11,9 @@ Request RequestHandler::HandleRequest(std::vector<unsigned char>& data)
 	return request;
 }
 
-DirResponse RequestHandler::HandleDirRequest(std::vector<unsigned char>& data)
+std::vector<unsigned char> RequestHandler::HandleDirRequest(std::vector<unsigned char>& data)
 {
-	DirResponse request;
+	std::vector<unsigned char> request;
 	switch (DetermineDirRequest(data))
 	{
 	case DirRequests::ServeRequest:
