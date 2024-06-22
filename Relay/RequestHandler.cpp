@@ -51,7 +51,7 @@ std::vector<unsigned char> RequestHandler::HandleServeRequest(const std::vector<
 {
 	unsigned int id = Deserializer::DeserializeServeRequest(data);
 	
-	EncryptionManager::AddSession()
+	EncryptionManager::AddSession(id, aes);
 
 	return Serializer::SerializeAES(aes);
 }
