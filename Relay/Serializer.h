@@ -1,9 +1,9 @@
 #pragma once
-#include <vector>
-#include <string>
 #include "Request.h"
 #include <AES.h>
 #include <RSA.h>
+#include <vector>
+#include <string>
 
 class Serializer
 {

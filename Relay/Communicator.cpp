@@ -78,16 +78,16 @@ void Communicator::HandleConnection(std::unique_ptr<sf::TcpSocket> socket)
 		{
 			std::cout << "Dir message" << std::endl;
 
-			RequestHandler handler;
+			AES aes;
 
-			DirResponse response = handler.HandleDirRequest(data);
+			auto response = RequestHandler::HandleDirRequest(data);
 			
 			std::cout << "Sending data: ";
-			for (auto& i : response.data)
+			for (auto& i : response)
 				std::cout << i;
 			std::cout << std::endl;
 
-			this->SendData(*socket, response.data);
+			this->SendData(*socket, response);
 
 			return;
 		}
