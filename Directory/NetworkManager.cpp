@@ -10,6 +10,7 @@
 // Initializing the relay vector
 // Value can be changed for testing
 std::vector<Relay> NetworkManager::_relays;
+std::unordered_set<unsigned int> NetworkManager::_sessionIDs;
 
 enum AssignedUserWeight { Low = 1, Medium = 2, High = 4 };
 
@@ -19,7 +20,6 @@ std::vector<DedicatedRelay> NetworkManager::GetRelays(const LoadLevel loadlevel)
     {
         std::cout << i.ip << std::endl;
     }
-
 
     // Making sure there are enough relays avilable
     if (_relays.size() < 3)

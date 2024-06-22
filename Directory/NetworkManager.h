@@ -2,6 +2,7 @@
 #include "Relay.h"
 #include "DedicatedRelay.h"
 #include "LoadLevel.h"
+#include <unordered_set>
 #include <vector>
 
 enum class LevelBandwidths { Low = 10, Medium = 100, High = 1000 };
@@ -20,4 +21,5 @@ private:
 
 	// Sorted by bandwidth ascending - Lower bandwidth -> Higher banwidth
 	static std::vector<Relay> _relays;
+	static std::unordered_set<unsigned int> _sessionIDs;
 };

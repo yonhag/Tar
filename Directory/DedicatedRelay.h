@@ -1,11 +1,14 @@
 #pragma once
 #include "Relay.h"
+#include <AES.h>
 #include <string>
 
 struct DedicatedRelay
 {
 	std::string ip;
 	unsigned short port;
+	AES key;
+
 public:
 	bool operator==(const Relay& other) const
 	{
