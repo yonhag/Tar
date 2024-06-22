@@ -108,23 +108,22 @@ bool NetworkHandler::GetRelays(const LoadLevel loadlevel)
 
 std::vector<unsigned char> NetworkHandler::EncryptMessage(const MessageRequest& message)
 {
-    std::vector<unsigned char> encrypted = message._data;
+    // Adding the original destination for last relay to open
+    MessageRequest currRequest = MessageRequest(message._data, message._destIP);
+    std::vector<unsigned char> encrypted = JsonSerializer::SerializeRelayDataSendingRequest(currRequest);
 
-    // Starting from the third, we add all the relay's IPs and encrypt with their keys.
-    encrypted = AddIP(encrypted, message._destIP);
+    // Encrypting with last relay key
+    auto key = this->_relays[this->_relays.size() - 1]._AESKey;
+    encrypted = key.EncryptCBC(encrypted);
 
-    
-    for (int i = this->_relays.size(); i > 0; i--)
+    // Adding the next relay for the rest of them
+    for (int i = this->_relays.size() - 2; i >= 0; i--)
     {
+        MessageRequest currRequest = MessageRequest(encrypted, this->_relays[i + 1]._ip);
+        encrypted = JsonSerializer::SerializeRelayDataSendingRequest(currRequest);
+
         auto key = this->_relays[i]._AESKey;
         encrypted = key.EncryptCBC(encrypted);
-        
-        // Adding the original destination for last relay to open
-        if (i == this->_relays.size())
-            encrypted = AddIP(encrypted, message._destIP);
-        // Adding the next relay for the rest of them
-        else
-            encrypted = AddIP(encrypted, this->_relays[i + 1]._ip);
     }
 
     return encrypted;
@@ -138,14 +137,4 @@ std::string NetworkHandler::GetFirstRelayIP() const
 unsigned short NetworkHandler::GetFirstRelayPort() const
 {
     return this->_relays[0]._port;
-}
-
-std::vector<unsigned char> NetworkHandler::AddIP(const std::vector<unsigned char>& message, const std::string& ip)
-{
-    std::vector<unsigned char> updatedMessage = message;
-
-    for (int i = 0; i < ip_size; i++)
-        updatedMessage.push_back(ip[i]);
-
-    return updatedMessage;
 }
