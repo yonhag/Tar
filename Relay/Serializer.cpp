@@ -11,7 +11,7 @@ DirResponse Serializer::SerializeDirectoryServeResponse()
 	return dr;
 }
 
-std::vector<unsigned char> Serializer::SerializeDirectoryConnectionResponse(const int AESKey, const int RSAKey)
+std::vector<unsigned char> Serializer::SerializeDirectoryConnectionResponse(const AES AESKey, const RSA RSAKey)
 {
 	std::vector<unsigned char> response;
 

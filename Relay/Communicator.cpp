@@ -62,8 +62,13 @@ void Communicator::HandleConnection(std::unique_ptr<sf::TcpSocket> socket)
 {
 	while (true)
 	{
+		// All conversations start with a handshake
+		AES aes;
+		RecieveRSAHandshake(*socket, aes);
+
 		// Receiving data
 		std::vector<unsigned char> data = ReceiveWithTimeout(*socket);
+		data = aes.DecryptCBC(data);
 
 		for (auto& i : data)
 			std::cout << i;
@@ -86,43 +91,41 @@ void Communicator::HandleConnection(std::unique_ptr<sf::TcpSocket> socket)
 
 			return;
 		}
-		else
+		else // Means this is a client message
 		{
-			RequestHandler handler;
-			Request request = handler.HandleRequest(data);
-			ServeClient(*socket, request);
+			Request request = Deserializer::DeserializeClientMessages(data);
+			ServeClient(*socket, request, aes);
 		}
 	}
 }
 
-void Communicator::ServeClient(sf::TcpSocket& incomingSocket, const Request& initialRequest)
+void Communicator::ServeClient(sf::TcpSocket& incomingSocket, const Request& initialRequest, AES& incomingAES)
 {
 	sf::TcpSocket targetSocket;
+	AES targetAES;
 	try
 	{
 		if (targetSocket.connect(StringToIP(initialRequest.dest_ip), this->client_port) != sf::Socket::Status::Done)
 			return;
+
+		targetAES = SendRSAHandshake(targetSocket);
 	}
-	catch (std::exception& e) { std::cout << e.what() << std::endl; return; }
+	catch (std::exception& e) { std::cout << e.what() << std::endl << "Error connecting to next destination" << std::endl; return; }
 
-	SendData(targetSocket, initialRequest.data); // Throws an exception on its own
-
-	// While loop closes on its own when RecieveWithTimeout closes without a connection made - exception thrown.
+	// While loop closes on its own when RecieveWithTimeout or SendData fail.
 	try
 	{
 		while (true)
 		{
-			std::vector<unsigned char> message = ReceiveWithTimeout(targetSocket);
-
-			// TODO: ENCRYPT THE MESSAGE
-
-			SendData(incomingSocket, message);
-
-			message = ReceiveWithTimeout(incomingSocket);
-
-			// TODO: DECRYPT THE MESSAGE
-
+			// Sending original message
+			std::vector<unsigned char> message = ReceiveWithTimeout(incomingSocket);
+			incomingAES.DecryptCBC(message);
 			SendData(targetSocket, message);
+
+			// Sending back the response
+			message = ReceiveWithTimeout(targetSocket);
+			targetAES.DecryptCBC(message);
+			SendData(incomingSocket, message);
 		}
 	}
 	catch (...) {} // No need to cleanup - SFML destructor will.

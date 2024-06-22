@@ -3,16 +3,11 @@
 #include "Serializer.h"
 #include <array>
 
-RequestHandler::RequestHandler()
-{
-	
-}
-
 Request RequestHandler::HandleRequest(std::vector<unsigned char>& data)
 {
 	Request request;
 
-	// Insert decryption 
+	// TODO: Insert decryption 
 	
 	std::pair<std::string, std::vector<unsigned char>> deserializedRequest = Deserializer::DeserializeClientMessages(data);
 
@@ -62,16 +57,6 @@ std::vector<unsigned char> RequestHandler::DecryptData(const std::vector<unsigne
 	decryptedData = DecryptAES(decryptedData);
 
 	return decryptedData;
-}
-
-std::vector<unsigned char> RequestHandler::DecryptAES(const std::vector<unsigned char>& data)
-{
-	return std::vector<unsigned char>();
-}
-
-std::vector<unsigned char> RequestHandler::DecryptRSA(const std::vector<unsigned char>& data)
-{
-	return std::vector<unsigned char>();
 }
 
 std::string hex_to_string(const std::string& input)

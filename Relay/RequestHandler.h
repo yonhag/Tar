@@ -1,4 +1,6 @@
 #include "Request.h"
+#include <RSA.h>
+#include <AES.h>
 #include <iostream>
 
 enum class DirRequests { ServeRequest };
@@ -6,24 +8,11 @@ enum class DirRequests { ServeRequest };
 class RequestHandler
 {
 public:
-	RequestHandler();
-
-	Request HandleRequest(std::vector<unsigned char>& data);
-	DirResponse HandleDirRequest(std::vector<unsigned char>& data) const;
+	static Request HandleRequest(std::vector<unsigned char>& data);
+	static DirResponse HandleDirRequest(std::vector<unsigned char>& data);
 
 private:
 	// Directory
-	DirRequests DetermineDirRequest(std::vector<unsigned char>& data) const;
-	DirResponse HandleKeyRequest() const;
-	
-	// Decryption
-	std::vector<unsigned char> DecryptData(const std::vector<unsigned char>& data);
-	std::vector<unsigned char> DecryptRSA(const std::vector<unsigned char>& data);
-	std::vector<unsigned char> DecryptAES(const std::vector<unsigned char>& data);
-
-	// Members
-	int _RSAKey;
-	int _AESKey;
-
-	// Additionals
+	static DirRequests DetermineDirRequest(std::vector<unsigned char>& data);
+	static DirResponse HandleKeyRequest();
 };

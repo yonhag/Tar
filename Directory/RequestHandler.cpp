@@ -28,14 +28,13 @@ Response RequestHandler::HandleRequest(const std::vector<unsigned char>& request
     {
         Relay newRelay = JsonDeserializer::DeserializeRelayConnectionRequest(RemoveFirstCharsFromVector(request, 1));
         std::cout << "passed" << std::endl;
+        // TODO: Use JoinNetwork();
         NetworkManager::AddRelay(newRelay);
         
         response.data = std::vector<unsigned char>();
         response.data.push_back('O');
         response.data.push_back('K');
     }
-    // TODO: 
-    // Encrypt the response using the key
 
     return response;
 }

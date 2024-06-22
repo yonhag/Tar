@@ -24,16 +24,16 @@ bool Deserializer::DeserializeDirectoryConnectionResponse(const std::vector<unsi
 	return false;
 }
 
-std::pair<std::string, std::vector<unsigned char>> Deserializer::DeserializeClientMessages(const std::vector<unsigned char>& data)
+Request Deserializer::DeserializeClientMessages(const std::vector<unsigned char>& data)
 {
-	std::pair<std::string, std::vector<unsigned char>> desUserMessage;
+	Request request;
 	
 	json j;
 	j = json::parse(data);
-	desUserMessage.first = j["DestIP"];
-	desUserMessage.second = std::vector<unsigned char>(j["Data"]);
+	request.dest_ip = j["DestIP"];
+	request.data = std::vector<unsigned char>(j["Data"]);
 
-	return desUserMessage;
+	return request;
 }
 
 RSA Deserializer::DeserializeReceivedRSAKeyExchange(std::vector<unsigned char>& message)

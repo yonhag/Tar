@@ -93,12 +93,10 @@ void NetworkManager::JoinNetwork(const std::string& ip, const unsigned int bandw
 
 bool NetworkManager::AddRelay(const Relay& relay)
 {
-    // TODO: test if this can fail
     _relays.push_back(relay);
 
     // Sorted by bandwidth ascending - Lower bandwidth -> Higher banwidth
     std::sort(_relays.begin(), _relays.end(), [](const Relay& a, const Relay& b) { return a.bandwidth < b.bandwidth; });
-    // TODO: Make sure that the rest of the code matches lower->higher, not sure it does.
 
     return true;
 }
