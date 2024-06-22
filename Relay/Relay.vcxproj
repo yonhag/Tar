@@ -135,6 +135,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Communicator.cpp" />
+    <ClCompile Include="EncryptionManager.cpp" />
     <ClCompile Include="FileHandler.cpp" />
     <ClCompile Include="Deserializer.cpp" />
     <ClCompile Include="Serializer.cpp" />

@@ -1,6 +1,7 @@
 #include "RequestHandler.h"
 #include "Deserializer.h"
 #include "Serializer.h"
+#include "EncryptionManager.h"
 #include <array>
 
 Request RequestHandler::HandleRequest(std::vector<unsigned char>& data)
@@ -46,10 +47,13 @@ DirResponse RequestHandler::HandleKeyRequest()
 	return res;
 }
 
-DirResponse RequestHandler::HandleServeRequest(const std::vector<unsigned char>& data)
+std::vector<unsigned char> RequestHandler::HandleServeRequest(const std::vector<unsigned char>& data, const AES& aes)
 {
 	unsigned int id = Deserializer::DeserializeServeRequest(data);
-	Serializer::SerializeDirectoryServeResponse()
+	
+	EncryptionManager::AddSession()
+
+	return Serializer::SerializeAES(aes);
 }
 
 std::vector<unsigned char> RequestHandler::DecryptData(const std::vector<unsigned char>& data)
