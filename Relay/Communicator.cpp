@@ -1,5 +1,6 @@
 #include "Communicator.h"
 #include "Protocol.h"
+#include "EncryptionManager.h"
 #include "Request.h"
 #include <thread>
 #include <exception>
@@ -96,13 +97,13 @@ void Communicator::HandleConnection(std::unique_ptr<sf::TcpSocket> socket)
 	}
 }
 
-void Communicator::ServeClient(sf::TcpSocket& incomingSocket, const Request& initialRequest, AES& incomingAES)
+void Communicator::ServeClient(sf::TcpSocket& incomingSocket, const Request& request, AES& incomingAES)
 {
 	sf::TcpSocket targetSocket;
 	AES targetAES;
 	try
 	{
-		if (targetSocket.connect(StringToIP(initialRequest.dest_ip), this->client_port) != sf::Socket::Status::Done)
+		if (targetSocket.connect(StringToIP(request.dest_ip), this->client_port) != sf::Socket::Status::Done)
 			return;
 
 		targetAES = SendRSAHandshake(targetSocket);
@@ -116,7 +117,10 @@ void Communicator::ServeClient(sf::TcpSocket& incomingSocket, const Request& ini
 		{
 			// Sending original message
 			std::vector<unsigned char> message = ReceiveWithTimeout(incomingSocket);
-			incomingAES.DecryptCBC(message);
+			incomingAES.DecryptCBC(message); // Initial Decrypt
+			
+			message = EncryptionManager::Decrypt(message, request.sessionID); // Decrypting the onion encryption
+
 			SendData(targetSocket, message);
 
 			// Sending back the response
