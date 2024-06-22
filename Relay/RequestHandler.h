@@ -9,7 +9,7 @@ class RequestHandler
 {
 public:
 	static Request HandleRequest(std::vector<unsigned char>& data);
-	static std::vector<unsigned char> HandleDirRequest(std::vector<unsigned char>& data);
+	static std::vector<unsigned char> HandleDirRequest(std::vector<unsigned char>& data, const AES& aes);
 
 private:
 	// Directory

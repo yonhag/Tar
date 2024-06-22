@@ -3,14 +3,6 @@
 
 using json = nlohmann::json;
 
-DirResponse Serializer::SerializeDirectoryServeResponse()
-{
-	DirResponse dr;
-	dr.data.push_back('O');
-	dr.data.push_back('K');
-	return dr;
-}
-
 std::vector<unsigned char> Serializer::SerializeAES(const AES& aes)
 {
 	json j;

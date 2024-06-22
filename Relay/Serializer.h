@@ -8,7 +8,6 @@
 class Serializer
 {
 public:
-	static DirResponse SerializeDirectoryServeResponse();
 	static std::vector<unsigned char> SerializeAES(const AES& aes);
 	static std::vector<unsigned char> SerializeDirectoryConnectionRequest(const std::string& ip, const unsigned int BandwidthInMb, const unsigned short listeningPort);
 	

@@ -11,13 +11,13 @@ Request RequestHandler::HandleRequest(std::vector<unsigned char>& data)
 	return request;
 }
 
-std::vector<unsigned char> RequestHandler::HandleDirRequest(std::vector<unsigned char>& data)
+std::vector<unsigned char> RequestHandler::HandleDirRequest(std::vector<unsigned char>& data, const AES& aes)
 {
 	std::vector<unsigned char> request;
 	switch (DetermineDirRequest(data))
 	{
 	case DirRequests::ServeRequest:
-		return RequestHandler::HandleServeRequest(data);
+		return RequestHandler::HandleServeRequest(data, aes);
 	default:
 		throw std::exception("Unknown Directory Code");
 	}
