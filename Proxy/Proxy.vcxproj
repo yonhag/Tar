@@ -40,6 +40,7 @@
     <ClInclude Include="Protocol.h" />
     <ClInclude Include="Relay.h" />
     <ClInclude Include="Request.h" />
+    <ClInclude Include="Session.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>

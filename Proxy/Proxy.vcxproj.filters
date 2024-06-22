@@ -86,5 +86,8 @@
     <ClInclude Include="Directory.h">
       <Filter>Header Files\Structs</Filter>
     </ClInclude>
+    <ClInclude Include="Session.h">
+      <Filter>Header Files\Structs</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
