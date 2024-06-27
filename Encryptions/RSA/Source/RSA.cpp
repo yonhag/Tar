@@ -204,13 +204,14 @@ Plain RSA::CipherToPlain(const Cipher& input)
 Cipher RSA::PlainToCipher(const Plain& input)
 {
     Cipher output;
-    size_t i = 0;
-    while (i < input.size()) {
+    size_t length = 0;
+
+    for(size_t i = 0; i < input.size(); i += length)
+    {
         // Read the length prefix (assuming 4 bytes for the length)
-        size_t length = 0;
-        for (int j = 0; j < 4; ++j) {
+        length = 0;
+        for (int j = 0; j < 4; ++j)
             length = (length << 8) | input[i++];
-        }
 
         // Read the bytes for the current number
         Integer num;

@@ -70,6 +70,7 @@ void Communicator::HandleClient(std::unique_ptr<sf::TcpSocket> sock)
 	// Recieving the message
 	std::vector<unsigned char> message = ReceiveWithTimeout(*sock);
 	
+	std::cout << "Received Message: ";
 	for (auto& i : message)
 		std::cout << i;
 	std::cout << std::endl;
@@ -169,6 +170,10 @@ AES Communicator::RSAKeyExchange(sf::TcpSocket& directorySocket)
 	SendData(directorySocket, request);
 
 	std::vector<unsigned char> response = ReceiveWithTimeout(directorySocket);
+	
+	for (auto& i : response)
+		std::cout << i;
+	std::cout << std::endl;
 
 	return JsonDeserializer::DeserializeRSAHandshake(rsa.Decrypt(RSA::PlainToCipher(response)));
 }

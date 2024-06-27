@@ -94,6 +94,7 @@ std::vector<unsigned char> JsonSerializer::SerializeAES(const AES& aes)
 	json j;
 	std::vector<unsigned char> buffer;
 	auto aesKey = aes.get_key();
+	auto aesIV = aes.get_iv();
 
 	std::stringstream ss1;
 	std::stringstream ss2;
@@ -104,7 +105,7 @@ std::vector<unsigned char> JsonSerializer::SerializeAES(const AES& aes)
 	for (size_t i = 0; i < sizeof(aesKey); ++i) 
 	{
 		ss1 << std::setw(2) << static_cast<int>(aesKey[i]);
-		ss2 << std::setw(2) << static_cast<int>(aesKey[i]);
+		ss2 << std::setw(2) << static_cast<int>(aesIV[i]);
 	}
 
 	std::string hexKey = ss1.str();

@@ -7,8 +7,8 @@
 int main()
 {
 	LoadLevel loadlevel = LoadLevel::Low;
-	int lvl;
 	/*
+	int lvl;
 	std::cout << "Enter load level:\n0: Low\n1: Medium\n2: High\nType: ";
 	std::cin >> lvl;
 	if (lvl < 0 || lvl > 2)

@@ -24,6 +24,8 @@ NetworkHandler::NetworkHandler(const LoadLevel loadlevel)
     }
     dirFile.close();
 
+    std::cout << "Sucess!" << std::endl;
+
     if (hasFoundDir)
         this->_isConnected = true;
     else
@@ -87,7 +89,7 @@ Directory NetworkHandler::GetNextDir(std::ifstream& dirFile) const
 
 bool NetworkHandler::GetRelays(const LoadLevel loadlevel)
 {
-    try 
+    try
     {
         std::vector<unsigned char> relayResponse = Communicator::GetRelays(this->_dir, loadlevel);
             
