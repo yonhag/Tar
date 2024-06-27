@@ -21,7 +21,7 @@ class RSA
 {
 public:
 	RSA();
-	RSA(const RSA& other);
+	RSA(const RSA& other) = default;
 	RSA(const PublicKey& pubk, const PrivateKey& privk, const Product& product);
 	RSA(const PublicKey& pubk, const Product& product);
 

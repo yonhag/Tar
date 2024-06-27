@@ -104,11 +104,15 @@ void Communicator::RSAHandshake(sf::TcpSocket& socket, const AES& aes)
 		std::cout << i;
 	std::cout << std::endl;
 
-	RSA rsa(JsonDeserializer::DeserializeRSAKeyExchange(msg));
+	RSA rsa(JsonDeserializer::DeserializeRSAKeyExchange(msg));	
 
-	std::cout << rsa.GetPublicKey() << std::endl;
+	auto output = JsonSerializer::SerializeAES(aes);
 
-	SendData(socket, rsa.CipherToPlain(rsa.Encrypt(JsonSerializer::SerializeAES(aes))));
+	for (const auto& i : output)
+		std::cout << i;
+	std::cout << std::endl;
+
+	SendData(socket, rsa.CipherToPlain(rsa.Encrypt(output)));
 }
 
 std::vector<unsigned char> Communicator::SendDataThroughNewClientSocket(const std::string& ip, const unsigned short port, const std::vector<unsigned char>& data)

@@ -56,6 +56,8 @@ std::vector<unsigned char> Communicator::GetRelays(const Directory& dir, const L
 	
 	AES aes(Communicator::RSAKeyExchange(directorySocket));
 
+	std::cout << "IV: " << aes.get_iv() << std::endl << "Key: " << aes.get_key() << std::endl;
+
 	SendData(directorySocket, aes.EncryptCBC(request));
 	
 	std::vector<unsigned char> relays(max_relay_response_size);
@@ -171,11 +173,14 @@ AES Communicator::RSAKeyExchange(sf::TcpSocket& directorySocket)
 
 	std::vector<unsigned char> response = ReceiveWithTimeout(directorySocket);
 	
+	std::cout << "Response: ";
 	for (auto& i : response)
 		std::cout << i;
 	std::cout << std::endl;
 
-	return JsonDeserializer::DeserializeRSAHandshake(rsa.Decrypt(RSA::PlainToCipher(response)));
+	std::vector<unsigned char> handshake = rsa.Decrypt(RSA::PlainToCipher(response));
+
+	return JsonDeserializer::DeserializeRSAHandshake(handshake);
 }
 
 bool Communicator::HasTimeoutPassed(const std::chrono::steady_clock::time_point& start_time)

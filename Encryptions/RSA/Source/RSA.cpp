@@ -6,7 +6,6 @@
 
 RSA::RSA()
 {
-    /*
     Prime P = 0;
     Prime Q = 0;
 
@@ -18,17 +17,7 @@ RSA::RSA()
     
     SelectPublicKey(t);
     SelectPrivateKey(t);
-   */
-    this->_product = 1485403;
-    this->_PublicKey = 1358689;
-    this->_PrivateKey = 837529;
-
-    std::cout << this->_product << std::endl << this->_PublicKey << std::endl << this->_PrivateKey << std::endl;
-
-}
-
-RSA::RSA(const RSA& other) : _PublicKey(other._PublicKey), _PrivateKey(other._PrivateKey), _product(other._product)
-{
+    std::cout << this->_product << " " << this->_PublicKey << " " << this->_PrivateKey << std::endl;
 }
 
 RSA::RSA(const PublicKey& pubk, const PrivateKey& privk, const Product& product) : _PublicKey(pubk), _PrivateKey(privk), _product(product)
@@ -204,14 +193,13 @@ Plain RSA::CipherToPlain(const Cipher& input)
 Cipher RSA::PlainToCipher(const Plain& input)
 {
     Cipher output;
-    size_t length = 0;
-
-    for(size_t i = 0; i < input.size(); i += length)
-    {
+    size_t i = 0;
+    while (i < input.size()) {
         // Read the length prefix (assuming 4 bytes for the length)
-        length = 0;
-        for (int j = 0; j < 4; ++j)
+        size_t length = 0;
+        for (int j = 0; j < 4; ++j) {
             length = (length << 8) | input[i++];
+        }
 
         // Read the bytes for the current number
         Integer num;
